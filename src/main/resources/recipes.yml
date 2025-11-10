@@ -1,12 +1,30 @@
-maxedsword:
+netherite_sword:
+  result:
+    ==: org.bukkit.inventory.ItemStack
+    v: 4440
+    type: NETHERITE_SWORD
   recipe:
-    - left: "air"
-      middle: "netherite_ingot"
-      right: "air"
-    - left: "netherite_ingot"
-      middle: "diamond_sword"
-      right: "netherite_ingot"
-    - left: "air"
-      middle: "netherite_ingot"
-      right: "air"
-  result: ITEMSTACK
+    - left: air
+      middle: air
+      right: air
+    - left: netherite_ingot
+      middle: diamond_sword
+      right: air
+    - left: air
+      middle: air
+      right: air
+endermite_spawnegg:
+  result:
+    ==: org.bukkit.inventory.ItemStack
+    v: 4440
+    type: ENDERMITE_SPAWN_EGG
+  recipe:
+    - left: air
+      middle: ender_pearl
+      right: air
+    - left: ender_pearl
+      middle: ender_eye
+      right: ender_pearl
+    - left: air
+      middle: ender_pearl
+      right: air

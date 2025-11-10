@@ -3,7 +3,14 @@ version: '1.0-SNAPSHOT'
 main: me.pintoadmin.pintoRecipes.PintoRecipes
 api-version: '1.21'
 authors: [ PintoJ ]
+
 commands:
   saverecipe:
     usage: /saverecipe
-    description: Saves the current item into a blank recipe (Edit in recipes.yml)
+    description: Saves the held item into a blank recipe (Edit in recipes.yml)
+    permission: pintorecipes.saverecipe
+  removerecipe:
+    usage: /removerecipe <recipe_name>
+    description: Removes a recipe from recipes.yml
+    permission: pintorecipes.removerecipe
+    aliases: [delrecipe, deleterecipe, rr]

@@ -1,11 +1,9 @@
 package me.pintoadmin.pintoRecipes;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.*;
+import org.bukkit.inventory.*;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -22,22 +20,30 @@ public class LoadRecipes {
             ItemStack item = configLoader.getResultItem(recipeName);
             List<Map<String, String>> recipeList = configLoader.getRecipe(recipeName);
 
+            if(item == null) continue;
+            ShapedRecipe newRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
+
+            newRecipe.shape("123","456","789");
+
+            int slot = 1;
             for(Map<String, String> recipeMap : recipeList){
-                ShapedRecipe newRecipe = new ShapedRecipe(item);
+                if(slot >9) break;
+                for(Map.Entry<String, String> mapEntry : recipeMap.entrySet()) {
+                    String key = mapEntry.getKey();
+                    String value = mapEntry.getValue().toUpperCase();
+                    Material material = Material.valueOf(value);
+                    if(value.equalsIgnoreCase("air")){
+                        slot++;
+                        continue;
+                    }
+                    newRecipe.setIngredient(String.valueOf(slot).charAt(0), material);
 
-                newRecipe.shape("123","456","789");
-
-                newRecipe.setIngredient('1', Material.valueOf(recipeMap.get("left").toUpperCase()));
-                newRecipe.setIngredient('2', Material.valueOf(recipeMap.get("left").toUpperCase()));
-                newRecipe.setIngredient('3', Material.valueOf(recipeMap.get("left").toUpperCase()));
-                newRecipe.setIngredient('4', Material.valueOf(recipeMap.get("middle").toUpperCase()));
-                newRecipe.setIngredient('5', Material.valueOf(recipeMap.get("middle").toUpperCase()));
-                newRecipe.setIngredient('6', Material.valueOf(recipeMap.get("middle").toUpperCase()));
-                newRecipe.setIngredient('7', Material.valueOf(recipeMap.get("right").toUpperCase()));
-                newRecipe.setIngredient('8', Material.valueOf(recipeMap.get("right").toUpperCase()));
-                newRecipe.setIngredient('9', Material.valueOf(recipeMap.get("right").toUpperCase()));
-
+                    slot++;
+                }
+            }
+            if(!newRecipe.getIngredientMap().isEmpty()){
                 getServer().addRecipe(newRecipe);
+                plugin.getLogger().warning("Loaded Recipe: "+item.getType()+" - "+recipeList);
             }
         }
     }

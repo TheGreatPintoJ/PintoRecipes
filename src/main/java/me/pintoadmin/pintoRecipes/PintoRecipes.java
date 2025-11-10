@@ -9,11 +9,13 @@ public final class PintoRecipes extends JavaPlugin {
     @Override
     public void onEnable() {
         new SaveRecipeCommand(this);
+        new RemoveRecipeCommand(this);
         loadRecipes.loadRecipes();
+
+        getCommand("removerecipe").setTabCompleter(new RecipeCompleter(this));
+        getCommand("saverecipe").setTabCompleter(new RecipeCompleter(this));
     }
 
     @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-    }
+    public void onDisable() {}
 }

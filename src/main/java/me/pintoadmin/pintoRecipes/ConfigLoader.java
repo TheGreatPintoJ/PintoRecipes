@@ -5,14 +5,14 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 public class ConfigLoader {
     private final JavaPlugin plugin;
+    private FileConfiguration recipeConfig;
     private FileConfiguration config;
-    public List<String> recipes;
+    public List<String> recipes = new ArrayList<>();
 
     private final Map<String, String> defaultRecipe = Map.of(
             "left", "air",
@@ -30,19 +30,39 @@ public class ConfigLoader {
         plugin.saveResource("recipes.yml", false);
     }
     private void loadConfig() {
-        config = YamlConfiguration.loadConfiguration(
-                new File(plugin.getDataFolder(), "rules.yml")
+        recipeConfig = YamlConfiguration.loadConfiguration(
+                new File(plugin.getDataFolder(), "recipes.yml")
         );
-        recipes = config.getKeys(true).stream().toList();
+        recipes.addAll(recipeConfig.getKeys(false).stream().toList());
     }
     public void saveEmptyRecipe(String name, ItemStack resultingItem){
-        config.set(name+".result", resultingItem);
-        config.set(name+".recipe", List.of(defaultRecipe, defaultRecipe,  defaultRecipe));
+        try {
+            recipeConfig.set(name + ".result", resultingItem);
+            recipeConfig.set(name + ".recipe", List.of(
+                    new HashMap<>(defaultRecipe),
+                    new HashMap<>(defaultRecipe),
+                    new HashMap<>(defaultRecipe)
+            ));
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save empty recipe: ");
+            e.printStackTrace();
+        }
+    }
+    public void removeRecipe(String name){
+        try {
+            recipeConfig.set(name, null);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            recipes.remove(name);
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to remove recipe: ");
+            e.printStackTrace();
+        }
     }
     public List<Map<String, String>> getRecipe(String name){
-        return (List<Map<String, String>>) config.getList(name+".recipe");
+        return (List<Map<String, String>>) recipeConfig.getList(name+".recipe");
     }
     public ItemStack getResultItem(String name){
-        return config.getItemStack(name + ".result");
+        return recipeConfig.getItemStack(name + ".result");
     }
 }
