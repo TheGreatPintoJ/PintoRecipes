@@ -3,11 +3,13 @@ package me.pintoadmin.pintoRecipes;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class PintoRecipes extends JavaPlugin {
+    public final ConfigLoader configLoader = new ConfigLoader(this);
+    public final LoadRecipes loadRecipes = new LoadRecipes(this);
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
-
+        new SaveRecipeCommand(this);
+        loadRecipes.loadRecipes();
     }
 
     @Override

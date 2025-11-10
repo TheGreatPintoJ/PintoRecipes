@@ -3,3 +3,7 @@ version: '1.0-SNAPSHOT'
 main: me.pintoadmin.pintoRecipes.PintoRecipes
 api-version: '1.21'
 authors: [ PintoJ ]
+commands:
+  saverecipe:
+    usage: /saverecipe
+    description: Saves the current item into a blank recipe (Edit in recipes.yml)

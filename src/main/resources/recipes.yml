@@ -1,0 +1,12 @@
+maxedsword:
+  recipe:
+    - left: "air"
+      middle: "netherite_ingot"
+      right: "air"
+    - left: "netherite_ingot"
+      middle: "diamond_sword"
+      right: "netherite_ingot"
+    - left: "air"
+      middle: "netherite_ingot"
+      right: "air"
+  result: ITEMSTACK
