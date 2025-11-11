@@ -18,7 +18,7 @@ public class SaveRecipeCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if(!(sender instanceof Player player)){
-            sender.sendMessage("This command can only be executed by players.");
+            sender.sendMessage(ChatColor.RED+"This command can only be executed by players.");
             return true;
         }
         if(args.length == 0 || args[0].isEmpty()){
@@ -31,6 +31,7 @@ public class SaveRecipeCommand implements CommandExecutor {
             return true;
         }
         plugin.configLoader.saveEmptyRecipe(args[0], item);
+        player.sendMessage(ChatColor.GREEN+"Saved a blank recipe in recipes.yml with name "+args[0]);
         return true;
     }
 }

@@ -14,7 +14,7 @@ public class RemoveRecipeCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if(args.length != 1){
-            sender.sendMessage("Usage: /removerecipe <recipe name>");
+            sender.sendMessage(ChatColor.RED+"Usage: /removerecipe <recipe name>");
             return true;
         }
         if(!plugin.configLoader.recipes.contains(args[0])){
@@ -22,6 +22,7 @@ public class RemoveRecipeCommand implements CommandExecutor {
             return true;
         }
         plugin.configLoader.removeRecipe(args[0]);
+        sender.sendMessage(ChatColor.GREEN+"Removed a recipe in recipes.yml with name "+args[0]);
         return true;
     }
 }
