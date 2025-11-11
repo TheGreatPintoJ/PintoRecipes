@@ -21,8 +21,9 @@ public class SaveRecipeCommand implements CommandExecutor {
             sender.sendMessage("This command can only be executed by players.");
             return true;
         }
-        if(args.length == 0){
-            sender.sendMessage("Usage: /save <recipe name>");
+        if(args.length == 0 || args[0].isEmpty()){
+            sender.sendMessage(ChatColor.RED+"Usage: /saverecipe <recipe name>");
+            return true;
         }
         ItemStack item = player.getInventory().getItemInMainHand();
         if(item.getType().isAir()){
