@@ -43,7 +43,7 @@ public class LoadRecipes {
             }
             if(!newRecipe.getIngredientMap().isEmpty()){
                 getServer().addRecipe(newRecipe);
-                plugin.getLogger().warning("Loaded Recipe: "+item.getType()+" - "+recipeList);
+                plugin.getLogger().info("Loaded Recipe: "+item.getType()+" - "+recipeList);
             }
         }
     }
