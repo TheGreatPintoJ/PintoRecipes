@@ -29,13 +29,14 @@ public class ConfigLoader {
     private void saveDefaultRecipes(){
         plugin.saveResource("recipes.yml", false);
     }
-    private void loadConfig() {
+    public void loadConfig() {
         recipeConfig = YamlConfiguration.loadConfiguration(
                 new File(plugin.getDataFolder(), "recipes.yml")
         );
         recipes.addAll(recipeConfig.getKeys(false).stream().toList());
     }
     public void saveEmptyRecipe(String name, ItemStack resultingItem){
+        loadConfig();
         try {
             recipeConfig.set(name + ".result", resultingItem);
             recipeConfig.set(name + ".recipe", List.of(
@@ -58,6 +59,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to remove recipe: ");
             e.printStackTrace();
         }
+        loadConfig();
     }
     public List<Map<String, String>> getRecipe(String name){
         return (List<Map<String, String>>) recipeConfig.getList(name+".recipe");
