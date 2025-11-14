@@ -5,7 +5,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public class SaveRecipeCommand implements CommandExecutor {
     private final PintoRecipes plugin;
@@ -25,13 +24,11 @@ public class SaveRecipeCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED+"Usage: /saverecipe <recipe name>");
             return true;
         }
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if(item.getType().isAir()){
-            sender.sendMessage(ChatColor.RED+"You must be holding an item to save a recipe.");
+        if(plugin.configLoader.recipes.contains(args[0])){
+            player.sendMessage(ChatColor.RED+"There is already a recipe with this name in the config");
             return true;
         }
-        plugin.configLoader.saveEmptyRecipe(args[0], item);
-        player.sendMessage(ChatColor.GREEN+"Saved a blank recipe in recipes.yml with name "+args[0]);
+        plugin.getRecipeGUI().sendToPlayer(player, args[0]);
         return true;
     }
 }

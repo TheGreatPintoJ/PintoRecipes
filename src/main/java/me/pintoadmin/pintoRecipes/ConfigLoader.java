@@ -1,15 +1,17 @@
 package me.pintoadmin.pintoRecipes;
 
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.*;
 import java.io.*;
 import java.util.*;
 
 public class ConfigLoader {
-    private final JavaPlugin plugin;
+    private final PintoRecipes plugin;
     private FileConfiguration recipeConfig;
     private FileConfiguration config;
     public List<String> recipes = new ArrayList<>();
@@ -20,7 +22,7 @@ public class ConfigLoader {
             "right", "air"
     );
 
-    public ConfigLoader(JavaPlugin plugin) {
+    public ConfigLoader(PintoRecipes plugin) {
         this.plugin = plugin;
         saveDefaultRecipes();
         loadConfig();
@@ -49,6 +51,22 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save empty recipe: ");
             e.printStackTrace();
         }
+    }
+    public void saveRecipe(String name, ItemStack resultingItem, Material[] materials){
+        loadConfig();
+        try {
+            recipeConfig.set(name + ".result", resultingItem);
+            recipeConfig.set(name + ".recipe", List.of(
+                    Map.of("left", materials[0].toString(), "middle", materials[1].toString(), "right", materials[2].toString()),
+                    Map.of("left", materials[3].toString(), "middle", materials[4].toString(), "right", materials[5].toString()),
+                    Map.of("left", materials[6].toString(), "middle", materials[7].toString(), "right", materials[8].toString())
+            ));
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save empty recipe: ");
+            e.printStackTrace();
+        }
+        plugin.loadRecipes.loadRecipes();
     }
     public void removeRecipe(String name){
         try {

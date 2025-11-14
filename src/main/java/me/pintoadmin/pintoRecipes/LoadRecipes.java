@@ -42,8 +42,12 @@ public class LoadRecipes {
                 }
             }
             if(!newRecipe.getIngredientMap().isEmpty()){
-                getServer().addRecipe(newRecipe);
-                plugin.getLogger().info("Loaded Recipe: "+item.getType()+" - "+recipeList);
+                try {
+                    getServer().addRecipe(newRecipe);
+                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeList);
+                } catch (IllegalStateException e){
+                    plugin.getLogger().severe("Duplicate result items found. Check out %s in the recipes.yml file".formatted(newRecipe));
+                }
             }
         }
     }
