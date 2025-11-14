@@ -8,7 +8,7 @@ A simple spigot plugin to add custom recipes to your server
 * Any item is craftable (including nbt)
 
 ### Commands
-* `/saverecipe <recipe_name> # saves currently held item to a blank recipe in config`
+* `/saverecipe <recipe_name> # open GUI for saving recipe to config`
 * `/removerecipe <recipe_name> # removes specified recipe from config`
     * Aliases: `/rr, /delrecipe, /deleterecipe`
 
@@ -26,7 +26,6 @@ The `recipes.yml` file is where all cusom recipes are stored. As of 1.0 this is 
 * All changes need a server restart to take effect
   * I have not yet found a problem with reloading instead, but you might run into problems so it's better to restart
 * Recipies might be shaped, but that does not mean they will be in that specific slot of the crafting grid. For example, the default `netherite_sword` recipe can be crafted anywhere on the grid, as long as the sword and ingot are in that configuration relative to each other.
-* Until requested, the only way to configure the recipe is in `recipes.yml`
  
 ### Errors/Bugs
 Make an issue in this project's repository
