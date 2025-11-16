@@ -54,7 +54,7 @@ public class CreateRecipeGUI {
                     }
                 }
             };
-        task.runTaskLater(plugin, 0L);
+        task.runTaskTimer(plugin, 0L, 2L);
         tasks.add(task);
     }
     public void onClick(InventoryClickEvent event){
