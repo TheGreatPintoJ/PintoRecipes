@@ -54,7 +54,7 @@ public class CreateRecipeGUI {
                     }
                 }
             };
-        task.runTaskLater(plugin, 0L);
+        task.runTaskTimer(plugin, 0L, 2L);
         tasks.add(task);
     }
     public void onClick(InventoryClickEvent event){
@@ -81,7 +81,7 @@ public class CreateRecipeGUI {
         }
         resultIsAir = inventory.getItem(24) == null;
         if(!air && !resultIsAir){
-            plugin.configLoader.saveRecipe(name, inventory.getItem(24), materials);
+            plugin.getConfigLoader().saveRecipe(name, inventory.getItem(24), materials);
             return true;
         }
         return false;
