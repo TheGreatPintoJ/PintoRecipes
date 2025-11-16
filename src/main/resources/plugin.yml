@@ -14,3 +14,8 @@ commands:
     description: Removes a recipe from recipes.yml
     permission: pintorecipes.removerecipe
     aliases: [delrecipe, deleterecipe, rr]
+  precipes:
+    usage: /precipes
+    description: Shows a GUI with all custom recipes listed
+    permission: pintorecipes.recipes
+    aliases: [pr]
