@@ -7,7 +7,7 @@ authors: [ PintoJ ]
 commands:
   saverecipe:
     usage: /saverecipe
-    description: Saves the held item into a blank recipe (Edit in recipes.yml)
+    description: Opens a GUI to save the item into a recipe
     permission: pintorecipes.saverecipe
   removerecipe:
     usage: /removerecipe <recipe_name>

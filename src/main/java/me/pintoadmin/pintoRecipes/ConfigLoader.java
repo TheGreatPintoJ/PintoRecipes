@@ -66,7 +66,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save empty recipe: ");
             e.printStackTrace();
         }
-        plugin.loadRecipes.loadRecipes();
+        plugin.getLoadRecipes().loadRecipes();
     }
     public void removeRecipe(String name){
         try {

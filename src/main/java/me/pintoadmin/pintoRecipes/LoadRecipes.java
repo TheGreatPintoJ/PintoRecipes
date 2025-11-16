@@ -12,7 +12,7 @@ public class LoadRecipes {
     private final ConfigLoader configLoader;
     public LoadRecipes(PintoRecipes plugin){
         this.plugin = plugin;
-        configLoader = plugin.configLoader;
+        configLoader = plugin.getConfigLoader();
     }
 
     public void loadRecipes(){

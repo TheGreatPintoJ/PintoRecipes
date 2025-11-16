@@ -26,7 +26,7 @@ public class CreateRecipeGUI {
         inventory = Bukkit.createInventory(null, 5 * 9, color("&e&lCustom Recipe Creator"));
 
         ItemMeta meta = unused_space.getItemMeta();
-        meta.setItemName("");
+        meta.setItemName(color("&f"));
         unused_space.setItemMeta(meta);
 
         for(int i = 0; i < inventory.getSize(); i++)

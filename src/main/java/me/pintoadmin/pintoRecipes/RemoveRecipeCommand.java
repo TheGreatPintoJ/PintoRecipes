@@ -17,11 +17,11 @@ public class RemoveRecipeCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED+"Usage: /removerecipe <recipe name>");
             return true;
         }
-        if(!plugin.configLoader.recipes.contains(args[0])){
+        if(!plugin.getConfigLoader().recipes.contains(args[0])){
             sender.sendMessage(ChatColor.RED+"Recipe "+args[0]+" does not exist.");
             return true;
         }
-        plugin.configLoader.removeRecipe(args[0]);
+        plugin.getConfigLoader().removeRecipe(args[0]);
         sender.sendMessage(ChatColor.GREEN+"Removed a recipe in recipes.yml with name "+args[0]);
         return true;
     }

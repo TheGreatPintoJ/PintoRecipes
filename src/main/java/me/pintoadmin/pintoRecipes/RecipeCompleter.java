@@ -13,7 +13,7 @@ public class RecipeCompleter implements TabCompleter {
     @Override
     public java.util.List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if(args.length == 1){
-            return new java.util.ArrayList<>(plugin.configLoader.recipes).stream()
+            return new java.util.ArrayList<>(plugin.getConfigLoader().recipes).stream()
                     .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
                     .toList();
         }
