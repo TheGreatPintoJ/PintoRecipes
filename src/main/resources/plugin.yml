@@ -1,12 +1,32 @@
 name: PintoRecipes
-version: '1.2'
+version: '1.3'
 main: me.pintoadmin.pintoRecipes.PintoRecipes
 api-version: '1.21'
 authors: [ PintoJ ]
 
 commands:
   pintorecipes:
-    usage: /pintorecipes <show|save|edit|list> [recipe_name]
+    usage: /pintorecipes <show|save|edit|list|remove> [recipe_name]
     description: Manage recipes
     permission: pintorecipes.recipes
     aliases: [pr, precipes]
+
+permissions:
+  pintorecipes.recipes:
+    description: Permission to use /pintorecipes
+    default: op
+  pintorecipes.recipes.show:
+    description: Permission to use subcommand "show" in /pintorecipes
+    default: true
+  pintorecipes.recipes.save:
+    description: Permission to use subcommand "save" in /pintorecipes
+    default: op
+  pintorecipes.recipes.edit:
+    description: Permission to use subcommand "edit" in /pintorecipes
+    default: op
+  pintorecipes.recipes.list:
+    description: Permission to use subcommand "edit" in /pintorecipes (or to use /pintorecipes without arguments)
+    default: true
+  pintorecipes.recipes.remove:
+    description: Permission to use subcommand "remove" in /pintorecipes
+    default: op

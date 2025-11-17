@@ -28,7 +28,8 @@ public class ConfigLoader {
     }
 
     private void saveDefaultRecipes(){
-        plugin.saveResource("recipes.yml", false);
+        if(!new File(plugin.getDataFolder()+"/recipes.yml").exists())
+            plugin.saveResource("recipes.yml", false);
     }
     public void loadConfig() {
         recipes.clear();
@@ -40,6 +41,7 @@ public class ConfigLoader {
     public void saveRecipe(String name, ItemStack resultingItem, Material[] materials){
         loadConfig();
         try {
+            recipeConfig.set(name+".enabled", true);
             recipeConfig.set(name + ".result", resultingItem);
             recipeConfig.set(name + ".recipe", List.of(
                     Map.of("left", materials[0].toString(), "middle", materials[1].toString(), "right", materials[2].toString()),
@@ -71,5 +73,17 @@ public class ConfigLoader {
     }
     public ItemStack getResultItem(String name){
         return recipeConfig.getItemStack(name + ".result");
+    }
+    public boolean getEnabled(String name){
+        loadConfig();
+        boolean enabled = recipeConfig.getBoolean(name+".enabled", true);
+        if(enabled){
+            try {
+                recipeConfig.set(name + ".enabled", true);
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        return enabled;
     }
 }

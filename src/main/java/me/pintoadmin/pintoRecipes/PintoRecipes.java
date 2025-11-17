@@ -10,8 +10,6 @@ public final class PintoRecipes extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        //new SaveRecipeCommand(this);
-        //new RemoveRecipeCommand(this);
         new RecipesCommand(this);
         new InventoryEvents(this);
         loadRecipes.loadRecipes();

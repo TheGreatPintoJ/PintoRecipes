@@ -1,5 +1,6 @@
-package me.pintoadmin.pintoRecipes;
+package me.pintoadmin.pintoRecipes.unused;
 
+import me.pintoadmin.pintoRecipes.*;
 import org.bukkit.*;
 import org.bukkit.command.*;
 

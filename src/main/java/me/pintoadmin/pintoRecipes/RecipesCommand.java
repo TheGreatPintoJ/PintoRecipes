@@ -19,12 +19,24 @@ public class RecipesCommand implements CommandExecutor {
             sender.sendMessage("This command can only be executed by a player");
             return true;
         }
+        if(!sender.hasPermission("pintorecipes.recipes")){
+            sender.sendMessage(ChatColor.RED+"You do not have permission to use this command");
+            return true;
+        }
         if(args.length < 2){
             if(args.length == 0 || args[0].equalsIgnoreCase("list")){
+                if(!sender.hasPermission("pintorecipes.recipes.list")){
+                    sender.sendMessage(ChatColor.RED+"You do not have permission to use this subcommand");
+                    return true;
+                }
                 plugin.getRecipesGUI().sendToPlayer(player);
             } else {
                 player.sendMessage(ChatColor.RED+"You must specify a name for this subcommand");
             }
+            return true;
+        }
+        if(!sender.hasPermission("pintorecipes.recipes."+args[0])){
+            sender.sendMessage(ChatColor.RED+"You do not have permission to use this subcommand");
             return true;
         }
 
@@ -50,7 +62,7 @@ public class RecipesCommand implements CommandExecutor {
                 else plugin.getConfigLoader().removeRecipe(args[1]);
                 break;
             default:
-                player.sendMessage(ChatColor.RED+"Usage: /"+label+" <show|save|edit> [recipe_name]");
+                player.sendMessage(ChatColor.RED+"Usage: /"+label+" <show|save|edit|remove> [recipe_name]");
         }
         plugin.getConfigLoader().loadConfig();
         return true;
