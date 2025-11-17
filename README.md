@@ -8,13 +8,14 @@ A simple spigot plugin to add custom recipes to your server
 * Any item is craftable (including nbt)
 
 ### Commands
-* `/saverecipe <recipe_name> # open GUI for saving recipe to config`
-* `/removerecipe <recipe_name> # removes specified recipe from config`
-    * Aliases: `/rr, /delrecipe, /deleterecipe`
+* `/pintorecipes <show|save|edit|list> [recipe_name]`
+  * `show <recipe_name>` - Opens a read-only GUI showing the recipe
+  * `save <recipe_name>` - Opens a recipe creating GUI. Closing without any items in either grid or result will result in saving being cancelled.
+  * `edit <recipe_name>` - Opens a writable GUI showing the recipe, saves on close with the same conditions as above (`save`)
+  * `list` - Opens a GUI showing all available recipes
 
 ### Permissions
-* `pintorecipes.saverecipe # Permission to use /saverecipe`
-* `pintorecipes.removerecipe # Permission to use /removerecipe`
+* `pintorecipes.recipes # Permission to use /pintorecipes (more coming soon)`
 
 ### Config
 The `recipes.yml` file is where all custom recipes are stored. As of 1.0 this is the only way to configure the recipe.
