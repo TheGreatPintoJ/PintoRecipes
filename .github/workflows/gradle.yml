@@ -1,0 +1,71 @@
+name: Release on merge to master
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true && (github.event.pull_request.base.ref == 'master' || github.event.pull_request.base.ref == 'main') && github.event.pull_request.head.ref == 'dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21' # Change if needed
+      
+      - name: Ensure Permissions
+        run: chmod a+x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean build
+
+      - name: Get PR info
+        id: pr
+        run: |
+          echo "title=${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "${{ github.event.pull_request.body }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        id: tag
+        run: |
+          TAG_NAME="${{ steps.pr.outputs.title }}"
+          SAFE_TAG=$(echo "$TAG_NAME" | tr ' ' '_' | tr -cd '[:alnum:]_.-')
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "$SAFE_TAG" -m "Release $TAG_NAME"
+          git push origin "$SAFE_TAG"
+          echo "tag=$SAFE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Find built JAR
+        id: jar
+        run: |
+          FILE=$(find build/libs -name "*.jar" | head -n 1)
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.pr.outputs.title }}
+          body: ${{ steps.pr.outputs.body }}
+          files: ${{ steps.jar.outputs.file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
