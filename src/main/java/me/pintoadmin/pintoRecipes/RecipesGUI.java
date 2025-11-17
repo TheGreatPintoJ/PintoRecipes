@@ -1,6 +1,5 @@
 package me.pintoadmin.pintoRecipes;
 
-import kotlin.jvm.internal.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.inventory.*;
@@ -46,19 +45,22 @@ public class RecipesGUI {
         recipes = plugin.getConfigLoader().recipes;
         inventory = Bukkit.createInventory(null, size, color("&8&l&oCustom Recipes"));
 
-        ItemMeta meta = unused_space.getItemMeta();
-        meta.setItemName(color("&f"));
-        unused_space.setItemMeta(meta);
+        ItemMeta unused_meta = unused_space.getItemMeta();
+        unused_meta.setItemName(color("&f"));
+        unused_space.setItemMeta(unused_meta);
 
         for(int i = 0; i < inventory.getSize(); i++)
             inventory.setItem(i, unused_space);
 
         for(int i = 0; i < size-18; i++){
             try {
-                ItemStack item = plugin.getConfigLoader().getResultItem(
-                        recipes.get(
-                                currentPage * (size - 18) + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
-                        ));
+                String recipeName = recipes.get(
+                        currentPage * (size - 18) + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
+                );
+                ItemStack item = plugin.getConfigLoader().getResultItem(recipeName).clone();
+                ItemMeta meta = item.getItemMeta();
+                meta.setLore(List.of("", color("&8&oCustom Recipe ID: "+recipeName)));
+                item.setItemMeta(meta);
                 inventory.setItem(i, item);
             } catch (IndexOutOfBoundsException ignored){
                 inventory.setItem(i, null);
