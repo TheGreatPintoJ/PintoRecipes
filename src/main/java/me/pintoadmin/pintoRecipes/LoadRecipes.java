@@ -63,7 +63,7 @@ public class LoadRecipes {
             if(!newRecipe.getIngredientMap().isEmpty()){
                 try {
                     getServer().addRecipe(newRecipe);
-                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeList);
+                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeMaps);
                 } catch (IllegalStateException ignored){}
             }
         }
