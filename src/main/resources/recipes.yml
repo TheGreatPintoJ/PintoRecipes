@@ -1,4 +1,5 @@
 netherite_sword:
+  enabled: false
   result:
     ==: org.bukkit.inventory.ItemStack
     v: 4440
@@ -14,6 +15,7 @@ netherite_sword:
       middle: air
       right: air
 endermite_spawnegg:
+  enabled: false
   result:
     ==: org.bukkit.inventory.ItemStack
     v: 4440

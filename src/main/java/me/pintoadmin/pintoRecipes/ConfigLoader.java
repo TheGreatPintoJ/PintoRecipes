@@ -73,4 +73,16 @@ public class ConfigLoader {
     public ItemStack getResultItem(String name){
         return recipeConfig.getItemStack(name + ".result");
     }
+    public boolean getEnabled(String name){
+        loadConfig();
+        boolean enabled = recipeConfig.getBoolean(name+".enabled", true);
+        if(enabled){
+            try {
+                recipeConfig.set(name + ".enabled", true);
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        return enabled;
+    }
 }
