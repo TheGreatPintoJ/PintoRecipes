@@ -28,7 +28,8 @@ public class ConfigLoader {
     }
 
     private void saveDefaultRecipes(){
-        plugin.saveResource("recipes.yml", false);
+        if(!new File(plugin.getDataFolder()+"/recipes.yml").exists())
+            plugin.saveResource("recipes.yml", false);
     }
     public void loadConfig() {
         recipes.clear();
