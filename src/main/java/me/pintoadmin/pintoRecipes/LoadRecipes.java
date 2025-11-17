@@ -19,6 +19,7 @@ public class LoadRecipes {
         for(String recipeName : configLoader.recipes){
             ItemStack item = configLoader.getResultItem(recipeName);
             List<Map<String, String>> recipeMaps = configLoader.getRecipe(recipeName);
+            if(!configLoader.getEnabled(recipeName)) continue;
 
             if(item == null) continue;
             ShapedRecipe newRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
