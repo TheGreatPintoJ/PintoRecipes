@@ -5,17 +5,8 @@ api-version: '1.21'
 authors: [ PintoJ ]
 
 commands:
-  saverecipe:
-    usage: /saverecipe
-    description: Opens a GUI to save the item into a recipe
-    permission: pintorecipes.saverecipe
-  removerecipe:
-    usage: /removerecipe <recipe_name>
-    description: Removes a recipe from recipes.yml
-    permission: pintorecipes.removerecipe
-    aliases: [delrecipe, deleterecipe, rr]
-  precipes:
-    usage: /precipes
-    description: Shows a GUI with all custom recipes listed
+  pintorecipes:
+    usage: /pintorecipes <show|save|edit|list> [recipe_name]
+    description: Manage recipes
     permission: pintorecipes.recipes
-    aliases: [pr]
+    aliases: [pr, precipes]

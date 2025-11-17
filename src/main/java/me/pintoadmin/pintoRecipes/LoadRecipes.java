@@ -18,15 +18,15 @@ public class LoadRecipes {
     public void loadRecipes(){
         for(String recipeName : configLoader.recipes){
             ItemStack item = configLoader.getResultItem(recipeName);
-            List<Map<String, String>> recipeList = configLoader.getRecipe(recipeName);
+            List<Map<String, String>> recipeMaps = configLoader.getRecipe(recipeName);
 
             if(item == null) continue;
             ShapedRecipe newRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
 
             newRecipe.shape("123","456","789");
 
-            int slot = 1;
-            for(Map<String, String> recipeMap : recipeList){
+            /*int slot = 1;
+            for(Map<String, String> recipeMap : recipeMaps){
                 if(slot >9) break;
                 for(Map.Entry<String, String> mapEntry : recipeMap.entrySet()) {
                     String key = mapEntry.getKey();
@@ -40,13 +40,32 @@ public class LoadRecipes {
 
                     slot++;
                 }
+            }*/// Old recipe loading loop
+
+            int round = 1;
+            for (Map<String, String> recipeMap : recipeMaps) {
+                for(int i = 0; i < 3; i++) {
+                    String value = null;
+                    if (round % 3 == 1)
+                        value = recipeMap.get("left");
+                    if (round % 3 == 2)
+                        value = recipeMap.get("middle");
+                    if (round % 3 == 0)
+                        value = recipeMap.get("right");
+
+                    if(value != null && !value.equalsIgnoreCase("air")){
+                        newRecipe.setIngredient(String.valueOf(round).charAt(0), Material.valueOf(value));
+                    }
+                    round++;
+                }
             }
+
             if(!newRecipe.getIngredientMap().isEmpty()){
                 try {
                     getServer().addRecipe(newRecipe);
-                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeList);
-                } catch (IllegalStateException e){
-                    plugin.getLogger().severe("Duplicate result items found. Check out %s in the recipes.yml file".formatted(newRecipe));
+                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeMaps);
+                } catch (IllegalStateException ignored){
+                    //plugin.getLogger().severe("Duplicate result items found. Check out %s in the recipes.yml file".formatted(newRecipe));
                 }
             }
         }

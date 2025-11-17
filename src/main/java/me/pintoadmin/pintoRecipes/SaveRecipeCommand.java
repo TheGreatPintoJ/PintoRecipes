@@ -24,11 +24,7 @@ public class SaveRecipeCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED+"Usage: /saverecipe <recipe name>");
             return true;
         }
-        if(plugin.getConfigLoader().recipes.contains(args[0])){
-            player.sendMessage(ChatColor.RED+"There is already a recipe with this name in the config");
-            return true;
-        }
-        plugin.getCreateRecipeGUI().sendToPlayer(player, args[0]);
+        plugin.getCreateRecipeGUI().sendToPlayer(player, args[0], false);
         return true;
     }
 }
