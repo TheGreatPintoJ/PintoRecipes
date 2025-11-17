@@ -63,10 +63,8 @@ public class LoadRecipes {
             if(!newRecipe.getIngredientMap().isEmpty()){
                 try {
                     getServer().addRecipe(newRecipe);
-                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeMaps);
-                } catch (IllegalStateException ignored){
-                    //plugin.getLogger().severe("Duplicate result items found. Check out %s in the recipes.yml file".formatted(newRecipe));
-                }
+                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeList);
+                } catch (IllegalStateException ignored){}
             }
         }
     }
