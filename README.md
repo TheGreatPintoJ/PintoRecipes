@@ -2,8 +2,7 @@
 A simple spigot plugin to add custom recipes to your server
 
 ### Features
-* Add blank recipes to config, and configure recipe there
-* Remove blank recipes from config
+* Save, show, and edit recipes from a GUI
 * All recipes are shaped
 * Any item is craftable (including nbt)
 
