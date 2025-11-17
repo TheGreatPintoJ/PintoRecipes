@@ -4,7 +4,6 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.*;
 import java.io.*;
@@ -32,25 +31,11 @@ public class ConfigLoader {
         plugin.saveResource("recipes.yml", false);
     }
     public void loadConfig() {
+        recipes.clear();
         recipeConfig = YamlConfiguration.loadConfiguration(
                 new File(plugin.getDataFolder(), "recipes.yml")
         );
         recipes.addAll(recipeConfig.getKeys(false).stream().toList());
-    }
-    public void saveEmptyRecipe(String name, ItemStack resultingItem){
-        loadConfig();
-        try {
-            recipeConfig.set(name + ".result", resultingItem);
-            recipeConfig.set(name + ".recipe", List.of(
-                    new HashMap<>(defaultRecipe),
-                    new HashMap<>(defaultRecipe),
-                    new HashMap<>(defaultRecipe)
-            ));
-            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-        } catch (IOException e){
-            plugin.getLogger().severe("Failed to save empty recipe: ");
-            e.printStackTrace();
-        }
     }
     public void saveRecipe(String name, ItemStack resultingItem, Material[] materials){
         loadConfig();
@@ -66,9 +51,10 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save empty recipe: ");
             e.printStackTrace();
         }
-        plugin.loadRecipes.loadRecipes();
+        plugin.getLoadRecipes().loadRecipes();
     }
     public void removeRecipe(String name){
+        loadConfig();
         try {
             recipeConfig.set(name, null);
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
@@ -79,6 +65,7 @@ public class ConfigLoader {
         }
         loadConfig();
     }
+
     public List<Map<String, String>> getRecipe(String name){
         return (List<Map<String, String>>) recipeConfig.getList(name+".recipe");
     }

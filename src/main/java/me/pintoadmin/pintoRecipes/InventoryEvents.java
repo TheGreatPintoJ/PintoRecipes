@@ -11,6 +11,7 @@ public class InventoryEvents implements Listener {
     }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event){
-        plugin.getRecipeGUI().onClick(event);
+        plugin.getCreateRecipeGUI().onClick(event);
+        plugin.getRecipesGUI().onClick(event);
     }
 }

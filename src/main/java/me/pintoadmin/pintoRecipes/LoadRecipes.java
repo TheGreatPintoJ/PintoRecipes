@@ -12,21 +12,21 @@ public class LoadRecipes {
     private final ConfigLoader configLoader;
     public LoadRecipes(PintoRecipes plugin){
         this.plugin = plugin;
-        configLoader = plugin.configLoader;
+        configLoader = plugin.getConfigLoader();
     }
 
     public void loadRecipes(){
         for(String recipeName : configLoader.recipes){
             ItemStack item = configLoader.getResultItem(recipeName);
-            List<Map<String, String>> recipeList = configLoader.getRecipe(recipeName);
+            List<Map<String, String>> recipeMaps = configLoader.getRecipe(recipeName);
 
             if(item == null) continue;
             ShapedRecipe newRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
 
             newRecipe.shape("123","456","789");
 
-            int slot = 1;
-            for(Map<String, String> recipeMap : recipeList){
+            /*int slot = 1;
+            for(Map<String, String> recipeMap : recipeMaps){
                 if(slot >9) break;
                 for(Map.Entry<String, String> mapEntry : recipeMap.entrySet()) {
                     String key = mapEntry.getKey();
@@ -40,11 +40,30 @@ public class LoadRecipes {
 
                     slot++;
                 }
+            }*/// Old recipe loading loop
+
+            int round = 1;
+            for (Map<String, String> recipeMap : recipeMaps) {
+                for(int i = 0; i < 3; i++) {
+                    String value = null;
+                    if (round % 3 == 1)
+                        value = recipeMap.get("left");
+                    if (round % 3 == 2)
+                        value = recipeMap.get("middle");
+                    if (round % 3 == 0)
+                        value = recipeMap.get("right");
+
+                    if(value != null && !value.equalsIgnoreCase("air")){
+                        newRecipe.setIngredient(String.valueOf(round).charAt(0), Material.valueOf(value));
+                    }
+                    round++;
+                }
             }
+
             if(!newRecipe.getIngredientMap().isEmpty()){
                 try {
                     getServer().addRecipe(newRecipe);
-                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeList);
+                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeMaps);
                 } catch (IllegalStateException ignored){}
             }
         }
