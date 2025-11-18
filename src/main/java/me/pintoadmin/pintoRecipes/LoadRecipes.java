@@ -2,7 +2,6 @@ package me.pintoadmin.pintoRecipes;
 
 import org.bukkit.*;
 import org.bukkit.inventory.*;
-import org.checkerframework.checker.units.qual.*;
 
 import java.util.*;
 
@@ -32,7 +31,7 @@ public class LoadRecipes {
                     ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
 
                     shapedRecipe.shape("123","456","789");
-                    shapedRecipe.setCategory(configLoader.getCategory(recipeName));
+                    shapedRecipe.setCategory(configLoader.getCraftingCategory(recipeName));
 
                     int round = 1;
                     for (Map<String, String> recipeMap : recipeMaps) {
@@ -77,6 +76,7 @@ public class LoadRecipes {
                     if(!furnaceMaterial.isAir()){
                         FurnaceRecipe furnaceRecipe = new FurnaceRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, furnaceMaterial, 0, 100); // TODO: add configurable cooking time and exp
                         try {
+                            furnaceRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(furnaceRecipe);
                             plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + furnaceMaterial);
                         } catch (IllegalStateException ignored){}

@@ -6,7 +6,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.recipe.*;
 
-import javax.annotation.*;
 import java.io.*;
 import java.util.*;
 
@@ -147,7 +146,7 @@ public class ConfigLoader {
         }
         return type;
     }
-    public CraftingBookCategory getCategory(String name){
+    public CraftingBookCategory getCraftingCategory(String name){
         loadConfig();
         String string = recipeConfig.getString(name+".category", "MISC");
         if(string.equalsIgnoreCase("MISC")){
