@@ -107,7 +107,7 @@ public class RecipesGUI {
                                 recipes.get(
                                         currentPage * (size - 18) + i
                                 ));
-                        if(event.getCurrentItem().equals(item)){
+                        if(event.getCurrentItem().getType().equals(item.getType()) && event.getCurrentItem().getAmount() == item.getAmount()){
                             plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(),
                                     recipes.get(
                                             currentPage * (size-18) + i
