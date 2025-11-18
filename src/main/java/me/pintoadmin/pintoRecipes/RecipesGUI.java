@@ -59,7 +59,7 @@ public class RecipesGUI {
                 );
                 ItemStack item = plugin.getConfigLoader().getResultItem(recipeName).clone();
                 ItemMeta meta = item.getItemMeta();
-                meta.setLore(List.of("", color("&8&oCustom Recipe ID: "+recipeName)));
+                meta.setLore(List.of("", color("&r&8Custom Recipe ID: "+recipeName), color("&r&dShift-right click to remove recipe")));
                 item.setItemMeta(meta);
                 inventory.setItem(i, item);
             } catch (IndexOutOfBoundsException ignored){
@@ -107,15 +107,23 @@ public class RecipesGUI {
                                 recipes.get(
                                         currentPage * (size - 18) + i
                                 ));
-                        if(event.getCurrentItem().equals(item)){
-                            plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(),
-                                    recipes.get(
-                                            currentPage * (size-18) + i
-                                    ), true);
-                            backOnClose((Player) event.getWhoClicked(), plugin.getCreateRecipeGUI().getInvView());
+                        if(event.getCurrentItem().getType().equals(item.getType()) && event.getCurrentItem().getAmount() == item.getAmount()){
+                            String recipeName = recipes.get( currentPage * (size - 18) + i );
+                            if(event.getClick().equals(ClickType.SHIFT_RIGHT)) {
+                                plugin.getConfigLoader().removeRecipe(recipeName);
+                                Player player = (Player) event.getWhoClicked();
+                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
+                                player.sendMessage(ChatColor.RED+"Removed recipe "+recipeName+" from config");
+                                sendToPlayer(player);
+                            } else {
+                                plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(), recipeName, true);
+                                backOnClose((Player) event.getWhoClicked(), plugin.getCreateRecipeGUI().getInvView());
+                            }
                             break;
                         }
-                    } catch (IndexOutOfBoundsException ignored){}
+                    } catch (IndexOutOfBoundsException ignored){
+                        plugin.getLogger().warning("Ignored: recipe with index of "+( currentPage * (size - 18) + i ));
+                    }
                 }
             }
         }

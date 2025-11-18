@@ -59,7 +59,11 @@ public class RecipesCommand implements CommandExecutor {
             case "remove":
                 if(!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe doesn't exist");
-                else plugin.getConfigLoader().removeRecipe(args[1]);
+                else {
+                    plugin.getConfigLoader().removeRecipe(args[1]);
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
+                    player.sendMessage(ChatColor.RED+"Removed recipe "+args[1]+" from config");
+                }
                 break;
             default:
                 player.sendMessage(ChatColor.RED+"Usage: /"+label+" <show|save|edit|remove> [recipe_name]");
