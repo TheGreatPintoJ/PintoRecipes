@@ -157,6 +157,28 @@ public class ConfigLoader {
                 loadConfig();
             } catch (IOException ignored) {}
         }
-        return CraftingBookCategory.valueOf(string);
+        try {
+            return CraftingBookCategory.valueOf(string);
+        } catch (IllegalArgumentException e){
+            plugin.getLogger().severe("Invalid crafting category: "+string);
+            return CraftingBookCategory.MISC;
+        }
+    }
+    public CookingBookCategory getCookingCategory(String name){
+        loadConfig();
+        String string = recipeConfig.getString(name+".category", "MISC");
+        if(string.equalsIgnoreCase("MISC")){
+            try {
+                recipeConfig.set(name + ".category", "MISC");
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        try {
+            return CookingBookCategory.valueOf(string);
+        } catch (IllegalArgumentException e){
+            plugin.getLogger().severe("Invalid cooking category: "+string);
+            return CookingBookCategory.MISC;
+        }
     }
 }
