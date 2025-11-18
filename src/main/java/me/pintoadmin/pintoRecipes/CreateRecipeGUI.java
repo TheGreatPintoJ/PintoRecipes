@@ -27,6 +27,8 @@ public class CreateRecipeGUI {
     private final List<String> typeList = List.of("shaped", "shapeless", "furnace");
 
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+    private final NamespacedKey unusedSpaceKey = new NamespacedKey(PintoRecipes.thisPlugin(), "unusedSpaceID");
+
     private final ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
 
     private final ItemStack typeSelectItem = new ItemStack(Material.PAPER);
@@ -41,6 +43,7 @@ public class CreateRecipeGUI {
 
         ItemMeta unusedMeta = unused_space.getItemMeta();
         unusedMeta.setItemName(color("&f"));
+        unusedMeta.getPersistentDataContainer().set(unusedSpaceKey, PersistentDataType.STRING, "unused_space");
         unused_space.setItemMeta(unusedMeta);
 
         inventory = Bukkit.createInventory(null, 5 * 9, color("&eRecipe - "+recipeName));
@@ -129,14 +132,26 @@ public class CreateRecipeGUI {
         switch(type) {
             case "shaped":
                 Material[] shapedMaterials = new Material[9];
-                boolean air = true;
                 boolean resultIsAir;
                 for (Integer index : craftingSlots) {
-                    shapedMaterials[craftingSlots.indexOf(index)] = inventory.getItem(index) == null ? Material.AIR : inventory.getItem(index).getType();
-                    if (inventory.getItem(index) != null) air = false;
+                    ItemStack item = inventory.getItem(index);
+                    if(item != null) {
+                        ItemMeta meta = item.getItemMeta();
+                        if (meta != null) {
+                            PersistentDataContainer container = meta.getPersistentDataContainer();
+                            String value = container.get(unusedSpaceKey, PersistentDataType.STRING);
+                            if (value != null) {
+                                if (value.equals("unused_space")) {
+                                    shapedMaterials[craftingSlots.indexOf(index)] = Material.AIR;
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    shapedMaterials[craftingSlots.indexOf(index)] = item == null ? Material.AIR : item.getType();
                 }
                 resultIsAir = inventory.getItem(resultSlot) == null;
-                if (!air && !resultIsAir) {
+                if (!resultIsAir) {
                     plugin.getConfigLoader().saveShapedRecipe(recipeName, inventory.getItem(resultSlot), shapedMaterials);
                     return;
                 }
@@ -147,6 +162,15 @@ public class CreateRecipeGUI {
                     ItemStack item = inventory.getItem(index);
                     if(item == null) continue;
                     Material material = item.getType();
+                    ItemMeta meta = item.getItemMeta();
+                    if(meta != null) {
+                        PersistentDataContainer container = meta.getPersistentDataContainer();
+                        String value = container.get(unusedSpaceKey, PersistentDataType.STRING);
+                        if(value != null) {
+                            if (value.equals("unused_space"))
+                                continue;
+                        }
+                    }
                     if(material.isAir()) continue;
                     shapelessMaterials.add(material.toString());
                 }
