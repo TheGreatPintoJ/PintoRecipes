@@ -1,21 +1,18 @@
 netherite_sword:
   enabled: false
+  type: shapeless
+  category: WEAPONS
   result:
     ==: org.bukkit.inventory.ItemStack
     v: 4440
     type: NETHERITE_SWORD
   recipe:
-    - left: air
-      middle: air
-      right: air
-    - left: netherite_ingot
-      middle: diamond_sword
-      right: air
-    - left: air
-      middle: air
-      right: air
+    - netherite_ingot
+    - diamond_sword
 endermite_spawnegg:
   enabled: false
+  type: shaped
+  category: MISC
   result:
     ==: org.bukkit.inventory.ItemStack
     v: 4440
