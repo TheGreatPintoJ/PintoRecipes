@@ -17,8 +17,6 @@ public class RecipesGUI {
     private final int size = 6*9;
     private int currentPage = 0;
 
-    private List<BukkitRunnable> tasks = new ArrayList<>();
-
     private ItemStack leftNavItem = new ItemStack(Material.ARROW);
     private ItemStack pageNavItem = new ItemStack(Material.PAPER);
     private ItemStack rightNavItem = new ItemStack(Material.ARROW);
@@ -57,9 +55,12 @@ public class RecipesGUI {
                 String recipeName = recipes.get(
                         currentPage * (size - 18) + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
                 );
-                ItemStack item = plugin.getConfigLoader().getResultItem(recipeName).clone();
+                String recipeType = plugin.getConfigLoader().getType(recipeName);
+                ItemStack itemOG = plugin.getConfigLoader().getResultItem(recipeName);
+                if(itemOG == null) throw new IndexOutOfBoundsException();
+                ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
-                meta.setLore(List.of("", color("&8&oCustom Recipe ID: "+recipeName)));
+                meta.setLore(List.of("", color("&r&8ID: "+recipeName), color("&r&8Type: "+recipeType), color("&r&dShift-right click to remove recipe")));
                 item.setItemMeta(meta);
                 inventory.setItem(i, item);
             } catch (IndexOutOfBoundsException ignored){
@@ -98,8 +99,7 @@ public class RecipesGUI {
                 currentPage--;
                 sendToPlayer((Player) event.getWhoClicked());
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
-                plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(), "new_recipe", false);
-                backOnClose((Player) event.getWhoClicked(), plugin.getCreateRecipeGUI().getInvView());
+                plugin.getCreateRecipeGUI("new_recipe").sendToPlayer((Player) event.getWhoClicked(), false);
             } else {
                 for(int i = 0; i < size-18; i++){
                     try {
@@ -107,12 +107,19 @@ public class RecipesGUI {
                                 recipes.get(
                                         currentPage * (size - 18) + i
                                 ));
-                        if(event.getCurrentItem().getType().equals(item.getType()) && event.getCurrentItem().getAmount() == item.getAmount()){
-                            plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(),
-                                    recipes.get(
-                                            currentPage * (size-18) + i
-                                    ), true);
-                            backOnClose((Player) event.getWhoClicked(), plugin.getCreateRecipeGUI().getInvView());
+                        ItemStack clickedItem = event.getCurrentItem();
+                        if(clickedItem.getItemMeta() == null) continue;
+                        if(clickedItem.getType().equals(item.getType()) && clickedItem.getAmount() == item.getAmount() && clickedItem.getItemMeta().getDisplayName().equals(item.getItemMeta().getDisplayName())){
+                            String recipeName = recipes.get( currentPage * (size - 18) + i );
+                            if(event.getClick().equals(ClickType.SHIFT_RIGHT)) {
+                                plugin.getConfigLoader().removeRecipe(recipeName);
+                                Player player = (Player) event.getWhoClicked();
+                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
+                                player.sendMessage(ChatColor.RED+"Removed recipe "+recipeName+" from config");
+                                sendToPlayer(player);
+                            } else {
+                                plugin.getCreateRecipeGUI(recipeName).sendToPlayer((Player) event.getWhoClicked(), true);
+                            }
                             break;
                         }
                     } catch (IndexOutOfBoundsException ignored){}
@@ -120,25 +127,7 @@ public class RecipesGUI {
             }
         }
     }
-    public void deinit(){
-        for(BukkitRunnable task : tasks){
-            task.cancel();
-        }
-    }
-
-    private void backOnClose(Player player, InventoryView invView){
-        BukkitRunnable task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (player.getOpenInventory() != invView) {
-                    sendToPlayer(player);
-                    this.cancel();
-                }
-            }
-        };
-        task.runTaskTimer(plugin, 0L, 2L);
-        tasks.add(task);
-    }
+    public void deinit(){}
 
     private String color(String input){
         return ChatColor.translateAlternateColorCodes('&', input);

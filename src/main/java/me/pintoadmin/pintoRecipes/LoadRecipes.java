@@ -18,57 +18,73 @@ public class LoadRecipes {
 
     public void loadRecipes(){
         localRecipes.addAll(configLoader.recipes);
+
         for(String recipeName : localRecipes){
+            if(recipeName == null || recipeName.isEmpty()) continue;
+            String type = configLoader.getType(recipeName);
             ItemStack item = configLoader.getResultItem(recipeName);
-            List<Map<String, String>> recipeMaps = configLoader.getRecipe(recipeName);
-            if(!configLoader.getEnabled(recipeName)) continue;
-
             if(item == null) continue;
-            ShapedRecipe newRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
+            if(!configLoader.getEnabled(recipeName)) continue;
+            switch(type.toLowerCase()){
+                case "shaped":
+                    List<Map<String, String>> recipeMaps = (List<Map<String, String>>) configLoader.getRecipe(recipeName);
+                    ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
 
-            newRecipe.shape("123","456","789");
+                    shapedRecipe.shape("123","456","789");
+                    shapedRecipe.setCategory(configLoader.getCraftingCategory(recipeName));
 
-            /*int slot = 1;
-            for(Map<String, String> recipeMap : recipeMaps){
-                if(slot >9) break;
-                for(Map.Entry<String, String> mapEntry : recipeMap.entrySet()) {
-                    String key = mapEntry.getKey();
-                    String value = mapEntry.getValue().toUpperCase();
-                    Material material = Material.valueOf(value);
-                    if(value.equalsIgnoreCase("air")){
-                        slot++;
-                        continue;
+                    int round = 1;
+                    for (Map<String, String> recipeMap : recipeMaps) {
+                        for(int i = 0; i < 3; i++) {
+                            String value = null;
+                            if (round % 3 == 1)
+                                value = recipeMap.get("left");
+                            if (round % 3 == 2)
+                                value = recipeMap.get("middle");
+                            if (round % 3 == 0)
+                                value = recipeMap.get("right");
+
+                            if(value != null && !value.equalsIgnoreCase("air")){
+                                shapedRecipe.setIngredient(String.valueOf(round).charAt(0), Material.valueOf(value));
+                            }
+                            round++;
+                        }
                     }
-                    newRecipe.setIngredient(String.valueOf(slot).charAt(0), material);
 
-                    slot++;
-                }
-            }*/// Old recipe loading loop
-
-            int round = 1;
-            for (Map<String, String> recipeMap : recipeMaps) {
-                for(int i = 0; i < 3; i++) {
-                    String value = null;
-                    if (round % 3 == 1)
-                        value = recipeMap.get("left");
-                    if (round % 3 == 2)
-                        value = recipeMap.get("middle");
-                    if (round % 3 == 0)
-                        value = recipeMap.get("right");
-
-                    if(value != null && !value.equalsIgnoreCase("air")){
-                        newRecipe.setIngredient(String.valueOf(round).charAt(0), Material.valueOf(value));
+                    if(!shapedRecipe.getIngredientMap().isEmpty()){
+                        try {
+                            getServer().addRecipe(shapedRecipe);
+                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeMaps);
+                        } catch (IllegalStateException ignored){}
                     }
-                    round++;
-                }
+                    break;
+                case "shapeless":
+                    ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
+                    List<String> materialsList = (List<String>) configLoader.getRecipe(recipeName);
+                    for(String entry : materialsList){
+                        shapelessRecipe.addIngredient(Material.valueOf(entry));
+                    }
+                    if(!shapelessRecipe.getIngredientList().isEmpty()){
+                        try {
+                            getServer().addRecipe(shapelessRecipe);
+                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + materialsList);
+                        } catch (IllegalStateException ignored){}
+                    }
+                    break;
+                case "furnace":
+                    Material furnaceMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    if(!furnaceMaterial.isAir()){
+                        FurnaceRecipe furnaceRecipe = new FurnaceRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, furnaceMaterial, 0, 100); // TODO: add configurable cooking time and exp
+                        try {
+                            furnaceRecipe.setCategory(configLoader.getCookingCategory(recipeName));
+                            getServer().addRecipe(furnaceRecipe);
+                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + furnaceMaterial);
+                        } catch (IllegalStateException ignored){}
+                    }
+                    break;
+                // TODO: add more types
             }
-
-            if(!newRecipe.getIngredientMap().isEmpty()){
-                try {
-                    getServer().addRecipe(newRecipe);
-                    plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeMaps);
-                } catch (IllegalStateException ignored){}
-            }
+            plugin.getCreateRecipeGUI(recipeName);
         }
     }
 }

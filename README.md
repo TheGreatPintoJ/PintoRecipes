@@ -4,8 +4,8 @@ A simple spigot plugin to add custom recipes to your server
 ### Features
 * Save, show, and edit recipes from a GUI
 * Remove recipes from config
-* All recipes are shaped
-* Any item is craftable (including nbt)
+* Options for shaped, shapeless, and furnace recipes
+* Any item is craftable/smeltable/etc. (including nbt)
 
 ### Commands
 * `/pintorecipes [show|save|edit|remove|list] [recipe_name]`
@@ -28,11 +28,13 @@ The `recipes.yml` file is where all custom recipes are stored.
 * The first key is whatever the name of the recipe is (defaults are endermite_spawnegg and netherite_sword)
 * `result` - This is the raw data of the item that spigot stores. I highly recommend leaving this be and using the commands to generate it.
 * `recipe` - This is where the recipe is stored. The first set of entries is the first row of the crafting grid, the second is the second row, etc. All entries beyond three will be ignored.
+* `enabled` - Whether to load the recipe when the server starts
+* `type` - The type of the recipe. Options are [`shaped`, `shapeless`, `furnace`]
+* `category` - The category of whatever book to put the recipe in (for shaped or shapeless `blocks`, `weapons`, `misc`, etc.)
 
 ### Notes
 * All changes need a server restart to take effect
   * I have not yet found a problem with reloading instead, but you might run into problems so it's better to restart
-* Recipes might be shaped, but that does not mean they will be in that specific slot of the crafting grid. For example, the default `netherite_sword` recipe can be crafted anywhere on the grid, as long as the sword and ingot are in that configuration relative to each other.
  
 ### Errors/Bugs
 Make an issue in this project's repository

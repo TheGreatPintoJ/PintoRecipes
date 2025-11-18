@@ -44,22 +44,26 @@ public class RecipesCommand implements CommandExecutor {
             case "show":
                 if(!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe doesn't exist");
-                else plugin.getCreateRecipeGUI().sendToPlayer(player, args[1], true);
+                else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, true);
                 break;
             case "save":
                 if(plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe already exists");
-                else plugin.getCreateRecipeGUI().sendToPlayer(player, args[1], false);
+                else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
                 break;
             case "edit":
                 if(!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe doesn't exist");
-                else plugin.getCreateRecipeGUI().sendToPlayer(player, args[1], false);
+                else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
                 break;
             case "remove":
                 if(!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe doesn't exist");
-                else plugin.getConfigLoader().removeRecipe(args[1]);
+                else {
+                    plugin.getConfigLoader().removeRecipe(args[1]);
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
+                    player.sendMessage(ChatColor.RED+"Removed recipe "+args[1]+" from config");
+                }
                 break;
             default:
                 player.sendMessage(ChatColor.RED+"Usage: /"+label+" <show|save|edit|remove> [recipe_name]");
