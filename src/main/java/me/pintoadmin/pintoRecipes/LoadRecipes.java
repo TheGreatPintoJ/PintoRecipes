@@ -14,9 +14,11 @@ public class LoadRecipes {
         this.plugin = plugin;
         configLoader = plugin.getConfigLoader();
     }
+    List<String> localRecipes = new ArrayList<>();
 
     public void loadRecipes(){
-        for(String recipeName : configLoader.recipes){
+        localRecipes.addAll(configLoader.recipes);
+        for(String recipeName : localRecipes){
             ItemStack item = configLoader.getResultItem(recipeName);
             List<Map<String, String>> recipeMaps = configLoader.getRecipe(recipeName);
             if(!configLoader.getEnabled(recipeName)) continue;
