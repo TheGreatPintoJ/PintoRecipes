@@ -44,17 +44,17 @@ public class RecipesCommand implements CommandExecutor {
             case "show":
                 if(!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe doesn't exist");
-                else plugin.getCreateRecipeGUI().sendToPlayer(player, args[1], true);
+                else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, true);
                 break;
             case "save":
                 if(plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe already exists");
-                else plugin.getCreateRecipeGUI().sendToPlayer(player, args[1], false);
+                else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
                 break;
             case "edit":
                 if(!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED+"That recipe doesn't exist");
-                else plugin.getCreateRecipeGUI().sendToPlayer(player, args[1], false);
+                else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
                 break;
             case "remove":
                 if(!plugin.getConfigLoader().recipes.contains(args[1]))

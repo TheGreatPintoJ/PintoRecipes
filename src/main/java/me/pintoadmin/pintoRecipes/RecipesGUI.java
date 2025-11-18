@@ -55,7 +55,9 @@ public class RecipesGUI {
                 String recipeName = recipes.get(
                         currentPage * (size - 18) + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
                 );
-                ItemStack item = plugin.getConfigLoader().getResultItem(recipeName).clone();
+                ItemStack itemOG = plugin.getConfigLoader().getResultItem(recipeName);
+                if(itemOG == null) throw new IndexOutOfBoundsException();
+                ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
                 meta.setLore(List.of("", color("&r&8Custom Recipe ID: "+recipeName), color("&r&dShift-right click to remove recipe")));
                 item.setItemMeta(meta);
@@ -96,7 +98,7 @@ public class RecipesGUI {
                 currentPage--;
                 sendToPlayer((Player) event.getWhoClicked());
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
-                plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(), "new_recipe", false);
+                plugin.getCreateRecipeGUI("new_recipe").sendToPlayer((Player) event.getWhoClicked(), false);
             } else {
                 for(int i = 0; i < size-18; i++){
                     try {
@@ -113,7 +115,7 @@ public class RecipesGUI {
                                 player.sendMessage(ChatColor.RED+"Removed recipe "+recipeName+" from config");
                                 sendToPlayer(player);
                             } else {
-                                plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(), recipeName, true);
+                                plugin.getCreateRecipeGUI(recipeName).sendToPlayer((Player) event.getWhoClicked(), true);
                             }
                             break;
                         }

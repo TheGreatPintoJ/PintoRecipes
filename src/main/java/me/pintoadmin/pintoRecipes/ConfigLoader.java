@@ -55,9 +55,13 @@ public class ConfigLoader {
     public void saveShapedRecipe(String name, ItemStack resultingItem, Material[] materials){
         loadConfig();
         try {
-            recipeConfig.set(name+".enabled", true);
-            recipeConfig.set(name+".result", resultingItem);
-            recipeConfig.set(name+".category", "MISC");
+            if(recipeConfig.get(name+".enabled") == null)
+                recipeConfig.set(name+".enabled", true);
+            if(recipeConfig.get(name+".result") == null)
+                recipeConfig.set(name+".result", resultingItem);
+            if(recipeConfig.get(name+".category") == null)
+                recipeConfig.set(name+".category", "MISC");
+
             recipeConfig.set(name+".type", "shaped");
             recipeConfig.set(name+".recipe", List.of(
                     Map.of("left", materials[0].toString(), "middle", materials[1].toString(), "right", materials[2].toString()),
@@ -65,6 +69,7 @@ public class ConfigLoader {
                     Map.of("left", materials[6].toString(), "middle", materials[7].toString(), "right", materials[8].toString())
             ));
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            plugin.getLogger().info("Saved shaped recipe: "+resultingItem.getType()+" - "+ Arrays.toString(materials));
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -74,12 +79,17 @@ public class ConfigLoader {
     public void saveShapelessRecipe(String name, ItemStack resultingItem, List<String> materials){
         loadConfig();
         try {
-            recipeConfig.set(name+".enabled", true);
-            recipeConfig.set(name+".result", resultingItem);
-            recipeConfig.set(name+".category", "MISC");
+            if(recipeConfig.get(name+".enabled") == null)
+                recipeConfig.set(name+".enabled", true);
+            if(recipeConfig.get(name+".result") == null)
+                recipeConfig.set(name+".result", resultingItem);
+            if(recipeConfig.get(name+".category") == null)
+                recipeConfig.set(name+".category", "MISC");
+
             recipeConfig.set(name+".type", "shapeless");
             recipeConfig.set(name+".recipe", materials);
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            plugin.getLogger().info("Saved shapeless recipe: "+resultingItem.getType()+" - "+materials);
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -89,12 +99,17 @@ public class ConfigLoader {
     public void saveFurnaceRecipe(String name, ItemStack resultingItem, Material material){
         loadConfig();
         try {
-            recipeConfig.set(name+".enabled", true);
-            recipeConfig.set(name+".result", resultingItem);
-            recipeConfig.set(name+".category", "MISC");
+            if(recipeConfig.get(name+".enabled") == null)
+                recipeConfig.set(name+".enabled", true);
+            if(recipeConfig.get(name+".result") == null)
+                recipeConfig.set(name+".result", resultingItem);
+            if(recipeConfig.get(name+".category") == null)
+                recipeConfig.set(name+".category", "MISC");
+
             recipeConfig.set(name+".type", "furnace");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            plugin.getLogger().info("Saved furnace recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();

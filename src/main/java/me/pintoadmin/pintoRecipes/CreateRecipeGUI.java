@@ -5,7 +5,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
-import org.bukkit.scheduler.*;
+import org.bukkit.persistence.*;
 
 import javax.annotation.*;
 import java.util.*;
@@ -13,20 +13,89 @@ import java.util.*;
 public class CreateRecipeGUI {
     private final PintoRecipes plugin;
     private Inventory inventory;
-    private final List<Integer> craftingSlots = new ArrayList<>();
-    private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-    private List<BukkitRunnable> tasks = new ArrayList<>();
-    private int resultSlot = 24;
+
+    private final List<UUID> playersViewing = new ArrayList<>();
+
+    private final List<Integer> craftingSlots = new ArrayList<>(List.of(10,11,12,19,20,21,28,29,30));
+    private final int furnaceSlot = 20;
+    private final int resultSlot = 24;
+
     private boolean currentReadOnly = false;
-    private String recipeName;
+    private final String recipeName;
 
-    private ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
+    private int selectedTypeIndex;
+    private final List<String> typeList = List.of("shaped", "shapeless", "furnace");
 
-    private InventoryView invView;
+    private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+    private final ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
 
-    public CreateRecipeGUI(PintoRecipes plugin) {
+    private final ItemStack typeSelectItem = new ItemStack(Material.PAPER);
+    private final NamespacedKey typeSelectIDKey = new NamespacedKey(PintoRecipes.thisPlugin(), "typeSelectID");
+
+
+    public CreateRecipeGUI(PintoRecipes plugin, String recipeName){
+        plugin.getLogger().warning("New CreateRecipeGUI instance");
         this.plugin = plugin;
-        craftingSlots.addAll(List.of(10,11,12,19,20,21,28,29,30));
+        this.recipeName = recipeName;
+
+        selectedTypeIndex = typeList.indexOf(plugin.getConfigLoader().getType(recipeName));
+
+        ItemMeta unusedMeta = unused_space.getItemMeta();
+        unusedMeta.setItemName(color("&f"));
+        unused_space.setItemMeta(unusedMeta);
+
+        inventory = Bukkit.createInventory(null, 5 * 9, color("&eRecipe - "+recipeName));
+        loadGUI();
+    }
+
+    public void loadGUI(){
+        for(int i = 0; i < inventory.getSize(); i++)
+            inventory.setItem(i, unused_space);
+
+        if(recipeName != null) {
+            switch (plugin.getConfigLoader().getType(recipeName)) {
+                case "shaped":
+                    List<Map<String, String>> shapedRecipe = (List<Map<String, String>>) plugin.getConfigLoader().getRecipe(recipeName);
+                    if (shapedRecipe == null) {
+                        for (Integer index : craftingSlots)
+                            inventory.setItem(index, null);
+                    } else {
+                        int round = 1;
+                        for (Map<String, String> recipeMap : shapedRecipe) {
+                            for (int i = 0; i < 3; i++) {
+                                int operatingSlot = craftingSlots.get(round - 1);
+
+                                String value = null;
+                                if (round % 3 == 1)
+                                    value = recipeMap.get("left");
+                                if (round % 3 == 2)
+                                    value = recipeMap.get("middle");
+                                if (round % 3 == 0)
+                                    value = recipeMap.get("right");
+
+                                setItem(operatingSlot, value);
+                                round++;
+                            }
+                        }
+                    }
+                    break;
+                case "shapeless":
+                    List<String> shapelessRecipe = (List<String>) plugin.getConfigLoader().getRecipe(recipeName);
+                    for(int i = 0; i < 9; i++){
+                        try {
+                            setItem(craftingSlots.get(i), shapelessRecipe.get(i));
+                        } catch (IndexOutOfBoundsException ignored){
+                            inventory.setItem(craftingSlots.get(i), null);
+                        }
+                    }
+                    break;
+                case "furnace":
+                    String furnaceRecipe = (String) plugin.getConfigLoader().getRecipe(recipeName);
+                    setItem(furnaceSlot, furnaceRecipe);
+                    break;
+                // TODO: add other types
+            }
+        }
 
         ItemMeta backNavMeta = backNavItem.getItemMeta();
         assert backNavMeta != null;
@@ -35,104 +104,119 @@ public class CreateRecipeGUI {
         fireworkMeta.setPower(0);
         backNavItem.setItemMeta(fireworkMeta);
 
-        constructGUI();
-    }
+        ItemMeta typeSelectMeta = typeSelectItem.getItemMeta();
+        assert typeSelectMeta != null;
+        typeSelectMeta.setItemName(color("&lRecipe type: "+getCurrentType()));
+        typeSelectMeta.setLore(List.of(color("&d&lLeft click to select next"), color("&d&lRight click to select previous")));
 
-    private void constructGUI(){
-        inventory = Bukkit.createInventory(null, 5 * 9, color("&e&lCustom Recipe Creator"));
+        typeSelectMeta.getPersistentDataContainer().set(typeSelectIDKey, PersistentDataType.STRING, "typeSelectItem");
 
-        ItemMeta meta = unused_space.getItemMeta();
-        assert meta != null;
-        meta.setItemName(color("&f"));
-        unused_space.setItemMeta(meta);
-
-        for(int i = 0; i < inventory.getSize(); i++)
-            inventory.setItem(i, unused_space);
-
-        List<Map<String, String>> recipe = plugin.getConfigLoader().getRecipe(recipeName);
-        if(recipe == null){
-            for(Integer index : craftingSlots)
-                inventory.setItem(index, null);
-        } else {
-            int round = 1;
-            for (Map<String, String> recipeMap : recipe) {
-                for(int i = 0; i < 3; i++) {
-                    int operatingSlot = craftingSlots.get(round-1);
-
-                    String value = null;
-                    if (round % 3 == 1)
-                        value = recipeMap.get("left");
-                    if (round % 3 == 2)
-                        value = recipeMap.get("middle");
-                    if (round % 3 == 0)
-                        value = recipeMap.get("right");
-
-                    setItem(operatingSlot, value);
-                    round++;
-                }
-            }
-        }
+        typeSelectItem.setItemMeta(typeSelectMeta);
 
         inventory.setItem(resultSlot, plugin.getConfigLoader().getResultItem(recipeName));
         inventory.setItem(8, backNavItem);
-    }
+        inventory.setItem(0, typeSelectItem);
 
-    public void sendToPlayer(Player player, String recipeName, boolean readOnly){
-        this.recipeName = recipeName;
+    }
+    public void sendToPlayer(Player player, boolean readOnly){
         currentReadOnly = readOnly;
-        constructGUI();
-        InventoryView invView = player.openInventory(inventory);
-        this.invView = invView;
-        if(!readOnly) {
-            BukkitRunnable task =
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            if (player.getOpenInventory() != invView) {
-                                if (saveRecipe(recipeName)) {
-                                    player.sendMessage(color("&aSaved recipe to recipes.yml"));
-                                } else {
-                                    player.sendMessage(color("&cCanceled saving recipe"));
-                                }
-                                this.cancel();
-                            }
-                        }
-                    };
-            task.runTaskTimer(plugin, 0L, 2L);
-            tasks.add(task);
+        if(!playersViewing.contains(player.getUniqueId()))
+            playersViewing.add(player.getUniqueId());
+        player.openInventory(inventory);
+    }
+    public void save(){
+        String type = typeList.get(selectedTypeIndex);
+        if(inventory.getItem(resultSlot) == null) return;
+        switch(type) {
+            case "shaped":
+                Material[] shapedMaterials = new Material[9];
+                boolean air = true;
+                boolean resultIsAir;
+                for (Integer index : craftingSlots) {
+                    shapedMaterials[craftingSlots.indexOf(index)] = inventory.getItem(index) == null ? Material.AIR : inventory.getItem(index).getType();
+                    if (inventory.getItem(index) != null) air = false;
+                }
+                resultIsAir = inventory.getItem(resultSlot) == null;
+                if (!air && !resultIsAir) {
+                    plugin.getConfigLoader().saveShapedRecipe(recipeName, inventory.getItem(resultSlot), shapedMaterials);
+                    return;
+                }
+                break;
+            case "shapeless":
+                List<String> shapelessMaterials = new ArrayList<>();
+                for(Integer index : craftingSlots){
+                    ItemStack item = inventory.getItem(index);
+                    if(item == null) continue;
+                    Material material = item.getType();
+                    if(material.isAir()) continue;
+                    shapelessMaterials.add(material.toString());
+                }
+                if(shapelessMaterials.isEmpty()) return;
+                plugin.getConfigLoader().saveShapelessRecipe(recipeName, inventory.getItem(resultSlot), shapelessMaterials);
+                break;
+            case "furnace":
+                ItemStack furnaceItem = inventory.getItem(furnaceSlot);
+                if(furnaceItem == null) return;
+                Material furnaceMaterial = furnaceItem.getType();
+                plugin.getConfigLoader().saveFurnaceRecipe(recipeName, inventory.getItem(resultSlot), furnaceMaterial);
+                break;
         }
     }
     public void onClick(InventoryClickEvent event){
-        if(event.getClickedInventory() != inventory) return;
+        Player player = (Player) event.getWhoClicked();
+        if(!playersViewing.contains(player.getUniqueId())) return;
+
         if(currentReadOnly) event.setCancelled(true);
 
         if(event.getCurrentItem() != null) {
-            if(event.getCurrentItem().isSimilar(backNavItem)) event.getWhoClicked().closeInventory();
-            if (event.getCurrentItem().isSimilar(unused_space)) {
+
+            if(event.getCurrentItem().isSimilar(backNavItem)) {
+                player.sendMessage("Similar to backNavItem");
+                plugin.getRecipesGUI().sendToPlayer(player);
                 event.setCancelled(true);
+                onClose(player);
             }
+
+            if(currentReadOnly) return;
+
+            ItemMeta meta = event.getCurrentItem().getItemMeta();
+            if(meta == null) return;
+
+            String idKey = meta.getPersistentDataContainer().get(typeSelectIDKey, PersistentDataType.STRING);
+
+            if(idKey != null && idKey.equals("typeSelectItem")){
+
+                event.setCancelled(true);
+                if(event.getClick() == ClickType.LEFT){
+                    selectedTypeIndex++;
+                    if(selectedTypeIndex > typeList.size()-1){
+                        selectedTypeIndex = 0;
+                    }
+                } else if(event.getClick() == ClickType.RIGHT){
+                    selectedTypeIndex--;
+                    if(selectedTypeIndex < 0){
+                        selectedTypeIndex = typeList.size()-1;
+                    }
+                }
+
+                save();
+                loadGUI();
+                sendToPlayer(player, currentReadOnly);
+            }
+
+            if (event.getCurrentItem().isSimilar(unused_space))
+                event.setCancelled(true);
         }
     }
-    public void deinit(){
-        for(BukkitRunnable task : tasks){
-            task.cancel();
-        }
+    public void onClose(Player player){
+        save();
+        playersViewing.remove(player.getUniqueId());
     }
 
-    private boolean saveRecipe(String name){
-        Material[] materials = new Material[9];
-        boolean air = true;
-        boolean resultIsAir;
-        for(Integer index : craftingSlots){
-            materials[craftingSlots.indexOf(index)] = inventory.getItem(index) == null ? Material.AIR : inventory.getItem(index).getType();
-            if(inventory.getItem(index) != null) air = false;
-        }
-        resultIsAir = inventory.getItem(resultSlot) == null;
-        if(!air && !resultIsAir){
-            plugin.getConfigLoader().saveRecipe(name, inventory.getItem(resultSlot), materials);
-            return true;
-        }
-        return false;
+    public void deinit(){}
+
+    public String getCurrentType(){
+        return typeList.get(selectedTypeIndex);
     }
 
     private void setItem(int index, @Nullable String value){
@@ -142,9 +226,6 @@ public class CreateRecipeGUI {
             Material material = Material.valueOf(value.toUpperCase());
             inventory.setItem(index, new ItemStack(material));
         }
-    }
-    public InventoryView getInvView(){
-        return invView;
     }
     private String color(String input){
         return ChatColor.translateAlternateColorCodes('&', input);
