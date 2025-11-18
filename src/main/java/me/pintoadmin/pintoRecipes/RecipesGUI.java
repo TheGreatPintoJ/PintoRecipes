@@ -55,11 +55,12 @@ public class RecipesGUI {
                 String recipeName = recipes.get(
                         currentPage * (size - 18) + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
                 );
+                String recipeType = plugin.getConfigLoader().getType(recipeName);
                 ItemStack itemOG = plugin.getConfigLoader().getResultItem(recipeName);
                 if(itemOG == null) throw new IndexOutOfBoundsException();
                 ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
-                meta.setLore(List.of("", color("&r&8Custom Recipe ID: "+recipeName), color("&r&dShift-right click to remove recipe")));
+                meta.setLore(List.of("", color("&r&8ID: "+recipeName), color("&r&8Type: "+recipeType), color("&r&dShift-right click to remove recipe")));
                 item.setItemMeta(meta);
                 inventory.setItem(i, item);
             } catch (IndexOutOfBoundsException ignored){
