@@ -4,6 +4,7 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.recipe.*;
 
 import javax.annotation.*;
 import java.io.*;
@@ -38,23 +39,6 @@ public class ConfigLoader {
         );
         recipes.addAll(recipeConfig.getKeys(false).stream().toList());
     }
-    public void saveRecipe(String name, ItemStack resultingItem, Material[] materials){
-        loadConfig();
-        try {
-            recipeConfig.set(name+".enabled", true);
-            recipeConfig.set(name + ".result", resultingItem);
-            recipeConfig.set(name + ".recipe", List.of(
-                    Map.of("left", materials[0].toString(), "middle", materials[1].toString(), "right", materials[2].toString()),
-                    Map.of("left", materials[3].toString(), "middle", materials[4].toString(), "right", materials[5].toString()),
-                    Map.of("left", materials[6].toString(), "middle", materials[7].toString(), "right", materials[8].toString())
-            ));
-            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-        } catch (IOException e){
-            plugin.getLogger().severe("Failed to save empty recipe: ");
-            e.printStackTrace();
-        }
-        plugin.getLoadRecipes().loadRecipes();
-    }
     public void removeRecipe(String name){
         loadConfig();
         try {
@@ -68,8 +52,58 @@ public class ConfigLoader {
         loadConfig();
     }
 
-    public List<Map<String, String>> getRecipe(String name){
-        return (List<Map<String, String>>) recipeConfig.getList(name+".recipe");
+    public void saveShapedRecipe(String name, ItemStack resultingItem, Material[] materials){
+        loadConfig();
+        try {
+            recipeConfig.set(name+".enabled", true);
+            recipeConfig.set(name+".result", resultingItem);
+            recipeConfig.set(name+".category", "MISC");
+            recipeConfig.set(name+".type", "shaped");
+            recipeConfig.set(name+".recipe", List.of(
+                    Map.of("left", materials[0].toString(), "middle", materials[1].toString(), "right", materials[2].toString()),
+                    Map.of("left", materials[3].toString(), "middle", materials[4].toString(), "right", materials[5].toString()),
+                    Map.of("left", materials[6].toString(), "middle", materials[7].toString(), "right", materials[8].toString())
+            ));
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save recipe: ");
+            e.printStackTrace();
+        }
+        plugin.getLoadRecipes().loadRecipes();
+    }
+    public void saveShapelessRecipe(String name, ItemStack resultingItem, List<String> materials){
+        loadConfig();
+        try {
+            recipeConfig.set(name+".enabled", true);
+            recipeConfig.set(name+".result", resultingItem);
+            recipeConfig.set(name+".category", "MISC");
+            recipeConfig.set(name+".type", "shapeless");
+            recipeConfig.set(name+".recipe", materials);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save recipe: ");
+            e.printStackTrace();
+        }
+        plugin.getLoadRecipes().loadRecipes();
+    }
+    public void saveFurnaceRecipe(String name, ItemStack resultingItem, Material material){
+        loadConfig();
+        try {
+            recipeConfig.set(name+".enabled", true);
+            recipeConfig.set(name+".result", resultingItem);
+            recipeConfig.set(name+".category", "MISC");
+            recipeConfig.set(name+".type", "furnace");
+            recipeConfig.set(name+".recipe", material.toString());
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save recipe: ");
+            e.printStackTrace();
+        }
+        plugin.getLoadRecipes().loadRecipes();
+    }
+
+    public Object getRecipe(String name){
+        return recipeConfig.get(name+".recipe");
     }
     public ItemStack getResultItem(String name){
         return recipeConfig.getItemStack(name + ".result");
@@ -85,5 +119,29 @@ public class ConfigLoader {
             } catch (IOException ignored) {}
         }
         return enabled;
+    }
+    public String getType(String name){
+        loadConfig();
+        String type = recipeConfig.getString(name+".type", "shaped");
+        if(type.equalsIgnoreCase("shaped")){
+            try {
+                recipeConfig.set(name + ".type", "shaped");
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        return type;
+    }
+    public CraftingBookCategory getCategory(String name){
+        loadConfig();
+        String string = recipeConfig.getString(name+".category", "MISC");
+        if(string.equalsIgnoreCase("MISC")){
+            try {
+                recipeConfig.set(name + ".category", "MISC");
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        return CraftingBookCategory.valueOf(string);
     }
 }

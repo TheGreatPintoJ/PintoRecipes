@@ -17,8 +17,6 @@ public class RecipesGUI {
     private final int size = 6*9;
     private int currentPage = 0;
 
-    private List<BukkitRunnable> tasks = new ArrayList<>();
-
     private ItemStack leftNavItem = new ItemStack(Material.ARROW);
     private ItemStack pageNavItem = new ItemStack(Material.PAPER);
     private ItemStack rightNavItem = new ItemStack(Material.ARROW);
@@ -99,7 +97,6 @@ public class RecipesGUI {
                 sendToPlayer((Player) event.getWhoClicked());
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
                 plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(), "new_recipe", false);
-                backOnClose((Player) event.getWhoClicked(), plugin.getCreateRecipeGUI().getInvView());
             } else {
                 for(int i = 0; i < size-18; i++){
                     try {
@@ -117,7 +114,6 @@ public class RecipesGUI {
                                 sendToPlayer(player);
                             } else {
                                 plugin.getCreateRecipeGUI().sendToPlayer((Player) event.getWhoClicked(), recipeName, true);
-                                backOnClose((Player) event.getWhoClicked(), plugin.getCreateRecipeGUI().getInvView());
                             }
                             break;
                         }
@@ -128,25 +124,7 @@ public class RecipesGUI {
             }
         }
     }
-    public void deinit(){
-        for(BukkitRunnable task : tasks){
-            task.cancel();
-        }
-    }
-
-    private void backOnClose(Player player, InventoryView invView){
-        BukkitRunnable task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (player.getOpenInventory() != invView) {
-                    sendToPlayer(player);
-                    this.cancel();
-                }
-            }
-        };
-        task.runTaskTimer(plugin, 0L, 2L);
-        tasks.add(task);
-    }
+    public void deinit(){}
 
     private String color(String input){
         return ChatColor.translateAlternateColorCodes('&', input);
