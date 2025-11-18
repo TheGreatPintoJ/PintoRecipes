@@ -34,7 +34,6 @@ public class CreateRecipeGUI {
 
 
     public CreateRecipeGUI(PintoRecipes plugin, String recipeName){
-        plugin.getLogger().warning("New CreateRecipeGUI instance");
         this.plugin = plugin;
         this.recipeName = recipeName;
 
@@ -171,7 +170,6 @@ public class CreateRecipeGUI {
         if(event.getCurrentItem() != null) {
 
             if(event.getCurrentItem().isSimilar(backNavItem)) {
-                player.sendMessage("Similar to backNavItem");
                 plugin.getRecipesGUI().sendToPlayer(player);
                 event.setCancelled(true);
                 onClose(player);

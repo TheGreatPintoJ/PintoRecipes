@@ -119,9 +119,7 @@ public class RecipesGUI {
                             }
                             break;
                         }
-                    } catch (IndexOutOfBoundsException ignored){
-                        plugin.getLogger().warning("Ignored: recipe with index of "+( currentPage * (size - 18) + i ));
-                    }
+                    } catch (IndexOutOfBoundsException ignored){}
                 }
             }
         }
