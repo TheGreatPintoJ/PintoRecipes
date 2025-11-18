@@ -107,7 +107,9 @@ public class RecipesGUI {
                                 recipes.get(
                                         currentPage * (size - 18) + i
                                 ));
-                        if(event.getCurrentItem().getType().equals(item.getType()) && event.getCurrentItem().getAmount() == item.getAmount()){
+                        ItemStack clickedItem = event.getCurrentItem();
+                        if(clickedItem.getItemMeta() == null) continue;
+                        if(clickedItem.getType().equals(item.getType()) && clickedItem.getAmount() == item.getAmount() && clickedItem.getItemMeta().getDisplayName().equals(item.getItemMeta().getDisplayName())){
                             String recipeName = recipes.get( currentPage * (size - 18) + i );
                             if(event.getClick().equals(ClickType.SHIFT_RIGHT)) {
                                 plugin.getConfigLoader().removeRecipe(recipeName);
