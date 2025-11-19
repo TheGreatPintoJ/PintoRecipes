@@ -24,7 +24,7 @@ public class CreateRecipeGUI {
     private final String recipeName;
 
     private int selectedTypeIndex;
-    private final List<String> typeList = List.of("shaped", "shapeless", "furnace", "blasting", "smoking");
+    private final List<String> typeList = List.of("shaped", "shapeless", "furnace", "blasting", "smoking", "campfire");
 
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
     private final NamespacedKey unusedSpaceKey = new NamespacedKey(PintoRecipes.thisPlugin(), "unusedSpaceID");
@@ -91,7 +91,7 @@ public class CreateRecipeGUI {
                         }
                     }
                     break;
-                case "furnace", "blasting", "smoking":
+                case "furnace", "blasting", "smoking", "campfire":
                     String furnaceRecipe = (String) plugin.getConfigLoader().getRecipe(recipeName);
                     setItem(furnaceSlot, furnaceRecipe);
                     break;
@@ -194,6 +194,12 @@ public class CreateRecipeGUI {
                 if(smokingItem == null) return;
                 Material smokingMaterial = smokingItem.getType();
                 plugin.getConfigLoader().saveSmokingRecipe(recipeName, inventory.getItem(resultSlot), smokingMaterial);
+                break;
+            case "campfire":
+                ItemStack campfireItem = inventory.getItem(furnaceSlot);
+                if(campfireItem == null) return;
+                Material campfireMaterial = campfireItem.getType();
+                plugin.getConfigLoader().saveCampfireRecipe(recipeName, inventory.getItem(resultSlot), campfireMaterial);
                 break;
         }
     }

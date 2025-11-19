@@ -155,6 +155,26 @@ public class ConfigLoader {
         }
         plugin.getLoadRecipes().loadRecipes();
     }
+    public void saveCampfireRecipe(String name, ItemStack resultingItem, Material material){
+        loadConfig();
+        try {
+            if(recipeConfig.get(name+".enabled") == null)
+                recipeConfig.set(name+".enabled", true);
+            if(recipeConfig.get(name+".result") == null)
+                recipeConfig.set(name+".result", resultingItem);
+            if(recipeConfig.get(name+".category") == null)
+                recipeConfig.set(name+".category", "MISC");
+
+            recipeConfig.set(name+".type", "campfire");
+            recipeConfig.set(name+".recipe", material.toString());
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            plugin.getLogger().info("Saved campfire recipe: "+resultingItem.getType()+" - "+material.name());
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save recipe: ");
+            e.printStackTrace();
+        }
+        plugin.getLoadRecipes().loadRecipes();
+    }
 
 
     public Object getRecipe(String name){
