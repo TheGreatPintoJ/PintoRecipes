@@ -47,7 +47,7 @@ public class LoadRecipes {
                                 value = recipeMap.get("right");
 
                             if(value != null && !value.equalsIgnoreCase("air")){
-                                shapedRecipe.setIngredient(String.valueOf(round).charAt(0), Material.valueOf(value));
+                                shapedRecipe.setIngredient(String.valueOf(round).charAt(0), Material.valueOf(value.toUpperCase()));
                             }
                             round++;
                         }
@@ -64,7 +64,7 @@ public class LoadRecipes {
                     ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
                     List<String> materialsList = (List<String>) configLoader.getRecipe(recipeName);
                     for(String entry : materialsList){
-                        shapelessRecipe.addIngredient(Material.valueOf(entry));
+                        shapelessRecipe.addIngredient(Material.valueOf(entry.toUpperCase()));
                     }
                     if(!shapelessRecipe.getIngredientList().isEmpty()){
                         try {
