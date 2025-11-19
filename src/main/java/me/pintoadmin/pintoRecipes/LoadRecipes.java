@@ -1,9 +1,7 @@
 package me.pintoadmin.pintoRecipes;
 
 import org.bukkit.*;
-import org.bukkit.block.*;
 import org.bukkit.inventory.*;
-import org.checkerframework.checker.units.qual.*;
 
 import java.util.*;
 
@@ -114,6 +112,16 @@ public class LoadRecipes {
                             campfireRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(campfireRecipe);
                             plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + campfireMaterial);
+                        } catch (IllegalStateException ignored){}
+                    }
+                    break;
+                case "stonecutter":
+                    Material stonecutterMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    if(!stonecutterMaterial.isAir()){
+                        StonecuttingRecipe stonecutterRecipe = new StonecuttingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, stonecutterMaterial);
+                        try {
+                            getServer().addRecipe(stonecutterRecipe);
+                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + stonecutterMaterial);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
