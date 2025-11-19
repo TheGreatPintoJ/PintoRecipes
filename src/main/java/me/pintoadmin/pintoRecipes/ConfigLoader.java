@@ -115,6 +115,47 @@ public class ConfigLoader {
         }
         plugin.getLoadRecipes().loadRecipes();
     }
+    public void saveBlastingRecipe(String name, ItemStack resultingItem, Material material){
+        loadConfig();
+        try {
+            if(recipeConfig.get(name+".enabled") == null)
+                recipeConfig.set(name+".enabled", true);
+            if(recipeConfig.get(name+".result") == null)
+                recipeConfig.set(name+".result", resultingItem);
+            if(recipeConfig.get(name+".category") == null)
+                recipeConfig.set(name+".category", "MISC");
+
+            recipeConfig.set(name+".type", "blasting");
+            recipeConfig.set(name+".recipe", material.toString());
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            plugin.getLogger().info("Saved blasting recipe: "+resultingItem.getType()+" - "+material.name());
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save recipe: ");
+            e.printStackTrace();
+        }
+        plugin.getLoadRecipes().loadRecipes();
+    }
+    public void saveSmokingRecipe(String name, ItemStack resultingItem, Material material){
+        loadConfig();
+        try {
+            if(recipeConfig.get(name+".enabled") == null)
+                recipeConfig.set(name+".enabled", true);
+            if(recipeConfig.get(name+".result") == null)
+                recipeConfig.set(name+".result", resultingItem);
+            if(recipeConfig.get(name+".category") == null)
+                recipeConfig.set(name+".category", "MISC");
+
+            recipeConfig.set(name+".type", "smoking");
+            recipeConfig.set(name+".recipe", material.toString());
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            plugin.getLogger().info("Saved smoking recipe: "+resultingItem.getType()+" - "+material.name());
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save recipe: ");
+            e.printStackTrace();
+        }
+        plugin.getLoadRecipes().loadRecipes();
+    }
+
 
     public Object getRecipe(String name){
         return recipeConfig.get(name+".recipe");

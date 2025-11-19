@@ -82,6 +82,28 @@ public class LoadRecipes {
                         } catch (IllegalStateException ignored){}
                     }
                     break;
+                case "blasting":
+                    Material blastingMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    if(!blastingMaterial.isAir()){
+                        BlastingRecipe blastingRecipe = new BlastingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, blastingMaterial, 0, 100); // TODO: add configurable cooking time and exp
+                        try {
+                            blastingRecipe.setCategory(configLoader.getCookingCategory(recipeName));
+                            getServer().addRecipe(blastingRecipe);
+                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + blastingMaterial);
+                        } catch (IllegalStateException ignored){}
+                    }
+                    break;
+                case "smoking":
+                    Material smokingMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    if(!smokingMaterial.isAir()){
+                        SmokingRecipe smokingRecipe = new SmokingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, smokingMaterial, 0, 100); // TODO: add configurable cooking time and exp
+                        try {
+                            smokingRecipe.setCategory(configLoader.getCookingCategory(recipeName));
+                            getServer().addRecipe(smokingRecipe);
+                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + smokingMaterial);
+                        } catch (IllegalStateException ignored){}
+                    }
+                    break;
                 // TODO: add more types
             }
             plugin.getCreateRecipeGUI(recipeName);
