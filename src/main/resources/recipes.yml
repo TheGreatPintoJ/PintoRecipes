@@ -27,3 +27,12 @@ endermite_spawnegg:
     - left: air
       middle: ender_pearl
       right: air
+wither_skull:
+  enabled: false
+  type: smoking
+  category: MISC
+  result:
+    ==: org.bukkit.inventory.ItemStack
+    v: 4440
+    type: WITHER_SKELETON_SKULL
+  recipe: SKELETON_SKULL
