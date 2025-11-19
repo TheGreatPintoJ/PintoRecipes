@@ -1,10 +1,10 @@
 ## PintoRecipes
-A simple spigot plugin to add custom recipes to your server
+A spigot plugin to add custom recipes to your server
 
 ### Features
 * Save, show, and edit recipes from a GUI
 * Remove recipes from config
-* Options for shaped, shapeless, and furnace recipes
+* Options for shaped, shapeless, furnace, blasting, smoking, and campfire recipes
 * Any item is craftable/smeltable/etc. (including nbt)
 
 ### Commands
@@ -29,7 +29,7 @@ The `recipes.yml` file is where all custom recipes are stored.
 * `result` - This is the raw data of the item that spigot stores. I highly recommend leaving this be and using the commands to generate it.
 * `recipe` - This is where the recipe is stored. The first set of entries is the first row of the crafting grid, the second is the second row, etc. All entries beyond three will be ignored.
 * `enabled` - Whether to load the recipe when the server starts
-* `type` - The type of the recipe. Options are [`shaped`, `shapeless`, `furnace`]
+* `type` - The type of the recipe. Options are [`shaped`, `shapeless`, `furnace`, `blasting`, `smoking`]
 * `category` - The category of whatever book to put the recipe in (for shaped or shapeless `blocks`, `weapons`, `misc`, etc.)
 
 ### Notes
@@ -37,4 +37,4 @@ The `recipes.yml` file is where all custom recipes are stored.
   * I have not yet found a problem with reloading instead, but you might run into problems so it's better to restart
  
 ### Errors/Bugs
-Make an issue in this project's repository
+Make an issue in this project's GitHub repository
