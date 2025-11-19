@@ -73,8 +73,10 @@ public class LoadRecipes {
                     break;
                 case "furnace":
                     Material furnaceMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    int furnaceCookTime = configLoader.getCooktime(recipeName.toLowerCase());
+                    int furnaceExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!furnaceMaterial.isAir()){
-                        FurnaceRecipe furnaceRecipe = new FurnaceRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, furnaceMaterial, 0, 100); // TODO: add configurable cooking time and exp
+                        FurnaceRecipe furnaceRecipe = new FurnaceRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, furnaceMaterial, furnaceExperience, furnaceCookTime);
                         try {
                             furnaceRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(furnaceRecipe);
@@ -84,8 +86,10 @@ public class LoadRecipes {
                     break;
                 case "blasting":
                     Material blastingMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    int blastingCookTime = configLoader.getCooktime(recipeName.toLowerCase());
+                    int blastingExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!blastingMaterial.isAir()){
-                        BlastingRecipe blastingRecipe = new BlastingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, blastingMaterial, 0, 100); // TODO: add configurable cooking time and exp
+                        BlastingRecipe blastingRecipe = new BlastingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, blastingMaterial, blastingExperience, blastingCookTime);
                         try {
                             blastingRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(blastingRecipe);
@@ -95,8 +99,10 @@ public class LoadRecipes {
                     break;
                 case "smoking":
                     Material smokingMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    int smokingCookTime = configLoader.getCooktime(recipeName.toLowerCase());
+                    int smokingExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!smokingMaterial.isAir()){
-                        SmokingRecipe smokingRecipe = new SmokingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, smokingMaterial, 0, 100); // TODO: add configurable cooking time and exp
+                        SmokingRecipe smokingRecipe = new SmokingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, smokingMaterial, smokingExperience, smokingCookTime);
                         try {
                             smokingRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(smokingRecipe);
@@ -106,8 +112,10 @@ public class LoadRecipes {
                     break;
                 case "campfire":
                     Material campfireMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
+                    int campfireCookTime = configLoader.getCooktime(recipeName.toLowerCase());
+                    int campfireExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!campfireMaterial.isAir()){
-                        CampfireRecipe campfireRecipe = new CampfireRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, campfireMaterial, 0, 100);
+                        CampfireRecipe campfireRecipe = new CampfireRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, campfireMaterial, campfireExperience, campfireCookTime);
                         try {
                             campfireRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(campfireRecipe);
@@ -125,7 +133,6 @@ public class LoadRecipes {
                         } catch (IllegalStateException ignored){}
                     }
                     break;
-                // TODO: add more types
             }
             plugin.getCreateRecipeGUI(recipeName);
         }
