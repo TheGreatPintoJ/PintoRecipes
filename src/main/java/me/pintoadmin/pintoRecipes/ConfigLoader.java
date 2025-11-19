@@ -15,12 +15,6 @@ public class ConfigLoader {
     private FileConfiguration config;
     public List<String> recipes = new ArrayList<>();
 
-    private final Map<String, String> defaultRecipe = Map.of(
-            "left", "air",
-            "middle", "air",
-            "right", "air"
-    );
-
     public ConfigLoader(PintoRecipes plugin) {
         this.plugin = plugin;
         saveDefaultRecipes();
@@ -175,7 +169,26 @@ public class ConfigLoader {
         }
         plugin.getLoadRecipes().loadRecipes();
     }
+    public void saveStonecutterRecipe(String name, ItemStack resultingItem, Material material){
+        loadConfig();
+        try {
+            if(recipeConfig.get(name+".enabled") == null)
+                recipeConfig.set(name+".enabled", true);
+            if(recipeConfig.get(name+".result") == null)
+                recipeConfig.set(name+".result", resultingItem);
+            if(recipeConfig.get(name+".category") == null)
+                recipeConfig.set(name+".category", "MISC");
 
+            recipeConfig.set(name+".type", "stonecutter");
+            recipeConfig.set(name+".recipe", material.toString());
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            plugin.getLogger().info("Saved stonecutter recipe: "+resultingItem.getType()+" - "+material.name());
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to save recipe: ");
+            e.printStackTrace();
+        }
+        plugin.getLoadRecipes().loadRecipes();
+    }
 
     public Object getRecipe(String name){
         return recipeConfig.get(name+".recipe");
@@ -239,6 +252,40 @@ public class ConfigLoader {
         } catch (IllegalArgumentException e){
             plugin.getLogger().severe("Invalid cooking category: "+string);
             return CookingBookCategory.MISC;
+        }
+    }
+    public int getCooktime(String name){
+        loadConfig();
+        int time = recipeConfig.getInt(name+".cooktime", 1);
+        if(time == 0){
+            try {
+                recipeConfig.set(name + ".cooktime", 1);
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        try {
+            return time;
+        } catch (IllegalArgumentException e){
+            plugin.getLogger().severe("Invalid cooktime: "+ time);
+            return 0;
+        }
+    }
+    public int getExperience(String name){
+        loadConfig();
+        int exp = recipeConfig.getInt(name+".experience", 1);
+        if(exp == 0){
+            try {
+                recipeConfig.set(name + ".experience", 1);
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        try {
+            return exp;
+        } catch (IllegalArgumentException e){
+            plugin.getLogger().severe("Invalid experience: "+ exp);
+            return 0;
         }
     }
 }

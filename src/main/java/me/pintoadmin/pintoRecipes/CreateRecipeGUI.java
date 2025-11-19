@@ -19,19 +19,30 @@ public class CreateRecipeGUI {
     private final List<Integer> craftingSlots = new ArrayList<>(List.of(10,11,12,19,20,21,28,29,30));
     private final int furnaceSlot = 20;
     private final int resultSlot = 24;
+    private final int typeSlot = 4;
 
     private boolean currentReadOnly = false;
     private final String recipeName;
 
     private int selectedTypeIndex;
-    private final List<String> typeList = List.of("shaped", "shapeless", "furnace", "blasting", "smoking", "campfire");
+    private final List<String> typeList = List.of("shaped", "shapeless", "furnace", "blasting", "smoking", "campfire", "stonecutter");
+    private final Map<String, Material> typeMap = Map.of(
+            "shaped", Material.CRAFTING_TABLE,
+            "shapeless", Material.CRAFTER,
+            "furnace", Material.FURNACE,
+            "blasting", Material.BLAST_FURNACE,
+            "smoking", Material.SMOKER,
+            "campfire", Material.CAMPFIRE,
+            "stonecutter", Material.STONECUTTER
+    );
 
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
     private final NamespacedKey unusedSpaceKey = new NamespacedKey(PintoRecipes.thisPlugin(), "unusedSpaceID");
 
     private final ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
 
-    private final ItemStack typeSelectItem = new ItemStack(Material.PAPER);
+    private ItemStack typeShowItem = new ItemStack(Material.CRAFTING_TABLE);
+    private ItemStack typeSelectItem = new ItemStack(Material.PAPER);
     private final NamespacedKey typeSelectIDKey = new NamespacedKey(PintoRecipes.thisPlugin(), "typeSelectID");
 
 
@@ -91,11 +102,10 @@ public class CreateRecipeGUI {
                         }
                     }
                     break;
-                case "furnace", "blasting", "smoking", "campfire":
+                case "furnace", "blasting", "smoking", "campfire", "stonecutter":
                     String furnaceRecipe = (String) plugin.getConfigLoader().getRecipe(recipeName);
                     setItem(furnaceSlot, furnaceRecipe);
                     break;
-                // TODO: add other types
             }
         }
 
@@ -106,6 +116,7 @@ public class CreateRecipeGUI {
         fireworkMeta.setPower(0);
         backNavItem.setItemMeta(fireworkMeta);
 
+        typeSelectItem = new ItemStack(typeMap.get(getCurrentType()));
         ItemMeta typeSelectMeta = typeSelectItem.getItemMeta();
         assert typeSelectMeta != null;
         typeSelectMeta.setItemName(color("&lRecipe type: "+getCurrentType()));
@@ -200,6 +211,12 @@ public class CreateRecipeGUI {
                 if(campfireItem == null) return;
                 Material campfireMaterial = campfireItem.getType();
                 plugin.getConfigLoader().saveCampfireRecipe(recipeName, inventory.getItem(resultSlot), campfireMaterial);
+                break;
+            case "stonecutter":
+                ItemStack stonecutterItem = inventory.getItem(furnaceSlot);
+                if(stonecutterItem == null) return;
+                Material stonecutterMaterial = stonecutterItem.getType();
+                plugin.getConfigLoader().saveStonecutterRecipe(recipeName, inventory.getItem(resultSlot), stonecutterMaterial);
                 break;
         }
     }
