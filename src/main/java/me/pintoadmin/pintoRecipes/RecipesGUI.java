@@ -60,7 +60,11 @@ public class RecipesGUI {
                 if(itemOG == null) throw new IndexOutOfBoundsException();
                 ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
-                meta.setLore(List.of("", color("&r&8ID: "+recipeName), color("&r&8Type: "+recipeType), color("&r&dShift-right click to remove recipe")));
+                meta.setLore(List.of("",
+                        color("&r&8ID: "+recipeName),
+                        color("&r&8Type: "+recipeType),
+                        color("&r&6Right click to edit recipe"),
+                        color("&r&cShift-right click to remove recipe")));
                 item.setItemMeta(meta);
                 inventory.setItem(i, item);
             } catch (IndexOutOfBoundsException ignored){
@@ -115,8 +119,11 @@ public class RecipesGUI {
                                 plugin.getConfigLoader().removeRecipe(recipeName);
                                 Player player = (Player) event.getWhoClicked();
                                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
-                                player.sendMessage(ChatColor.RED+"Removed recipe "+recipeName+" from config");
+                                player.sendMessage(ChatColor.RED + "Removed recipe " + recipeName + " from config");
                                 sendToPlayer(player);
+                            } else if(event.getClick().equals(ClickType.RIGHT)){
+                                Player player = (Player) event.getWhoClicked();
+                                plugin.getCreateRecipeGUI(recipeName).sendToPlayer(player, false);
                             } else {
                                 plugin.getCreateRecipeGUI(recipeName).sendToPlayer((Player) event.getWhoClicked(), true);
                             }
