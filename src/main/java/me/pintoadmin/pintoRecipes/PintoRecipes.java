@@ -9,6 +9,7 @@ public final class PintoRecipes extends JavaPlugin {
     private final ConfigLoader configLoader = new ConfigLoader(this);
     private final LoadRecipes loadRecipes = new LoadRecipes(this);
     private final RecipesGUI recipesGUI = new RecipesGUI(this);
+    private final SQLiteManager sqLiteManager = new SQLiteManager(this);
 
     private final Map<String, CreateRecipeGUI> editGUIs = new HashMap<>();
 
@@ -29,6 +30,8 @@ public final class PintoRecipes extends JavaPlugin {
         for(Map.Entry<String, CreateRecipeGUI> entry : editGUIs.entrySet())
             entry.getValue().deinit();
         recipesGUI.deinit();
+
+        sqLiteManager.deinit();
     }
 
     public CreateRecipeGUI getCreateRecipeGUI(String recipeName){
@@ -47,5 +50,8 @@ public final class PintoRecipes extends JavaPlugin {
     }
     public RecipesGUI getRecipesGUI() {
         return recipesGUI;
+    }
+    public SQLiteManager getSqLiteManager(){
+        return sqLiteManager;
     }
 }

@@ -2,6 +2,8 @@ netherite_sword:
   enabled: false
   type: shapeless
   category: WEAPONS
+  limit: -1
+  limit-type: PLAYER
   result:
     ==: org.bukkit.inventory.ItemStack
     v: 4440
@@ -13,6 +15,8 @@ endermite_spawnegg:
   enabled: false
   type: shaped
   category: MISC
+  limit: -1
+  limit-type: SERVER
   result:
     ==: org.bukkit.inventory.ItemStack
     v: 4440
@@ -31,6 +35,8 @@ wither_skull:
   enabled: false
   type: smoking
   category: MISC
+  limit: 3
+  limit-type: PLAYER
   result:
     ==: org.bukkit.inventory.ItemStack
     v: 4440

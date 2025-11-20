@@ -136,5 +136,6 @@ public class LoadRecipes {
             }
             plugin.getCreateRecipeGUI(recipeName);
         }
+        plugin.getSqLiteManager().addColumns();
     }
 }

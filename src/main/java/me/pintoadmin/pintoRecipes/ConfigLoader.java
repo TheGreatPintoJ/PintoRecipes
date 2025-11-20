@@ -257,7 +257,7 @@ public class ConfigLoader {
     public int getCooktime(String name){
         loadConfig();
         int time = recipeConfig.getInt(name+".cooktime", 1);
-        if(time == 0){
+        if(time == 1){
             try {
                 recipeConfig.set(name + ".cooktime", 1);
                 recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
@@ -268,13 +268,13 @@ public class ConfigLoader {
             return time;
         } catch (IllegalArgumentException e){
             plugin.getLogger().severe("Invalid cooktime: "+ time);
-            return 0;
+            return 1;
         }
     }
     public int getExperience(String name){
         loadConfig();
         int exp = recipeConfig.getInt(name+".experience", 1);
-        if(exp == 0){
+        if(exp == 1){
             try {
                 recipeConfig.set(name + ".experience", 1);
                 recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
@@ -285,7 +285,36 @@ public class ConfigLoader {
             return exp;
         } catch (IllegalArgumentException e){
             plugin.getLogger().severe("Invalid experience: "+ exp);
-            return 0;
+            return 1;
         }
+    }
+    public int getLimit(String name){
+        loadConfig();
+        int limit = recipeConfig.getInt(name+".limit", -1);
+        if(limit == -1){
+            try {
+                recipeConfig.set(name + ".limit", -1);
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        try {
+            return limit;
+        } catch (IllegalArgumentException e){
+            plugin.getLogger().severe("Invalid limit: "+ limit);
+            return -1;
+        }
+    }
+    public String getLimitType(String name){
+        loadConfig();
+        String type = recipeConfig.getString(name+".limit-type", "SERVER");
+        if(type.equalsIgnoreCase("SERVER")){
+            try {
+                recipeConfig.set(name + ".limit-type", "SERVER");
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        return type;
     }
 }
