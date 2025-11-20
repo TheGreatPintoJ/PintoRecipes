@@ -178,6 +178,10 @@ public class ConfigLoader {
                 recipeConfig.set(name+".result", resultingItem);
             if(recipeConfig.get(name+".category") == null)
                 recipeConfig.set(name+".category", "MISC");
+            if(recipeConfig.get(name+".limit-type") == null)
+                recipeConfig.set(name+".limit-type", "PLAYER");
+            if(recipeConfig.get(name+".limit") == null)
+                recipeConfig.set(name+".limit", -1);
 
             recipeConfig.set(name+".type", "stonecutter");
             recipeConfig.set(name+".recipe", material.toString());
