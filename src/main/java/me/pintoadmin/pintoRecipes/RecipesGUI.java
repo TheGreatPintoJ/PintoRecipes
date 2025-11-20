@@ -129,7 +129,9 @@ public class RecipesGUI {
                                 Player player = (Player) event.getWhoClicked();
                                 AnvilGUI.Builder renameGUI = new AnvilGUI.Builder()
                                         .onClose(stateSnapshot -> {
-                                           stateSnapshot.getPlayer().sendMessage(color("&cCancelled renaming"));
+                                            if(!stateSnapshot.getText().equals(recipeName))
+                                                stateSnapshot.getPlayer().sendMessage(color("&cCancelled renaming"));
+                                            else player.sendMessage(ChatColor.GREEN+"Renamed "+recipeName+" to "+stateSnapshot.getText());
                                         })
                                         .onClick((slot, stateSnapshot) -> {
                                             if(slot != AnvilGUI.Slot.OUTPUT) {
