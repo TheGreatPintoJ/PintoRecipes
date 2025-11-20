@@ -136,9 +136,10 @@ public class LoadRecipes {
                     break;
             }
             plugin.getCreateRecipeGUI(recipeName);
-            plugin.getServer().getPluginManager().addPermission(
-                    new Permission("pintorecipes.craft."+recipeName, "Permission to craft the recipe "+recipeName, PermissionDefault.TRUE)
-            );
+
+            Permission permission = new Permission("pintorecipes.craft."+recipeName, "Permission to craft the recipe "+recipeName, PermissionDefault.TRUE);
+            if(plugin.getServer().getPluginManager().getPermission(permission.getName()) == null)
+                plugin.getServer().getPluginManager().addPermission(permission);
         }
         plugin.getSqLiteManager().addColumns();
     }
