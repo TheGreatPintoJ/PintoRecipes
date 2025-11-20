@@ -56,6 +56,17 @@ public class SQLiteManager {
             }
         }
     }
+    public void renameColumn(String oldName, String newName){
+        getConnection();
+        if(!columnExists(oldName)) return;
+        try {
+            PreparedStatement ps = connection.prepareStatement("ALTER TABLE crafts RENAME COLUMN "+oldName+" TO "+newName);
+            ps.execute();
+            ps.close();
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error renaming column: "+e.getMessage());
+        }
+    }
 
     public int getServerCrafts(String recipeName){
         getConnection();

@@ -139,6 +139,7 @@ public class RecipesGUI {
                                             }
 
                                             plugin.getConfigLoader().renameRecipe(recipeName, stateSnapshot.getText());
+                                            plugin.getSqLiteManager().renameColumn(recipeName, stateSnapshot.getText());
                                             sendToPlayer(player);
                                             return Collections.emptyList();
                                         })
