@@ -309,6 +309,16 @@ public class ConfigLoader {
             return -1;
         }
     }
+    public void setLimit(String name, int newValue){
+        loadConfig();
+        try {
+            recipeConfig.set(name+".limit", newValue);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to set limit for recipe"+name);
+        }
+    }
     public String getLimitType(String name){
         loadConfig();
         String type = recipeConfig.getString(name+".limit-type", "SERVER");
@@ -320,5 +330,15 @@ public class ConfigLoader {
             } catch (IOException ignored) {}
         }
         return type;
+    }
+    public void setLimitType(String name, String newValue){
+        loadConfig();
+        try {
+            recipeConfig.set(name+".limit-type", newValue);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to set limit-type for recipe"+name);
+        }
     }
 }
