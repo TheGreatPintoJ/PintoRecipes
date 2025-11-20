@@ -36,6 +36,12 @@ public class InventoryEvents implements Listener {
         }
 
         if(craftedRecipe.isEmpty()) return;
+        if(!player.hasPermission("pintorecipes.craft."+craftedRecipe)) {
+            player.sendMessage(ChatColor.RED+"You don't have permission to craft this");
+            event.setCancelled(true);
+            return;
+        }
+
         String limitType = plugin.getConfigLoader().getLimitType(craftedRecipe);
         int limitNum = plugin.getConfigLoader().getLimit(craftedRecipe);
         if(limitNum == -1) return;
