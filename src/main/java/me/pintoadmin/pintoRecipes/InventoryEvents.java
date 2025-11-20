@@ -36,7 +36,7 @@ public class InventoryEvents implements Listener {
         }
 
         if(craftedRecipe.isEmpty()) return;
-        if(!player.hasPermission("pintorecipes.craft."+craftedRecipe)) {
+        if(!player.hasPermission("pintorecipes.craft."+craftedRecipe) && !player.hasPermission("pintorecipes.craftbypass")) {
             player.sendMessage(ChatColor.RED+"You don't have permission to craft this");
             event.setCancelled(true);
             return;
@@ -50,13 +50,13 @@ public class InventoryEvents implements Listener {
 
         switch(limitType){
             case "SERVER":
-                if(limitNum <= serverCrafted){
+                if(limitNum <= serverCrafted && !player.hasPermission("pintorecipes.craftbypass")){
                     event.setCancelled(true);
                     player.sendMessage(ChatColor.RED+"The maximum amount of this item has already been crafted on this server");
                 } else plugin.getSqLiteManager().incrementPlayerCrafts(craftedRecipe, player.getUniqueId());
                 break;
             case "PLAYER":
-                if(limitNum <= alreadyCrafted){
+                if(limitNum <= alreadyCrafted && !player.hasPermission("pintorecipes.craftbypass")){
                     event.setCancelled(true);
                     player.sendMessage(ChatColor.RED+"You have already crafted the maximum number of this item on this server");
                 } else plugin.getSqLiteManager().incrementPlayerCrafts(craftedRecipe, player.getUniqueId());

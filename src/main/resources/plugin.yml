@@ -30,3 +30,6 @@ permissions:
   pintorecipes.recipes.remove:
     description: Permission to use subcommand "remove" in /pintorecipes
     default: op
+  pintorecipes.craftbypass:
+    description: Permission to bypass crafting limits
+    default: false
