@@ -44,6 +44,19 @@ public class ConfigLoader {
         }
         loadConfig();
     }
+    public void renameRecipe(String beforeName, String afterName){
+        loadConfig();
+        try {
+            Object value = recipeConfig.get(beforeName);     // copy the contents
+            recipeConfig.set(afterName, value);             // write to new key
+            recipeConfig.set(beforeName, null);              // remove old key
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to rename recipe: ");
+            e.printStackTrace();
+        }
+        loadConfig();
+    }
 
     public void saveShapedRecipe(String name, ItemStack resultingItem, Material[] materials){
         loadConfig();
