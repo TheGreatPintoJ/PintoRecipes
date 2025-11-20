@@ -1,5 +1,5 @@
 name: PintoRecipes
-version: '1.6'
+version: '1.7'
 main: me.pintoadmin.pintoRecipes.PintoRecipes
 api-version: '1.21'
 authors: [ PintoJ ]
@@ -30,3 +30,6 @@ permissions:
   pintorecipes.recipes.remove:
     description: Permission to use subcommand "remove" in /pintorecipes
     default: op
+  pintorecipes.craftbypass:
+    description: Permission to bypass crafting limits
+    default: false

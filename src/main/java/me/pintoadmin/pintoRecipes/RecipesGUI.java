@@ -1,11 +1,11 @@
 package me.pintoadmin.pintoRecipes;
 
+import net.wesjd.anvilgui.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
-import org.bukkit.scheduler.*;
 
 import java.util.*;
 
@@ -60,7 +60,12 @@ public class RecipesGUI {
                 if(itemOG == null) throw new IndexOutOfBoundsException();
                 ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
-                meta.setLore(List.of("", color("&r&8ID: "+recipeName), color("&r&8Type: "+recipeType), color("&r&dShift-right click to remove recipe")));
+                meta.setLore(List.of("",
+                        color("&r&8ID: "+recipeName),
+                        color("&r&8Type: "+recipeType),
+                        color("&r&6Right click to edit recipe"),
+                        color("&r&cShift-right click to remove recipe"),
+                        color("&r&aShift-left click to rename recipe")));
                 item.setItemMeta(meta);
                 inventory.setItem(i, item);
             } catch (IndexOutOfBoundsException ignored){
@@ -115,8 +120,34 @@ public class RecipesGUI {
                                 plugin.getConfigLoader().removeRecipe(recipeName);
                                 Player player = (Player) event.getWhoClicked();
                                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
-                                player.sendMessage(ChatColor.RED+"Removed recipe "+recipeName+" from config");
+                                player.sendMessage(ChatColor.RED + "Removed recipe " + recipeName + " from config");
                                 sendToPlayer(player);
+                            } else if(event.getClick().equals(ClickType.RIGHT)) {
+                                Player player = (Player) event.getWhoClicked();
+                                plugin.getCreateRecipeGUI(recipeName).sendToPlayer(player, false);
+                            } else if(event.getClick().equals(ClickType.SHIFT_LEFT)){
+                                Player player = (Player) event.getWhoClicked();
+                                AnvilGUI.Builder renameGUI = new AnvilGUI.Builder()
+                                        .onClose(stateSnapshot -> {
+                                            if(stateSnapshot.getText().equals(recipeName))
+                                                stateSnapshot.getPlayer().sendMessage(color("&cCancelled renaming"));
+                                            else player.sendMessage(ChatColor.GREEN+"Renamed "+recipeName+" to "+stateSnapshot.getText());
+                                        })
+                                        .onClick((slot, stateSnapshot) -> {
+                                            if(slot != AnvilGUI.Slot.OUTPUT) {
+                                                return Collections.emptyList();
+                                            }
+                                            if(stateSnapshot.getText().equals(recipeName)) return Collections.emptyList();
+
+                                            plugin.getConfigLoader().renameRecipe(recipeName, stateSnapshot.getText());
+                                            plugin.getSqLiteManager().renameColumn(recipeName, stateSnapshot.getText());
+                                            sendToPlayer(player);
+                                            return Collections.emptyList();
+                                        })
+                                        .text(recipeName)
+                                        .title("Enter the new name")
+                                        .plugin(PintoRecipes.thisPlugin());
+                                renameGUI.open(player);
                             } else {
                                 plugin.getCreateRecipeGUI(recipeName).sendToPlayer((Player) event.getWhoClicked(), true);
                             }

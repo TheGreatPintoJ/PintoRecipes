@@ -2,9 +2,13 @@
 A spigot plugin to add custom recipes to your server
 
 ### Features
-* Save, show, edit, and remove recipes from a GUI
+* Save, show, edit, rename, remove recipes from a GUI
 * Options for shaped, shapeless, furnace, blasting, smoking, campfire, and stonecutter recipes
 * Any item is craftable/smeltable/etc. (including nbt)
+* Option to limit how many of a custom item is crafted (including vanilla recipes if you create a 'custom' recipe for them)
+  * Permission to bypass crafting limitations (`pintorecipes.craftbypass`)
+* Permissions to limit who can craft any item (default to anybody)
+
 
 ### Commands
 * `/pintorecipes [show|save|edit|remove|list] [recipe_name]`
@@ -21,6 +25,8 @@ A spigot plugin to add custom recipes to your server
 * `pintorecipes.recipes.edit # Permission to use '/pr edit'`
 * `pintorecipes.recipes.remove # Permission to use '/pr remove'`
 * `pintorecipes.recipes.list # Permission to use '/pr list' or '/pr' (without args)`
+* `pintorecipes.craftbypass # Permission to bypass crafting permissions and limits`
+* `pintorecipes.craft.<recipe_name> # Permission to craft specified recipe`
 
 ### Config
 The `recipes.yml` file is where all custom recipes are stored.

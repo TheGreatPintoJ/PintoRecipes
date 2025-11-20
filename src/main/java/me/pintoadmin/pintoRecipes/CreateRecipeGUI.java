@@ -8,6 +8,7 @@ import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.*;
 
 import javax.annotation.*;
+import javax.naming.*;
 import java.util.*;
 
 public class CreateRecipeGUI {
@@ -35,15 +36,12 @@ public class CreateRecipeGUI {
             "campfire", Material.CAMPFIRE,
             "stonecutter", Material.STONECUTTER
     );
+    private final NamespacedKey idNameKey = new NamespacedKey(PintoRecipes.thisPlugin(), "item_id");
 
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-    private final NamespacedKey unusedSpaceKey = new NamespacedKey(PintoRecipes.thisPlugin(), "unusedSpaceID");
-
     private final ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
-
-    private ItemStack typeShowItem = new ItemStack(Material.CRAFTING_TABLE);
     private ItemStack typeSelectItem = new ItemStack(Material.PAPER);
-    private final NamespacedKey typeSelectIDKey = new NamespacedKey(PintoRecipes.thisPlugin(), "typeSelectID");
+    private ItemStack limitSelectItem = new ItemStack(Material.PAPER);
 
 
     public CreateRecipeGUI(PintoRecipes plugin, String recipeName){
@@ -54,7 +52,7 @@ public class CreateRecipeGUI {
 
         ItemMeta unusedMeta = unused_space.getItemMeta();
         unusedMeta.setItemName(color("&f"));
-        unusedMeta.getPersistentDataContainer().set(unusedSpaceKey, PersistentDataType.STRING, "unused_space");
+        unusedMeta.getPersistentDataContainer().set(idNameKey, PersistentDataType.STRING, "unused_space");
         unused_space.setItemMeta(unusedMeta);
 
         inventory = Bukkit.createInventory(null, 5 * 9, color("&eRecipe - "+recipeName));
@@ -121,14 +119,21 @@ public class CreateRecipeGUI {
         assert typeSelectMeta != null;
         typeSelectMeta.setItemName(color("&lRecipe type: "+getCurrentType()));
         typeSelectMeta.setLore(List.of(color("&d&lLeft click to select next"), color("&d&lRight click to select previous")));
-
-        typeSelectMeta.getPersistentDataContainer().set(typeSelectIDKey, PersistentDataType.STRING, "typeSelectItem");
-
+        typeSelectMeta.getPersistentDataContainer().set(idNameKey, PersistentDataType.STRING, "typeSelectItem");
         typeSelectItem.setItemMeta(typeSelectMeta);
+
+        ItemMeta limitSelectMeta = limitSelectItem.getItemMeta();
+        assert limitSelectMeta != null;
+        limitSelectMeta.setItemName(color("&lRecipe limit"));
+        limitSelectMeta.setLore(List.of(color("&r&7Type: "+getCurrentLimitType()), color("&r&7Number: "+getCurrentLimitNumber()),
+                color("&d&lLeft or right click to switch type"), color("&d&lShift-left click to increment number"), color("&d&lShift-right click to decrement number")));
+        limitSelectMeta.getPersistentDataContainer().set(idNameKey, PersistentDataType.STRING, "limitSelectItem");
+        limitSelectItem.setItemMeta(limitSelectMeta);
 
         inventory.setItem(resultSlot, plugin.getConfigLoader().getResultItem(recipeName));
         inventory.setItem(8, backNavItem);
         inventory.setItem(0, typeSelectItem);
+        inventory.setItem(36, limitSelectItem);
 
     }
     public void sendToPlayer(Player player, boolean readOnly){
@@ -150,7 +155,7 @@ public class CreateRecipeGUI {
                         ItemMeta meta = item.getItemMeta();
                         if (meta != null) {
                             PersistentDataContainer container = meta.getPersistentDataContainer();
-                            String value = container.get(unusedSpaceKey, PersistentDataType.STRING);
+                            String value = container.get(idNameKey, PersistentDataType.STRING);
                             if (value != null) {
                                 if (value.equals("unused_space")) {
                                     shapedMaterials[craftingSlots.indexOf(index)] = Material.AIR;
@@ -176,7 +181,7 @@ public class CreateRecipeGUI {
                     ItemMeta meta = item.getItemMeta();
                     if(meta != null) {
                         PersistentDataContainer container = meta.getPersistentDataContainer();
-                        String value = container.get(unusedSpaceKey, PersistentDataType.STRING);
+                        String value = container.get(idNameKey, PersistentDataType.STRING);
                         if(value != null) {
                             if (value.equals("unused_space"))
                                 continue;
@@ -239,11 +244,11 @@ public class CreateRecipeGUI {
             ItemMeta meta = event.getCurrentItem().getItemMeta();
             if(meta == null) return;
 
-            String idKey = meta.getPersistentDataContainer().get(typeSelectIDKey, PersistentDataType.STRING);
+            String idKey = meta.getPersistentDataContainer().get(idNameKey, PersistentDataType.STRING);
+            if(idKey == null) return;
+            event.setCancelled(true);
 
-            if(idKey != null && idKey.equals("typeSelectItem")){
-
-                event.setCancelled(true);
+            if(idKey.equals("typeSelectItem")){
                 if(event.getClick() == ClickType.LEFT){
                     selectedTypeIndex++;
                     if(selectedTypeIndex > typeList.size()-1){
@@ -261,8 +266,23 @@ public class CreateRecipeGUI {
                 sendToPlayer(player, currentReadOnly);
             }
 
-            if (event.getCurrentItem().isSimilar(unused_space))
-                event.setCancelled(true);
+            if(idKey.equals("limitSelectItem")){
+                if(event.getClick() == ClickType.RIGHT || event.getClick() == ClickType.LEFT){
+                    String newType = getCurrentLimitType().equals("PLAYER") ? "SERVER" : "PLAYER";
+                    plugin.getConfigLoader().setLimitType(recipeName, newType);
+                } else if(event.getClick() == ClickType.SHIFT_LEFT){
+                    int newLimit = getCurrentLimitNumber()+1;
+                    plugin.getConfigLoader().setLimit(recipeName, newLimit);
+                } else if(event.getClick() == ClickType.SHIFT_RIGHT) {
+                    int newLimit = getCurrentLimitNumber()-1;
+                    plugin.getConfigLoader().setLimit(recipeName, newLimit);
+                }
+                save();
+                loadGUI();
+                sendToPlayer(player, currentReadOnly);
+            }
+
+            if(idKey.equals("unused_space")){}
         }
     }
     public void onClose(Player player){
@@ -274,6 +294,12 @@ public class CreateRecipeGUI {
 
     public String getCurrentType(){
         return typeList.get(selectedTypeIndex);
+    }
+    public String getCurrentLimitType(){
+        return plugin.getConfigLoader().getLimitType(recipeName);
+    }
+    public int getCurrentLimitNumber(){
+        return plugin.getConfigLoader().getLimit(recipeName);
     }
 
     private void setItem(int index, @Nullable String value){

@@ -44,6 +44,20 @@ public class ConfigLoader {
         }
         loadConfig();
     }
+    public void renameRecipe(String beforeName, String afterName){
+        if(beforeName.equals(afterName)) return;
+        loadConfig();
+        try {
+            Object value = recipeConfig.get(beforeName);     // copy the contents
+            recipeConfig.set(afterName, value);             // write to new key
+            recipeConfig.set(beforeName, null);              // remove old key
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+        } catch (IOException e){
+            plugin.getLogger().severe("Failed to rename recipe: ");
+            e.printStackTrace();
+        }
+        loadConfig();
+    }
 
     public void saveShapedRecipe(String name, ItemStack resultingItem, Material[] materials){
         loadConfig();
@@ -62,7 +76,7 @@ public class ConfigLoader {
                     Map.of("left", materials[6].toString(), "middle", materials[7].toString(), "right", materials[8].toString())
             ));
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved shaped recipe: "+resultingItem.getType()+" - "+ Arrays.toString(materials));
+            //plugin.getLogger().info("Saved shaped recipe: "+resultingItem.getType()+" - "+ Arrays.toString(materials));
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -82,7 +96,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "shapeless");
             recipeConfig.set(name+".recipe", materials);
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved shapeless recipe: "+resultingItem.getType()+" - "+materials);
+            //plugin.getLogger().info("Saved shapeless recipe: "+resultingItem.getType()+" - "+materials);
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -102,7 +116,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "furnace");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved furnace recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved furnace recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -122,7 +136,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "blasting");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved blasting recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved blasting recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -142,7 +156,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "smoking");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved smoking recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved smoking recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -162,7 +176,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "campfire");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved campfire recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved campfire recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -178,11 +192,15 @@ public class ConfigLoader {
                 recipeConfig.set(name+".result", resultingItem);
             if(recipeConfig.get(name+".category") == null)
                 recipeConfig.set(name+".category", "MISC");
+            if(recipeConfig.get(name+".limit-type") == null)
+                recipeConfig.set(name+".limit-type", "PLAYER");
+            if(recipeConfig.get(name+".limit") == null)
+                recipeConfig.set(name+".limit", -1);
 
             recipeConfig.set(name+".type", "stonecutter");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved stonecutter recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved stonecutter recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -257,7 +275,7 @@ public class ConfigLoader {
     public int getCooktime(String name){
         loadConfig();
         int time = recipeConfig.getInt(name+".cooktime", 1);
-        if(time == 0){
+        if(time == 1){
             try {
                 recipeConfig.set(name + ".cooktime", 1);
                 recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
@@ -268,13 +286,13 @@ public class ConfigLoader {
             return time;
         } catch (IllegalArgumentException e){
             plugin.getLogger().severe("Invalid cooktime: "+ time);
-            return 0;
+            return 1;
         }
     }
     public int getExperience(String name){
         loadConfig();
         int exp = recipeConfig.getInt(name+".experience", 1);
-        if(exp == 0){
+        if(exp == 1){
             try {
                 recipeConfig.set(name + ".experience", 1);
                 recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
@@ -285,7 +303,56 @@ public class ConfigLoader {
             return exp;
         } catch (IllegalArgumentException e){
             plugin.getLogger().severe("Invalid experience: "+ exp);
-            return 0;
+            return 1;
+        }
+    }
+    public int getLimit(String name){
+        loadConfig();
+        int limit = recipeConfig.getInt(name+".limit", -1);
+        if(limit == -1){
+            try {
+                recipeConfig.set(name + ".limit", -1);
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        try {
+            return limit;
+        } catch (IllegalArgumentException e){
+            plugin.getLogger().severe("Invalid limit: "+ limit);
+            return -1;
+        }
+    }
+    public void setLimit(String name, int newValue){
+        loadConfig();
+        try {
+            recipeConfig.set(name+".limit", newValue);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to set limit for recipe"+name);
+        }
+    }
+    public String getLimitType(String name){
+        loadConfig();
+        String type = recipeConfig.getString(name+".limit-type", "SERVER");
+        if(type.equalsIgnoreCase("SERVER")){
+            try {
+                recipeConfig.set(name + ".limit-type", "SERVER");
+                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+                loadConfig();
+            } catch (IOException ignored) {}
+        }
+        return type;
+    }
+    public void setLimitType(String name, String newValue){
+        loadConfig();
+        try {
+            recipeConfig.set(name+".limit-type", newValue);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to set limit-type for recipe"+name);
         }
     }
 }

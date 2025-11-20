@@ -2,6 +2,7 @@ package me.pintoadmin.pintoRecipes;
 
 import org.bukkit.*;
 import org.bukkit.inventory.*;
+import org.bukkit.permissions.*;
 
 import java.util.*;
 
@@ -135,6 +136,11 @@ public class LoadRecipes {
                     break;
             }
             plugin.getCreateRecipeGUI(recipeName);
+
+            Permission permission = new Permission("pintorecipes.craft."+recipeName, "Permission to craft the recipe "+recipeName, PermissionDefault.TRUE);
+            if(plugin.getServer().getPluginManager().getPermission(permission.getName()) == null)
+                plugin.getServer().getPluginManager().addPermission(permission);
         }
+        plugin.getSqLiteManager().addColumns();
     }
 }
