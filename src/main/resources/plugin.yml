@@ -1,5 +1,5 @@
 name: PintoRecipes
-version: '1.6'
+version: '1.7'
 main: me.pintoadmin.pintoRecipes.PintoRecipes
 api-version: '1.21'
 authors: [ PintoJ ]
