@@ -45,6 +45,7 @@ public class ConfigLoader {
         loadConfig();
     }
     public void renameRecipe(String beforeName, String afterName){
+        if(beforeName.equals(afterName)) return;
         loadConfig();
         try {
             Object value = recipeConfig.get(beforeName);     // copy the contents
@@ -75,7 +76,7 @@ public class ConfigLoader {
                     Map.of("left", materials[6].toString(), "middle", materials[7].toString(), "right", materials[8].toString())
             ));
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved shaped recipe: "+resultingItem.getType()+" - "+ Arrays.toString(materials));
+            //plugin.getLogger().info("Saved shaped recipe: "+resultingItem.getType()+" - "+ Arrays.toString(materials));
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -95,7 +96,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "shapeless");
             recipeConfig.set(name+".recipe", materials);
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved shapeless recipe: "+resultingItem.getType()+" - "+materials);
+            //plugin.getLogger().info("Saved shapeless recipe: "+resultingItem.getType()+" - "+materials);
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -115,7 +116,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "furnace");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved furnace recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved furnace recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -135,7 +136,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "blasting");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved blasting recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved blasting recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -155,7 +156,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "smoking");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved smoking recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved smoking recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -175,7 +176,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "campfire");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved campfire recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved campfire recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
@@ -199,7 +200,7 @@ public class ConfigLoader {
             recipeConfig.set(name+".type", "stonecutter");
             recipeConfig.set(name+".recipe", material.toString());
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-            plugin.getLogger().info("Saved stonecutter recipe: "+resultingItem.getType()+" - "+material.name());
+            //plugin.getLogger().info("Saved stonecutter recipe: "+resultingItem.getType()+" - "+material.name());
         } catch (IOException e){
             plugin.getLogger().severe("Failed to save recipe: ");
             e.printStackTrace();
