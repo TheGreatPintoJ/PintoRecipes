@@ -129,7 +129,7 @@ public class RecipesGUI {
                                 Player player = (Player) event.getWhoClicked();
                                 AnvilGUI.Builder renameGUI = new AnvilGUI.Builder()
                                         .onClose(stateSnapshot -> {
-                                            if(!stateSnapshot.getText().equals(recipeName))
+                                            if(stateSnapshot.getText().equals(recipeName))
                                                 stateSnapshot.getPlayer().sendMessage(color("&cCancelled renaming"));
                                             else player.sendMessage(ChatColor.GREEN+"Renamed "+recipeName+" to "+stateSnapshot.getText());
                                         })
@@ -137,6 +137,7 @@ public class RecipesGUI {
                                             if(slot != AnvilGUI.Slot.OUTPUT) {
                                                 return Collections.emptyList();
                                             }
+                                            if(stateSnapshot.getText().equals(recipeName)) return Collections.emptyList();
 
                                             plugin.getConfigLoader().renameRecipe(recipeName, stateSnapshot.getText());
                                             plugin.getSqLiteManager().renameColumn(recipeName, stateSnapshot.getText());
@@ -147,7 +148,6 @@ public class RecipesGUI {
                                         .title("Enter the new name")
                                         .plugin(PintoRecipes.thisPlugin());
                                 renameGUI.open(player);
-
                             } else {
                                 plugin.getCreateRecipeGUI(recipeName).sendToPlayer((Player) event.getWhoClicked(), true);
                             }
