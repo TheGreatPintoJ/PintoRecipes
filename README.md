@@ -1,5 +1,7 @@
-## PintoRecipes
-A spigot plugin to add custom recipes to your server
+<img width="1498" height="455" alt="PintoRecipes_banner" src="https://github.com/user-attachments/assets/ded88270-4681-4df8-9e61-f01270824a00" />
+
+<h1 align="center">PintoRecipes</h1>
+<p align="center">A spigot plugin to add custom recipes to your server</p>
 
 ### Features
 * Save, show, edit, rename, remove recipes from a GUI
