@@ -23,15 +23,15 @@ public class LoadRecipes {
         for(String recipeName : localRecipes){
             if(recipeName == null || recipeName.isEmpty()) continue;
             String type = configLoader.getType(recipeName);
-            ItemStack item = configLoader.getResultItem(recipeName);
-            if(item == null) continue;
+            ItemStack result = configLoader.getResultItem(recipeName);
+            if(result == null) continue;
             if(!configLoader.getEnabled(recipeName)) continue;
             Object recipe = configLoader.getRecipe(recipeName);
             if(recipe == null) continue;
             switch(type.toLowerCase()){
                 case "shaped":
                     List<Map<String, String>> recipeMaps = (List<Map<String, String>>) configLoader.getRecipe(recipeName);
-                    ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
+                    ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), result);
 
                     shapedRecipe.shape("123","456","789");
                     shapedRecipe.setCategory(configLoader.getCraftingCategory(recipeName));
@@ -57,12 +57,12 @@ public class LoadRecipes {
                     if(!shapedRecipe.getIngredientMap().isEmpty()){
                         try {
                             getServer().addRecipe(shapedRecipe);
-                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + recipeMaps);
+                            plugin.getLogger().info("Loaded Recipe: " + result.getType() + " - " + recipeMaps);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
                 case "shapeless":
-                    ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item);
+                    ShapelessRecipe shapelessRecipe = new ShapelessRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), result);
                     List<String> materialsList = (List<String>) configLoader.getRecipe(recipeName);
                     for(String entry : materialsList){
                         shapelessRecipe.addIngredient(Material.valueOf(entry.toUpperCase()));
@@ -70,7 +70,7 @@ public class LoadRecipes {
                     if(!shapelessRecipe.getIngredientList().isEmpty()){
                         try {
                             getServer().addRecipe(shapelessRecipe);
-                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + materialsList);
+                            plugin.getLogger().info("Loaded Recipe: " + result.getType() + " - " + materialsList);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
@@ -79,11 +79,11 @@ public class LoadRecipes {
                     int furnaceCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                     int furnaceExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!furnaceMaterial.isAir()){
-                        FurnaceRecipe furnaceRecipe = new FurnaceRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, furnaceMaterial, furnaceExperience, furnaceCookTime);
+                        FurnaceRecipe furnaceRecipe = new FurnaceRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), result, furnaceMaterial, furnaceExperience, furnaceCookTime);
                         try {
                             furnaceRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(furnaceRecipe);
-                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + furnaceMaterial);
+                            plugin.getLogger().info("Loaded Recipe: " + result.getType() + " - " + furnaceMaterial);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
@@ -92,11 +92,11 @@ public class LoadRecipes {
                     int blastingCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                     int blastingExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!blastingMaterial.isAir()){
-                        BlastingRecipe blastingRecipe = new BlastingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, blastingMaterial, blastingExperience, blastingCookTime);
+                        BlastingRecipe blastingRecipe = new BlastingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), result, blastingMaterial, blastingExperience, blastingCookTime);
                         try {
                             blastingRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(blastingRecipe);
-                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + blastingMaterial);
+                            plugin.getLogger().info("Loaded Recipe: " + result.getType() + " - " + blastingMaterial);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
@@ -105,11 +105,11 @@ public class LoadRecipes {
                     int smokingCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                     int smokingExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!smokingMaterial.isAir()){
-                        SmokingRecipe smokingRecipe = new SmokingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, smokingMaterial, smokingExperience, smokingCookTime);
+                        SmokingRecipe smokingRecipe = new SmokingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), result, smokingMaterial, smokingExperience, smokingCookTime);
                         try {
                             smokingRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(smokingRecipe);
-                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + smokingMaterial);
+                            plugin.getLogger().info("Loaded Recipe: " + result.getType() + " - " + smokingMaterial);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
@@ -118,21 +118,21 @@ public class LoadRecipes {
                     int campfireCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                     int campfireExperience = configLoader.getExperience(recipeName.toLowerCase());
                     if(!campfireMaterial.isAir()){
-                        CampfireRecipe campfireRecipe = new CampfireRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, campfireMaterial, campfireExperience, campfireCookTime);
+                        CampfireRecipe campfireRecipe = new CampfireRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), result, campfireMaterial, campfireExperience, campfireCookTime);
                         try {
                             campfireRecipe.setCategory(configLoader.getCookingCategory(recipeName));
                             getServer().addRecipe(campfireRecipe);
-                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + campfireMaterial);
+                            plugin.getLogger().info("Loaded Recipe: " + result.getType() + " - " + campfireMaterial);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
                 case "stonecutter":
                     Material stonecutterMaterial = Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
                     if(!stonecutterMaterial.isAir()){
-                        StonecuttingRecipe stonecutterRecipe = new StonecuttingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), item, stonecutterMaterial);
+                        StonecuttingRecipe stonecutterRecipe = new StonecuttingRecipe(new NamespacedKey(plugin, recipeName.toLowerCase()), result, stonecutterMaterial);
                         try {
                             getServer().addRecipe(stonecutterRecipe);
-                            plugin.getLogger().info("Loaded Recipe: " + item.getType() + " - " + stonecutterMaterial);
+                            plugin.getLogger().info("Loaded Recipe: " + result.getType() + " - " + stonecutterMaterial);
                         } catch (IllegalStateException ignored){}
                     }
                     break;
