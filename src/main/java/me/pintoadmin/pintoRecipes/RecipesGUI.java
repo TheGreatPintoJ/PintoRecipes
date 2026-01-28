@@ -69,7 +69,7 @@ public class RecipesGUI {
                                 : plugin.getSqLiteManager().getServerCrafts(recipeName);
 
                 ItemStack itemOG = plugin.getConfigLoader().getResultItem(recipeName);
-                if (itemOG == null) throw new IndexOutOfBoundsException();
+                if (itemOG == null || itemOG.getType().isAir()) throw new IndexOutOfBoundsException(recipeName);
                 ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
                 assert meta != null;
@@ -91,7 +91,8 @@ public class RecipesGUI {
                                 color("&r&aShift-left click to rename recipe")));
                 item.setItemMeta(meta);
                 inventory.setItem(i, item);
-            } catch (IndexOutOfBoundsException ignored) {
+            } catch (IndexOutOfBoundsException e) {
+                plugin.getConfigLoader().removeRecipe(e.getMessage());
                 inventory.setItem(i, null);
             }
         }
@@ -138,7 +139,7 @@ public class RecipesGUI {
                                 plugin.getConfigLoader()
                                         .getResultItem(recipes.get(currentPage * (size - 18) + i));
                         ItemStack clickedItem = event.getCurrentItem();
-                        if (clickedItem.getItemMeta() == null) continue;
+                        if (clickedItem.getItemMeta() == null || item == null) continue;
                         if (clickedItem.getType().equals(item.getType())
                                 && clickedItem.getAmount() == item.getAmount()
                                 && clickedItem
