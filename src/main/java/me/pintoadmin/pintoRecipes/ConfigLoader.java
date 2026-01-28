@@ -265,30 +265,12 @@ public class ConfigLoader {
     }
 
     public String getType(String name) {
-        loadConfig();
-        String type = recipeConfig.getString(name + ".type", "shaped");
-        if (type.equalsIgnoreCase("shaped")) {
-            try {
-                recipeConfig.set(name + ".type", "shaped");
-                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-                loadConfig();
-            } catch (IOException ignored) {
-            }
-        }
-        return type;
+        return recipeConfig.getString(name + ".type", "shaped");
     }
 
     public CraftingBookCategory getCraftingCategory(String name) {
         loadConfig();
         String string = recipeConfig.getString(name + ".category", "MISC");
-        if (string.equalsIgnoreCase("MISC")) {
-            try {
-                recipeConfig.set(name + ".category", "MISC");
-                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-                loadConfig();
-            } catch (IOException ignored) {
-            }
-        }
         try {
             return CraftingBookCategory.valueOf(string);
         } catch (IllegalArgumentException e) {
@@ -300,14 +282,6 @@ public class ConfigLoader {
     public CookingBookCategory getCookingCategory(String name) {
         loadConfig();
         String string = recipeConfig.getString(name + ".category", "MISC");
-        if (string.equalsIgnoreCase("MISC")) {
-            try {
-                recipeConfig.set(name + ".category", "MISC");
-                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-                loadConfig();
-            } catch (IOException ignored) {
-            }
-        }
         try {
             return CookingBookCategory.valueOf(string);
         } catch (IllegalArgumentException e) {
@@ -387,14 +361,7 @@ public class ConfigLoader {
     public String getLimitType(String name) {
         loadConfig();
         String type = recipeConfig.getString(name + ".limit-type", "SERVER");
-        if (type.equalsIgnoreCase("SERVER")) {
-            try {
-                recipeConfig.set(name + ".limit-type", "SERVER");
-                recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
-                loadConfig();
-            } catch (IOException ignored) {
-            }
-        }
+        if (type.equalsIgnoreCase("SERVER")) setLimitType(name, type);
         return type;
     }
 

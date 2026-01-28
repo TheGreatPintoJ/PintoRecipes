@@ -7,6 +7,8 @@ import org.bukkit.*;
 import org.bukkit.inventory.*;
 import org.bukkit.permissions.*;
 
+import javax.naming.*;
+
 public class LoadRecipes {
     private final PintoRecipes plugin;
     private final ConfigLoader configLoader;
@@ -239,8 +241,11 @@ public class LoadRecipes {
     }
 
     public void reloadRecipes(){
-        for(NamespacedKey key : activeRecipes.values()) {
+        for(Map.Entry<String, NamespacedKey> entry : activeRecipes.entrySet()) {
+            NamespacedKey key = entry.getValue();
+            String recipeName = entry.getKey();
             getServer().removeRecipe(key);
+            localRecipes.remove(recipeName);
         }
         loadRecipes();
         plugin.getLogger().info("Finished reloading recipes!");
