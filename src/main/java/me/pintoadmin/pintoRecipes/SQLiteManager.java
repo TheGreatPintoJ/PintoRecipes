@@ -5,10 +5,11 @@ import java.util.*;
 
 public class SQLiteManager {
     private final PintoRecipes plugin;
-    
+
     public SQLiteManager(PintoRecipes plugin) {
         this.plugin = plugin;
     }
+
     Connection connection;
 
     public void init() {
@@ -18,10 +19,13 @@ public class SQLiteManager {
             Class.forName("org.sqlite.JDBC");
 
             // Establish a connection to the database (creates a new file if it doesn't exist)
-            String url = "jdbc:sqlite:%s/crafts.db".formatted(plugin.getDataFolder().getAbsolutePath());
+            String url =
+                    "jdbc:sqlite:%s/crafts.db".formatted(plugin.getDataFolder().getAbsolutePath());
             connection = DriverManager.getConnection(url);
 
-            PreparedStatement ps = connection.prepareStatement("CREATE TABLE IF NOT EXISTS crafts (uuid TEXT PRIMARY KEY);");
+            PreparedStatement ps =
+                    connection.prepareStatement(
+                            "CREATE TABLE IF NOT EXISTS crafts (uuid TEXT PRIMARY KEY);");
             ps.execute();
 
             plugin.getLogger().info("Connection to SQLite established.");
@@ -32,9 +36,9 @@ public class SQLiteManager {
         }
     }
 
-    public void addColumns(){
+    public void addColumns() {
         getConnection();
-        for(String recipeName : plugin.getConfigLoader().recipes) {
+        for (String recipeName : plugin.getConfigLoader().recipes) {
             try {
                 Statement statement = connection.createStatement();
                 boolean columnExists = false;
@@ -48,74 +52,114 @@ public class SQLiteManager {
                 rs.close();
 
                 if (!columnExists) {
-                    PreparedStatement tablePS = connection.prepareStatement("ALTER TABLE crafts ADD COLUMN "+recipeName+" INTEGER NOT NULL DEFAULT 0;");
+                    PreparedStatement tablePS =
+                            connection.prepareStatement(
+                                    "ALTER TABLE crafts ADD COLUMN "
+                                            + recipeName
+                                            + " INTEGER NOT NULL DEFAULT 0;");
                     tablePS.execute();
                 }
             } catch (SQLException e) {
-                plugin.getLogger().severe("Error adding column "+recipeName+" to database: " + e.getMessage());
+                plugin.getLogger()
+                        .severe(
+                                "Error adding column "
+                                        + recipeName
+                                        + " to database: "
+                                        + e.getMessage());
             }
         }
     }
-    public void renameColumn(String oldName, String newName){
+
+    public void renameColumn(String oldName, String newName) {
         getConnection();
-        if(!columnExists(oldName)) return;
+        if (columnNotExists(oldName)) return;
         try {
-            PreparedStatement ps = connection.prepareStatement("ALTER TABLE crafts RENAME COLUMN "+oldName+" TO "+newName);
+            PreparedStatement ps =
+                    connection.prepareStatement(
+                            "ALTER TABLE crafts RENAME COLUMN " + oldName + " TO " + newName);
             ps.execute();
             ps.close();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error renaming column: "+e.getMessage());
+            plugin.getLogger().severe("Error renaming column: " + e.getMessage());
         }
     }
 
-    public int getServerCrafts(String recipeName){
+    public int getServerCrafts(String recipeName) {
         getConnection();
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT "+recipeName+" FROM crafts");
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT " + recipeName + " FROM crafts");
             ResultSet rs = ps.executeQuery();
 
             int totalCrafts = 0;
-            while (rs.next()){
-                if(rs.getInt(recipeName) > 0) totalCrafts += rs.getInt(recipeName);
+            while (rs.next()) {
+                if (rs.getInt(recipeName) > 0) totalCrafts += rs.getInt(recipeName);
             }
             rs.close();
             return totalCrafts;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error querying column "+recipeName+" in database: " + e.getMessage());
+            plugin.getLogger()
+                    .severe(
+                            "Error querying column "
+                                    + recipeName
+                                    + " in database: "
+                                    + e.getMessage());
             return 0;
         }
     }
-    public int getPlayerCrafts(String recipeName, UUID uuid){
+
+    public int getPlayerCrafts(String recipeName, UUID uuid) {
         getConnection();
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT "+recipeName+" FROM crafts WHERE uuid = ?;");
+            PreparedStatement ps =
+                    connection.prepareStatement(
+                            "SELECT " + recipeName + " FROM crafts WHERE uuid = ?;");
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
                 return rs.getInt(recipeName);
             } else return 0;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error querying column "+recipeName+" in database: " + e.getMessage());
+            plugin.getLogger()
+                    .severe(
+                            "Error querying column "
+                                    + recipeName
+                                    + " in database: "
+                                    + e.getMessage());
             return 0;
         }
     }
-    public void incrementPlayerCrafts(String recipeName, UUID uuid){
+
+    public void incrementPlayerCrafts(String recipeName, UUID uuid) {
         getConnection();
         try {
-            if(!columnExists(recipeName)) return;
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO crafts (uuid, "+recipeName+") VALUES (?, 1) " +
-                    "ON CONFLICT(uuid) DO UPDATE SET "+recipeName+" = "+recipeName+" + 1;");
+            if (columnNotExists(recipeName)) return;
+            PreparedStatement ps =
+                    connection.prepareStatement(
+                            "INSERT INTO crafts (uuid, "
+                                    + recipeName
+                                    + ") VALUES (?, 1) "
+                                    + "ON CONFLICT(uuid) DO UPDATE SET "
+                                    + recipeName
+                                    + " = "
+                                    + recipeName
+                                    + " + 1;");
             ps.setString(1, uuid.toString());
 
             ps.executeUpdate();
-        } catch (SQLException e){
-            plugin.getLogger().severe("Error updating column "+recipeName+" in database: " + e.getMessage());
-            e.printStackTrace();
+        } catch (SQLException e) {
+            plugin.getLogger()
+                    .severe(
+                            "Error updating column "
+                                    + recipeName
+                                    + " in database: "
+                                    + e.getMessage());
+            plugin.getLogger().severe(e.getMessage());
         }
     }
 
-    public boolean columnExists(String name){
+    public boolean columnNotExists(String name) {
         try {
             Statement statement = connection.createStatement();
             boolean columnExists = false;
@@ -127,25 +171,25 @@ public class SQLiteManager {
                 }
             }
             rs.close();
-            return columnExists;
-        } catch (SQLException e){
-            plugin.getLogger().severe("Error checking if column exists: "+e.getMessage());
-            return false;
+            return !columnExists;
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error checking if column exists: " + e.getMessage());
+            return true;
         }
     }
 
-    public void deinit(){
-        if(connection == null) return;
+    public void deinit() {
+        if (connection == null) return;
         try {
             connection.close();
         } catch (SQLException e) {
             plugin.getLogger().severe("Error closing SQLite connection: " + e.getMessage());
         }
     }
-    public Connection getConnection(){
+
+    public void getConnection() {
         if (connection == null) {
             init();
         }
-        return connection;
     }
 }

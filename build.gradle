@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id("com.gradleup.shadow") version "9.3.1"
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'me.pintoadmin'
@@ -60,8 +61,20 @@ processResources {
     }
 }
 
+spotless {
+    java {
+        googleJavaFormat("1.17.0").aosp()
+        target 'src/main/java/**/*.java'
+        removeUnusedImports()
+        formatAnnotations()
+        trimTrailingWhitespace()
+        toggleOffOn('// @formatter:off','// @formatter:on')
+    }
+}
+
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     relocate 'nes.wesjd.anvilgui', 'me.pintoadmin.pintorecipes.anvilgui'
     archiveClassifier.set('')
 }
+
 build.dependsOn shadowJar

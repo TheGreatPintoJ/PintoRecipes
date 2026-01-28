@@ -1,5 +1,6 @@
 package me.pintoadmin.pintoRecipes;
 
+import java.util.*;
 import net.wesjd.anvilgui.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -7,160 +8,226 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 
-import java.util.*;
-
 public class RecipesGUI {
     private final PintoRecipes plugin;
     private Inventory inventory;
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
     private List<String> recipes;
-    private final int size = 6*9;
+    private final int size = 6 * 9;
     private int currentPage = 0;
 
-    private ItemStack leftNavItem = new ItemStack(Material.ARROW);
-    private ItemStack pageNavItem = new ItemStack(Material.PAPER);
-    private ItemStack rightNavItem = new ItemStack(Material.ARROW);
-    private ItemStack newNavItem = new ItemStack(Material.RED_DYE);
+    private final ItemStack leftNavItem = new ItemStack(Material.ARROW);
+    private final ItemStack pageNavItem = new ItemStack(Material.PAPER);
+    private final ItemStack rightNavItem = new ItemStack(Material.ARROW);
+    private final ItemStack newNavItem = new ItemStack(Material.RED_DYE);
 
     public RecipesGUI(PintoRecipes plugin) {
         this.plugin = plugin;
 
         ItemMeta leftNavMeta = leftNavItem.getItemMeta();
+        assert leftNavMeta != null;
         leftNavMeta.setItemName(color("&lPrevious Page"));
         leftNavItem.setItemMeta(leftNavMeta);
 
         ItemMeta rightNavMeta = rightNavItem.getItemMeta();
+        assert rightNavMeta != null;
         rightNavMeta.setItemName(color("&lNext Page"));
         rightNavItem.setItemMeta(rightNavMeta);
 
         ItemMeta newNavMeta = newNavItem.getItemMeta();
+        assert newNavMeta != null;
         newNavMeta.setItemName(color("&c&lCreate new recipe"));
         newNavItem.setItemMeta(newNavMeta);
     }
 
-    private void constructGUI(){
+    private void constructGUI() {
         plugin.getConfigLoader().loadConfig();
         recipes = plugin.getConfigLoader().recipes;
         inventory = Bukkit.createInventory(null, size, color("&8&l&oCustom Recipes"));
 
         ItemMeta unused_meta = unused_space.getItemMeta();
+        assert unused_meta != null;
         unused_meta.setItemName(color("&f"));
         unused_space.setItemMeta(unused_meta);
 
-        for(int i = 0; i < inventory.getSize(); i++)
-            inventory.setItem(i, unused_space);
+        for (int i = 0; i < inventory.getSize(); i++) inventory.setItem(i, unused_space);
 
-        for(int i = 0; i < size-18; i++){
+        for (int i = 0; i < size - 18; i++) {
             try {
-                String recipeName = recipes.get(
-                        currentPage * (size - 18) + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
-                );
+                String recipeName =
+                        recipes.get(
+                                currentPage * (size - 18)
+                                        + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
+                                );
                 String recipeType = plugin.getConfigLoader().getType(recipeName);
+
+                String limitType = plugin.getConfigLoader().getLimitType(recipeName);
+                int limitNum = plugin.getConfigLoader().getLimit(recipeName);
+                int limitAmnt =
+                        limitType.equalsIgnoreCase("SERVER")
+                                ? 0
+                                : plugin.getSqLiteManager().getServerCrafts(recipeName);
+
                 ItemStack itemOG = plugin.getConfigLoader().getResultItem(recipeName);
-                if(itemOG == null) throw new IndexOutOfBoundsException();
+                if (itemOG == null || itemOG.getType().isAir()) throw new IndexOutOfBoundsException(recipeName);
                 ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
-                meta.setLore(List.of("",
-                        color("&r&8ID: "+recipeName),
-                        color("&r&8Type: "+recipeType),
-                        color("&r&6Right click to edit recipe"),
-                        color("&r&cShift-right click to remove recipe"),
-                        color("&r&aShift-left click to rename recipe")));
+                assert meta != null;
+                meta.setLore(
+                        List.of(
+                                "",
+                                color("&r&8ID: " + recipeName),
+                                color("&r&8Type: " + recipeType),
+                                color("&r&8Limit Type: " + limitType),
+                                color(
+                                        "&r&8Limit amount: "
+                                                + (limitType.equalsIgnoreCase("SERVER")
+                                                                && limitNum > -1
+                                                        ? limitAmnt + "/" + limitNum
+                                                        : limitNum)),
+                                color("&r&dLeft click to view recipe"),
+                                color("&r&6Right click to edit recipe"),
+                                color("&r&cShift-right click to remove recipe"),
+                                color("&r&aShift-left click to rename recipe")));
                 item.setItemMeta(meta);
                 inventory.setItem(i, item);
-            } catch (IndexOutOfBoundsException ignored){
+            } catch (IndexOutOfBoundsException e) {
+                plugin.getConfigLoader().removeRecipe(e.getMessage());
                 inventory.setItem(i, null);
             }
         }
 
-        if(currentPage != 0)
-            inventory.setItem(size-6, leftNavItem);
+        if (currentPage != 0) inventory.setItem(size - 6, leftNavItem);
 
         ItemMeta pageNavMeta = pageNavItem.getItemMeta();
-        pageNavMeta.setItemName(color("&lPage: "+(currentPage+1)));
+        assert pageNavMeta != null;
+        pageNavMeta.setItemName(color("&lPage: " + (currentPage + 1)));
         pageNavItem.setItemMeta(pageNavMeta);
-        inventory.setItem(size-5, pageNavItem);
+        inventory.setItem(size - 5, pageNavItem);
 
         try {
-            if (plugin.getConfigLoader().getResultItem(recipes.get(currentPage * (size - 18))) != null)
-                inventory.setItem(size - 4, rightNavItem);
-        } catch (IndexOutOfBoundsException ignored){}
+            if (plugin.getConfigLoader().getResultItem(recipes.get(currentPage * (size - 18)))
+                    != null) inventory.setItem(size - 4, rightNavItem);
+        } catch (IndexOutOfBoundsException ignored) {
+        }
 
-        inventory.setItem(size-1, newNavItem);
+        inventory.setItem(size - 1, newNavItem);
     }
 
-    public void sendToPlayer(Player player){
+    public void sendToPlayer(Player player) {
         constructGUI();
-        InventoryView invView = player.openInventory(inventory);
+        player.openInventory(inventory);
     }
-    public void onClick(InventoryClickEvent event){
-        if(event.getClickedInventory() != inventory) return;
-        if(event.getCurrentItem() != null) {
+
+    public void onClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() != inventory) return;
+        if (event.getCurrentItem() != null) {
             event.setCancelled(true);
-            if(event.getCurrentItem().isSimilar(rightNavItem)){
+            if (event.getCurrentItem().isSimilar(rightNavItem)) {
                 currentPage++;
                 sendToPlayer((Player) event.getWhoClicked());
-            } else if(event.getCurrentItem().isSimilar(leftNavItem)){
+            } else if (event.getCurrentItem().isSimilar(leftNavItem)) {
                 currentPage--;
                 sendToPlayer((Player) event.getWhoClicked());
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
-                plugin.getCreateRecipeGUI("new_recipe").sendToPlayer((Player) event.getWhoClicked(), false);
+                plugin.getCreateRecipeGUI("new_recipe")
+                        .sendToPlayer((Player) event.getWhoClicked(), false);
             } else {
-                for(int i = 0; i < size-18; i++){
+                for (int i = 0; i < size - 18; i++) {
                     try {
-                        ItemStack item = plugin.getConfigLoader().getResultItem(
-                                recipes.get(
-                                        currentPage * (size - 18) + i
-                                ));
+                        ItemStack item =
+                                plugin.getConfigLoader()
+                                        .getResultItem(recipes.get(currentPage * (size - 18) + i));
                         ItemStack clickedItem = event.getCurrentItem();
-                        if(clickedItem.getItemMeta() == null) continue;
-                        if(clickedItem.getType().equals(item.getType()) && clickedItem.getAmount() == item.getAmount() && clickedItem.getItemMeta().getDisplayName().equals(item.getItemMeta().getDisplayName())){
-                            String recipeName = recipes.get( currentPage * (size - 18) + i );
-                            if(event.getClick().equals(ClickType.SHIFT_RIGHT)) {
+                        if (clickedItem.getItemMeta() == null || item == null) continue;
+                        if (clickedItem.getType().equals(item.getType())
+                                && clickedItem.getAmount() == item.getAmount()
+                                && clickedItem
+                                        .getItemMeta()
+                                        .getDisplayName()
+                                        .equals(
+                                                Objects.requireNonNull(item.getItemMeta())
+                                                        .getDisplayName())) {
+                            String recipeName = recipes.get(currentPage * (size - 18) + i);
+                            if (event.getClick().equals(ClickType.SHIFT_RIGHT)) {
                                 plugin.getConfigLoader().removeRecipe(recipeName);
                                 Player player = (Player) event.getWhoClicked();
                                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
-                                player.sendMessage(ChatColor.RED + "Removed recipe " + recipeName + " from config");
+                                player.sendMessage(
+                                        ChatColor.RED
+                                                + "Removed recipe "
+                                                + recipeName
+                                                + " from config");
                                 sendToPlayer(player);
-                            } else if(event.getClick().equals(ClickType.RIGHT)) {
+                            } else if (event.getClick().equals(ClickType.RIGHT)) {
                                 Player player = (Player) event.getWhoClicked();
                                 plugin.getCreateRecipeGUI(recipeName).sendToPlayer(player, false);
-                            } else if(event.getClick().equals(ClickType.SHIFT_LEFT)){
+                            } else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
                                 Player player = (Player) event.getWhoClicked();
-                                AnvilGUI.Builder renameGUI = new AnvilGUI.Builder()
-                                        .onClose(stateSnapshot -> {
-                                            if(stateSnapshot.getText().equals(recipeName))
-                                                stateSnapshot.getPlayer().sendMessage(color("&cCancelled renaming"));
-                                            else player.sendMessage(ChatColor.GREEN+"Renamed "+recipeName+" to "+stateSnapshot.getText());
-                                        })
-                                        .onClick((slot, stateSnapshot) -> {
-                                            if(slot != AnvilGUI.Slot.OUTPUT) {
-                                                return Collections.emptyList();
-                                            }
-                                            if(stateSnapshot.getText().equals(recipeName)) return Collections.emptyList();
+                                AnvilGUI.Builder renameGUI =
+                                        new AnvilGUI.Builder()
+                                                .onClose(
+                                                        stateSnapshot -> {
+                                                            if (stateSnapshot
+                                                                    .getText()
+                                                                    .equals(recipeName))
+                                                                stateSnapshot
+                                                                        .getPlayer()
+                                                                        .sendMessage(
+                                                                                color(
+                                                                                        "&cCancelled renaming"));
+                                                            else
+                                                                player.sendMessage(
+                                                                        ChatColor.GREEN
+                                                                                + "Renamed "
+                                                                                + recipeName
+                                                                                + " to "
+                                                                                + stateSnapshot
+                                                                                        .getText());
+                                                        })
+                                                .onClick(
+                                                        (slot, stateSnapshot) -> {
+                                                            if (slot != AnvilGUI.Slot.OUTPUT) {
+                                                                return Collections.emptyList();
+                                                            }
+                                                            if (stateSnapshot
+                                                                    .getText()
+                                                                    .equals(recipeName))
+                                                                return Collections.emptyList();
 
-                                            plugin.getConfigLoader().renameRecipe(recipeName, stateSnapshot.getText());
-                                            plugin.getSqLiteManager().renameColumn(recipeName, stateSnapshot.getText());
-                                            sendToPlayer(player);
-                                            return Collections.emptyList();
-                                        })
-                                        .text(recipeName)
-                                        .title("Enter the new name")
-                                        .plugin(PintoRecipes.thisPlugin());
+                                                            plugin.getConfigLoader()
+                                                                    .renameRecipe(
+                                                                            recipeName,
+                                                                            stateSnapshot
+                                                                                    .getText());
+                                                            plugin.getSqLiteManager()
+                                                                    .renameColumn(
+                                                                            recipeName,
+                                                                            stateSnapshot
+                                                                                    .getText());
+                                                            sendToPlayer(player);
+                                                            return Collections.emptyList();
+                                                        })
+                                                .text(recipeName)
+                                                .title("Enter the new name")
+                                                .plugin(PintoRecipes.thisPlugin());
                                 renameGUI.open(player);
                             } else {
-                                plugin.getCreateRecipeGUI(recipeName).sendToPlayer((Player) event.getWhoClicked(), true);
+                                plugin.getCreateRecipeGUI(recipeName)
+                                        .sendToPlayer((Player) event.getWhoClicked(), true);
                             }
                             break;
                         }
-                    } catch (IndexOutOfBoundsException ignored){}
+                    } catch (IndexOutOfBoundsException ignored) {
+                    }
                 }
             }
         }
     }
-    public void deinit(){}
 
-    private String color(String input){
+    public void deinit() {}
+
+    private String color(String input) {
         return ChatColor.translateAlternateColorCodes('&', input);
     }
 }
