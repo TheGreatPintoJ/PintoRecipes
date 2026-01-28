@@ -321,9 +321,9 @@ public class CreateRecipeGUI {
 
         if (event.getCurrentItem() != null) {
             if (event.getCurrentItem().isSimilar(backNavItem)) {
-                plugin.getRecipesGUI().sendToPlayer(player);
                 event.setCancelled(true);
                 onClose(player);
+                plugin.getRecipesGUI().sendToPlayer(player);
                 return;
             }
 

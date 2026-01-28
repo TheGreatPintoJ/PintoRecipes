@@ -38,17 +38,17 @@ public class RecipesGUI {
         assert newNavMeta != null;
         newNavMeta.setItemName(color("&c&lCreate new recipe"));
         newNavItem.setItemMeta(newNavMeta);
+
+        ItemMeta unused_meta = unused_space.getItemMeta();
+        assert unused_meta != null;
+        unused_meta.setItemName(color("&f"));
+        unused_space.setItemMeta(unused_meta);
     }
 
     private void constructGUI() {
         plugin.getConfigLoader().loadConfig();
         recipes = plugin.getConfigLoader().recipes;
         inventory = Bukkit.createInventory(null, size, color("&8&l&oCustom Recipes"));
-
-        ItemMeta unused_meta = unused_space.getItemMeta();
-        assert unused_meta != null;
-        unused_meta.setItemName(color("&f"));
-        unused_space.setItemMeta(unused_meta);
 
         for (int i = 0; i < inventory.getSize(); i++) inventory.setItem(i, unused_space);
 
@@ -102,6 +102,7 @@ public class RecipesGUI {
         ItemMeta pageNavMeta = pageNavItem.getItemMeta();
         assert pageNavMeta != null;
         pageNavMeta.setItemName(color("&lPage: " + (currentPage + 1)));
+        pageNavMeta.setLore(List.of(color("&r&6Click to reload")));
         pageNavItem.setItemMeta(pageNavMeta);
         inventory.setItem(size - 5, pageNavItem);
 
@@ -122,16 +123,19 @@ public class RecipesGUI {
     public void onClick(InventoryClickEvent event) {
         if (event.getClickedInventory() != inventory) return;
         if (event.getCurrentItem() != null) {
+            Player player = (Player) event.getWhoClicked();
             event.setCancelled(true);
             if (event.getCurrentItem().isSimilar(rightNavItem)) {
                 currentPage++;
-                sendToPlayer((Player) event.getWhoClicked());
+                sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(leftNavItem)) {
                 currentPage--;
-                sendToPlayer((Player) event.getWhoClicked());
+                sendToPlayer(player);
+            } else if (event.getCurrentItem().isSimilar(pageNavItem)){
+                sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
                 plugin.getCreateRecipeGUI("new_recipe")
-                        .sendToPlayer((Player) event.getWhoClicked(), false);
+                        .sendToPlayer(player, false);
             } else {
                 for (int i = 0; i < size - 18; i++) {
                     try {
@@ -151,7 +155,6 @@ public class RecipesGUI {
                             String recipeName = recipes.get(currentPage * (size - 18) + i);
                             if (event.getClick().equals(ClickType.SHIFT_RIGHT)) {
                                 plugin.getConfigLoader().removeRecipe(recipeName);
-                                Player player = (Player) event.getWhoClicked();
                                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
                                 player.sendMessage(
                                         ChatColor.RED
@@ -160,10 +163,8 @@ public class RecipesGUI {
                                                 + " from config");
                                 sendToPlayer(player);
                             } else if (event.getClick().equals(ClickType.RIGHT)) {
-                                Player player = (Player) event.getWhoClicked();
                                 plugin.getCreateRecipeGUI(recipeName).sendToPlayer(player, false);
                             } else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
-                                Player player = (Player) event.getWhoClicked();
                                 AnvilGUI.Builder renameGUI =
                                         new AnvilGUI.Builder()
                                                 .onClose(
