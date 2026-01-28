@@ -85,6 +85,7 @@ public class RecipesGUI {
                                                                 && limitNum > -1
                                                         ? limitAmnt + "/" + limitNum
                                                         : limitNum)),
+                                color("&r&dLeft click to view recipe"),
                                 color("&r&6Right click to edit recipe"),
                                 color("&r&cShift-right click to remove recipe"),
                                 color("&r&aShift-left click to rename recipe")));
