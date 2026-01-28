@@ -70,6 +70,20 @@ public class SQLiteManager {
         }
     }
 
+    public void removeColumn(String name){
+        getConnection();
+        if (columnNotExists(name)) return;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement(
+                            "ALTER TABLE crafts DROP COLUMN " + name);
+            ps.execute();
+            ps.close();
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error removing column: " + e.getMessage());
+        }
+    }
+
     public void renameColumn(String oldName, String newName) {
         getConnection();
         if (columnNotExists(oldName)) return;

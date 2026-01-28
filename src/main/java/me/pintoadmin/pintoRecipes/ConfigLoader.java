@@ -42,6 +42,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to remove recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
+        plugin.getSqLiteManager().removeColumn(name);
         loadConfig();
     }
 
@@ -57,6 +58,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to rename recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
+        plugin.getSqLiteManager().renameColumn(beforeName, afterName);
         loadConfig();
     }
 
