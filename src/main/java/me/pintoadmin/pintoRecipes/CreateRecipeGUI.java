@@ -127,51 +127,65 @@ public class CreateRecipeGUI {
 
     public void loadGUI() {
         if (recipeName != null) {
-            switch (plugin.getConfigLoader().getType(recipeName)) {
-                case "shaped":
-                    List<Map<String, String>> shapedRecipe =
-                            plugin.toShapedRecipe(plugin.getConfigLoader().getRecipe(recipeName));
-                    if (shapedRecipe == null) {
-                        for (Integer index : craftingSlots) inventory.setItem(index, null);
-                    } else {
-                        int round = 1;
-                        for (Map<String, String> recipeMap : shapedRecipe) {
-                            for (int i = 0; i < 3; i++) {
-                                int operatingSlot = craftingSlots.get(round - 1);
-
-                                String value = null;
-                                if (round % 3 == 1) value = recipeMap.get("left");
-                                if (round % 3 == 2) value = recipeMap.get("middle");
-                                if (round % 3 == 0) value = recipeMap.get("right");
-
-                                setItem(operatingSlot, value);
-                                round++;
-                            }
-                        }
-                    }
-                    break;
-                case "shapeless":
-                    List<String> shapelessRecipe =
-                            plugin.toStringList(plugin.getConfigLoader().getRecipe(recipeName));
-                    for (int i = 0; i < 9; i++) {
-                        try {
-                            setItem(craftingSlots.get(i), shapelessRecipe.get(i));
-                        } catch (IndexOutOfBoundsException ignored) {
-                            inventory.setItem(craftingSlots.get(i), null);
-                        }
-                    }
-                    break;
-                case "furnace", "blasting", "smoking", "campfire", "stonecutter":
-                    String furnaceRecipe = (String) plugin.getConfigLoader().getRecipe(recipeName);
-                    setItem(furnaceSlot, furnaceRecipe);
-                    break;
-            }
+            loadSlots();
 
             updateTypeIcon();
             updateLimitIcon();
 
             inventory.setItem(resultSlot, plugin.getConfigLoader().getResultItem(recipeName));
             inventory.setItem(8, backNavItem);
+        }
+    }
+
+    private void loadSlots(){
+        clearSlots();
+        switch (plugin.getConfigLoader().getType(recipeName)) {
+            case "shaped":
+                List<Map<String, String>> shapedRecipe =
+                        plugin.toShapedRecipe(plugin.getConfigLoader().getRecipe(recipeName));
+                if (shapedRecipe != null) {
+                    int round = 1;
+                    for (Map<String, String> recipeMap : shapedRecipe) {
+                        for (int i = 0; i < 3; i++) {
+                            int operatingSlot = craftingSlots.get(round - 1);
+
+                            String value = null;
+                            if (round % 3 == 1) value = recipeMap.get("left");
+                            if (round % 3 == 2) value = recipeMap.get("middle");
+                            if (round % 3 == 0) value = recipeMap.get("right");
+
+                            setItem(operatingSlot, value);
+                            round++;
+                        }
+                    }
+                }
+                break;
+            case "shapeless":
+                List<String> shapelessRecipe =
+                        plugin.toStringList(plugin.getConfigLoader().getRecipe(recipeName));
+                for (int i = 0; i < 9; i++) {
+                    try {
+                        setItem(craftingSlots.get(i), shapelessRecipe.get(i));
+                    } catch (IndexOutOfBoundsException ignored) {
+                        inventory.setItem(craftingSlots.get(i), null);
+                    }
+                }
+                break;
+            case "furnace", "blasting", "smoking", "campfire", "stonecutter":
+                String furnaceRecipe = (String) plugin.getConfigLoader().getRecipe(recipeName);
+                setItem(furnaceSlot, furnaceRecipe);
+                break;
+        }
+    }
+
+    private void clearSlots(){
+        inventory.setItem(resultSlot, null);
+        if(getCurrentType().equalsIgnoreCase("shaped")
+            || getCurrentType().equalsIgnoreCase("shapeless"))
+                for (Integer index : craftingSlots) inventory.setItem(index, null);
+        else {
+            for (Integer index : craftingSlots) inventory.setItem(index, unused_space);
+            setItem(furnaceSlot, null);
         }
     }
 
@@ -213,12 +227,13 @@ public class CreateRecipeGUI {
         currentReadOnly = readOnly;
         if (!playersViewing.contains(player.getUniqueId()))
             playersViewing.add(player.getUniqueId());
+        loadGUI();
         player.openInventory(inventory);
     }
 
-    public void save() {
+    public boolean save() {
         String type = typeList.get(selectedTypeIndex);
-        if (inventory.getItem(resultSlot) == null) return;
+        if (inventory.getItem(resultSlot) == null) return false;
         switch (type) {
             case "shaped":
                 Material[] shapedMaterials = new Material[9];
@@ -246,9 +261,9 @@ public class CreateRecipeGUI {
                     plugin.getConfigLoader()
                             .saveShapedRecipe(
                                     recipeName, inventory.getItem(resultSlot), shapedMaterials);
-                    return;
+                    return true;
                 }
-                return;
+                return false;
             case "shapeless":
                 List<String> shapelessMaterials = new ArrayList<>();
                 for (Integer index : craftingSlots) {
@@ -266,51 +281,52 @@ public class CreateRecipeGUI {
                     if (material.isAir()) continue;
                     shapelessMaterials.add(material.toString());
                 }
-                if (shapelessMaterials.isEmpty()) return;
+                if (shapelessMaterials.isEmpty()) return false;
                 plugin.getConfigLoader()
                         .saveShapelessRecipe(
                                 recipeName, inventory.getItem(resultSlot), shapelessMaterials);
-                return;
+                break;
             case "furnace":
                 ItemStack furnaceItem = inventory.getItem(furnaceSlot);
-                if (furnaceItem == null) return;
+                if (furnaceItem == null) return false;
                 Material furnaceMaterial = furnaceItem.getType();
                 plugin.getConfigLoader()
                         .saveFurnaceRecipe(
                                 recipeName, inventory.getItem(resultSlot), furnaceMaterial);
-                return;
+                break;
             case "blasting":
                 ItemStack blastingItem = inventory.getItem(furnaceSlot);
-                if (blastingItem == null) return;
+                if (blastingItem == null) return false;
                 Material blastingMaterial = blastingItem.getType();
                 plugin.getConfigLoader()
                         .saveBlastingRecipe(
                                 recipeName, inventory.getItem(resultSlot), blastingMaterial);
-                return;
+                break;
             case "smoking":
                 ItemStack smokingItem = inventory.getItem(furnaceSlot);
-                if (smokingItem == null) return;
+                if (smokingItem == null) return false;
                 Material smokingMaterial = smokingItem.getType();
                 plugin.getConfigLoader()
                         .saveSmokingRecipe(
                                 recipeName, inventory.getItem(resultSlot), smokingMaterial);
-                return;
+                break;
             case "campfire":
                 ItemStack campfireItem = inventory.getItem(furnaceSlot);
-                if (campfireItem == null) return;
+                if (campfireItem == null) return false;
                 Material campfireMaterial = campfireItem.getType();
                 plugin.getConfigLoader()
                         .saveCampfireRecipe(
                                 recipeName, inventory.getItem(resultSlot), campfireMaterial);
-                return;
+                break;
             case "stonecutter":
                 ItemStack stonecutterItem = inventory.getItem(furnaceSlot);
-                if (stonecutterItem == null) return;
+                if (stonecutterItem == null) return false;
                 Material stonecutterMaterial = stonecutterItem.getType();
                 plugin.getConfigLoader()
                         .saveStonecutterRecipe(
                                 recipeName, inventory.getItem(resultSlot), stonecutterMaterial);
         }
+        return true;
     }
 
     public void onClick(InventoryClickEvent event) {
@@ -373,7 +389,7 @@ public class CreateRecipeGUI {
     }
 
     public void onClose(Player player) {
-        save();
+        if(save()) clearSlots();
         playersViewing.remove(player.getUniqueId());
     }
 
