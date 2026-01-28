@@ -37,6 +37,9 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     return true;
                 }
                 plugin.getRecipesGUI().sendToPlayer(player);
+            } else if(args[0].equalsIgnoreCase("reload")){
+                plugin.getLoadRecipes().reloadRecipes();
+                player.sendMessage(ChatColor.GREEN+"Reloaded recipes");
             } else {
                 player.sendMessage(ChatColor.RED + "You must specify a name for this subcommand");
             }
@@ -78,7 +81,7 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                         ChatColor.RED
                                 + "Usage: /"
                                 + label
-                                + " <show|save|edit|remove> [recipe_name]");
+                                + " <show|save|edit|remove|reload> [recipe_name]");
         }
         plugin.getConfigLoader().loadConfig();
         return true;

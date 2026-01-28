@@ -17,6 +17,7 @@ public class LoadRecipes {
     }
 
     List<String> localRecipes = new ArrayList<>();
+    Map<String, NamespacedKey> activeRecipes = new HashMap<>();
 
     public void loadRecipes() {
         localRecipes.addAll(configLoader.recipes);
@@ -224,6 +225,7 @@ public class LoadRecipes {
                     break;
             }
             plugin.getCreateRecipeGUI(recipeName);
+            activeRecipes.put(recipeName, new NamespacedKey(plugin, recipeName.toLowerCase()));
 
             Permission permission =
                     new Permission(
@@ -234,5 +236,13 @@ public class LoadRecipes {
                 plugin.getServer().getPluginManager().addPermission(permission);
         }
         plugin.getSqLiteManager().addColumns();
+    }
+
+    public void reloadRecipes(){
+        for(NamespacedKey key : activeRecipes.values()) {
+            getServer().removeRecipe(key);
+        }
+        loadRecipes();
+        plugin.getLogger().info("Finished reloading recipes!");
     }
 }

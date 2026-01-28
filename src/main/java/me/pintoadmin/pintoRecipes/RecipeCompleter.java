@@ -13,7 +13,7 @@ public record RecipeCompleter(PintoRecipes plugin) implements TabCompleter {
             String[] args) {
         List<String> endArray = new ArrayList<>();
         if (args.length == 1) {
-            endArray.addAll(List.of("save", "show", "edit", "list", "remove"));
+            endArray.addAll(List.of("save", "show", "edit", "list", "remove", "reload"));
         } else if (args.length == 2 && !args[0].equalsIgnoreCase("list")) {
             endArray = new ArrayList<>(plugin.getConfigLoader().recipes);
         }
