@@ -56,6 +56,11 @@ public class RecipesGUI {
                         currentPage * (size - 18) + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
                 );
                 String recipeType = plugin.getConfigLoader().getType(recipeName);
+
+                String limitType = plugin.getConfigLoader().getLimitType(recipeName);
+                int limitNum = plugin.getConfigLoader().getLimit(recipeName);
+                int limitAmnt = limitType.equalsIgnoreCase("SERVER") ? 0 : plugin.getSqLiteManager().getServerCrafts(recipeName);
+
                 ItemStack itemOG = plugin.getConfigLoader().getResultItem(recipeName);
                 if(itemOG == null) throw new IndexOutOfBoundsException();
                 ItemStack item = itemOG.clone();
@@ -63,6 +68,8 @@ public class RecipesGUI {
                 meta.setLore(List.of("",
                         color("&r&8ID: "+recipeName),
                         color("&r&8Type: "+recipeType),
+                        color("&r&8Limit Type: "+limitType),
+                        color("&r&8Limit amount: "+ (limitType.equalsIgnoreCase("SERVER")  && limitNum > -1 ? limitAmnt+"/"+limitNum : limitNum)),
                         color("&r&6Right click to edit recipe"),
                         color("&r&cShift-right click to remove recipe"),
                         color("&r&aShift-left click to rename recipe")));
