@@ -11,7 +11,6 @@ import org.bukkit.inventory.recipe.*;
 public class ConfigLoader {
     private final PintoRecipes plugin;
     private FileConfiguration recipeConfig;
-    private FileConfiguration config;
     public List<String> recipes = new ArrayList<>();
 
     public ConfigLoader(PintoRecipes plugin) {
@@ -41,7 +40,7 @@ public class ConfigLoader {
             recipes.remove(name);
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to remove recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         loadConfig();
     }
@@ -56,7 +55,7 @@ public class ConfigLoader {
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to rename recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         loadConfig();
     }
@@ -72,17 +71,36 @@ public class ConfigLoader {
                 recipeConfig.set(name + ".category", "MISC");
 
             recipeConfig.set(name + ".type", "shaped");
-            recipeConfig.set(name+".recipe", List.of(
-                    Map.of("left", materials[0].toString(), "middle", materials[1].toString(), "right", materials[2].toString()),
-                    Map.of("left", materials[3].toString(), "middle", materials[4].toString(), "right", materials[5].toString()),
-                    Map.of("left", materials[6].toString(), "middle", materials[7].toString(), "right", materials[8].toString())
-            ));
+            recipeConfig.set(
+                    name + ".recipe",
+                    List.of(
+                            Map.of(
+                                    "left",
+                                    materials[0].toString(),
+                                    "middle",
+                                    materials[1].toString(),
+                                    "right",
+                                    materials[2].toString()),
+                            Map.of(
+                                    "left",
+                                    materials[3].toString(),
+                                    "middle",
+                                    materials[4].toString(),
+                                    "right",
+                                    materials[5].toString()),
+                            Map.of(
+                                    "left",
+                                    materials[6].toString(),
+                                    "middle",
+                                    materials[7].toString(),
+                                    "right",
+                                    materials[8].toString())));
             recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
             // plugin.getLogger().info("Saved shaped recipe: "+resultingItem.getType()+" - "+
             // Arrays.toString(materials));
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         plugin.getLoadRecipes().loadRecipes();
     }
@@ -104,7 +122,7 @@ public class ConfigLoader {
             // "+materials);
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         plugin.getLoadRecipes().loadRecipes();
     }
@@ -126,7 +144,7 @@ public class ConfigLoader {
             // "+material.name());
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         plugin.getLoadRecipes().loadRecipes();
     }
@@ -148,7 +166,7 @@ public class ConfigLoader {
             // "+material.name());
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         plugin.getLoadRecipes().loadRecipes();
     }
@@ -170,7 +188,7 @@ public class ConfigLoader {
             // "+material.name());
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         plugin.getLoadRecipes().loadRecipes();
     }
@@ -192,7 +210,7 @@ public class ConfigLoader {
             // "+material.name());
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         plugin.getLoadRecipes().loadRecipes();
     }
@@ -217,7 +235,7 @@ public class ConfigLoader {
             // "+material.name());
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
         plugin.getLoadRecipes().loadRecipes();
     }

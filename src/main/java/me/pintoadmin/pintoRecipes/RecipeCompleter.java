@@ -2,17 +2,15 @@ package me.pintoadmin.pintoRecipes;
 
 import java.util.*;
 import org.bukkit.command.*;
+import org.jetbrains.annotations.*;
 
-public class RecipeCompleter implements TabCompleter {
-    private final PintoRecipes plugin;
-
-    public RecipeCompleter(PintoRecipes plugin) {
-        this.plugin = plugin;
-    }
-
+public record RecipeCompleter(PintoRecipes plugin) implements TabCompleter {
     @Override
     public List<String> onTabComplete(
-            CommandSender sender, Command command, String alias, String[] args) {
+            @NotNull CommandSender sender,
+            @NotNull Command command,
+            @NotNull String alias,
+            String[] args) {
         List<String> endArray = new ArrayList<>();
         if (args.length == 1) {
             endArray.addAll(List.of("save", "show", "edit", "list", "remove"));

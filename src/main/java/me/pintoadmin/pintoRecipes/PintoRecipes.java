@@ -58,4 +58,28 @@ public final class PintoRecipes extends JavaPlugin {
     public SQLiteManager getSqLiteManager() {
         return sqLiteManager;
     }
+
+    // Helper converters to avoid unchecked casts
+    List<Map<String, String>> toShapedRecipe(Object obj) {
+        if (!(obj instanceof List<?> outer)) return null;
+        List<Map<String, String>> result = new ArrayList<>();
+        for (Object o : outer) {
+            if (!(o instanceof Map<?, ?> raw)) return null;
+            Map<String, String> converted = new HashMap<>();
+            for (Map.Entry<?, ?> e : raw.entrySet()) {
+                String k = e.getKey() == null ? null : String.valueOf(e.getKey());
+                String v = e.getValue() == null ? null : String.valueOf(e.getValue());
+                converted.put(k, v);
+            }
+            result.add(converted);
+        }
+        return result;
+    }
+
+    List<String> toStringList(Object obj) {
+        if (!(obj instanceof List)) return null;
+        List<String> result = new ArrayList<>();
+        for (Object o : (List<?>) obj) result.add(o == null ? null : String.valueOf(o));
+        return result;
+    }
 }

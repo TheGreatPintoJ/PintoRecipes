@@ -72,7 +72,7 @@ public class SQLiteManager {
 
     public void renameColumn(String oldName, String newName) {
         getConnection();
-        if (!columnExists(oldName)) return;
+        if (columnNotExists(oldName)) return;
         try {
             PreparedStatement ps =
                     connection.prepareStatement(
@@ -134,7 +134,7 @@ public class SQLiteManager {
     public void incrementPlayerCrafts(String recipeName, UUID uuid) {
         getConnection();
         try {
-            if (!columnExists(recipeName)) return;
+            if (columnNotExists(recipeName)) return;
             PreparedStatement ps =
                     connection.prepareStatement(
                             "INSERT INTO crafts (uuid, "
@@ -155,11 +155,11 @@ public class SQLiteManager {
                                     + recipeName
                                     + " in database: "
                                     + e.getMessage());
-            e.printStackTrace();
+            plugin.getLogger().severe(e.getMessage());
         }
     }
 
-    public boolean columnExists(String name) {
+    public boolean columnNotExists(String name) {
         try {
             Statement statement = connection.createStatement();
             boolean columnExists = false;
@@ -171,10 +171,10 @@ public class SQLiteManager {
                 }
             }
             rs.close();
-            return columnExists;
+            return !columnExists;
         } catch (SQLException e) {
             plugin.getLogger().severe("Error checking if column exists: " + e.getMessage());
-            return false;
+            return true;
         }
     }
 
@@ -187,10 +187,9 @@ public class SQLiteManager {
         }
     }
 
-    public Connection getConnection() {
+    public void getConnection() {
         if (connection == null) {
             init();
         }
-        return connection;
     }
 }

@@ -2,18 +2,16 @@ package me.pintoadmin.pintoRecipes;
 
 import java.util.*;
 import javax.annotation.*;
-import javax.naming.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.*;
-import org.bukkit.scheduler.*;
 
 public class CreateRecipeGUI {
     private final PintoRecipes plugin;
-    private Inventory inventory;
+    private final Inventory inventory;
 
     private final List<UUID> playersViewing = new ArrayList<>();
 
@@ -21,7 +19,6 @@ public class CreateRecipeGUI {
             new ArrayList<>(List.of(10, 11, 12, 19, 20, 21, 28, 29, 30));
     private final int furnaceSlot = 20;
     private final int resultSlot = 24;
-    private final int typeSlot = 4;
 
     private boolean currentReadOnly = false;
     private final String recipeName;
@@ -49,8 +46,7 @@ public class CreateRecipeGUI {
 
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
     private final ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
-    private ItemStack typeSelectItem = new ItemStack(Material.PAPER);
-    private ItemStack limitSelectItem = new ItemStack(Material.PAPER);
+    private final ItemStack limitSelectItem = new ItemStack(Material.PAPER);
 
     public CreateRecipeGUI(PintoRecipes plugin, String recipeName) {
         this.plugin = plugin;
@@ -59,6 +55,7 @@ public class CreateRecipeGUI {
         selectedTypeIndex = typeList.indexOf(plugin.getConfigLoader().getType(recipeName));
 
         ItemMeta unusedMeta = unused_space.getItemMeta();
+        assert unusedMeta != null;
         unusedMeta.setItemName(color("&f"));
         unusedMeta
                 .getPersistentDataContainer()
@@ -83,8 +80,7 @@ public class CreateRecipeGUI {
             switch (plugin.getConfigLoader().getType(recipeName)) {
                 case "shaped":
                     List<Map<String, String>> shapedRecipe =
-                            (List<Map<String, String>>)
-                                    plugin.getConfigLoader().getRecipe(recipeName);
+                            plugin.toShapedRecipe(plugin.getConfigLoader().getRecipe(recipeName));
                     if (shapedRecipe == null) {
                         for (Integer index : craftingSlots) inventory.setItem(index, null);
                     } else {
@@ -106,7 +102,7 @@ public class CreateRecipeGUI {
                     break;
                 case "shapeless":
                     List<String> shapelessRecipe =
-                            (List<String>) plugin.getConfigLoader().getRecipe(recipeName);
+                            plugin.toStringList(plugin.getConfigLoader().getRecipe(recipeName));
                     for (int i = 0; i < 9; i++) {
                         try {
                             setItem(craftingSlots.get(i), shapelessRecipe.get(i));
@@ -134,8 +130,7 @@ public class CreateRecipeGUI {
             switch (plugin.getConfigLoader().getType(recipeName)) {
                 case "shaped":
                     List<Map<String, String>> shapedRecipe =
-                            (List<Map<String, String>>)
-                                    plugin.getConfigLoader().getRecipe(recipeName);
+                            plugin.toShapedRecipe(plugin.getConfigLoader().getRecipe(recipeName));
                     if (shapedRecipe == null) {
                         for (Integer index : craftingSlots) inventory.setItem(index, null);
                     } else {
@@ -157,7 +152,7 @@ public class CreateRecipeGUI {
                     break;
                 case "shapeless":
                     List<String> shapelessRecipe =
-                            (List<String>) plugin.getConfigLoader().getRecipe(recipeName);
+                            plugin.toStringList(plugin.getConfigLoader().getRecipe(recipeName));
                     for (int i = 0; i < 9; i++) {
                         try {
                             setItem(craftingSlots.get(i), shapelessRecipe.get(i));
@@ -181,7 +176,7 @@ public class CreateRecipeGUI {
     }
 
     private void updateTypeIcon() {
-        typeSelectItem = new ItemStack(typeMap.get(getCurrentType()));
+        ItemStack typeSelectItem = new ItemStack(typeMap.get(getCurrentType()));
         ItemMeta typeSelectMeta = typeSelectItem.getItemMeta();
         assert typeSelectMeta != null;
         typeSelectMeta.setItemName(color("&lRecipe type: " + getCurrentType()));
@@ -315,7 +310,6 @@ public class CreateRecipeGUI {
                 plugin.getConfigLoader()
                         .saveStonecutterRecipe(
                                 recipeName, inventory.getItem(resultSlot), stonecutterMaterial);
-                return;
         }
     }
 
@@ -343,39 +337,38 @@ public class CreateRecipeGUI {
             if (idKey == null) return;
             event.setCancelled(true);
 
-            if (idKey.equals("typeSelectItem")) {
-                if (event.getClick() == ClickType.LEFT) {
-                    selectedTypeIndex++;
-                    if (selectedTypeIndex > typeList.size() - 1) selectedTypeIndex = 0;
-                } else if (event.getClick() == ClickType.RIGHT) {
-                    selectedTypeIndex--;
-                    if (selectedTypeIndex < 0) selectedTypeIndex = typeList.size() - 1;
+            switch (idKey) {
+                case "typeSelectItem" -> {
+                    if (event.getClick() == ClickType.LEFT) {
+                        selectedTypeIndex++;
+                        if (selectedTypeIndex > typeList.size() - 1) selectedTypeIndex = 0;
+                    } else if (event.getClick() == ClickType.RIGHT) {
+                        selectedTypeIndex--;
+                        if (selectedTypeIndex < 0) selectedTypeIndex = typeList.size() - 1;
+                    }
+
+                    save();
+                    loadGUI();
+                    sendToPlayer(player, currentReadOnly);
                 }
-
-                save();
-                loadGUI();
-                sendToPlayer(player, currentReadOnly);
-                return;
-            }
-
-            if (idKey.equals("limitSelectItem")) {
-                if (event.getClick() == ClickType.RIGHT || event.getClick() == ClickType.LEFT) {
-                    String newType = getCurrentLimitType().equals("PLAYER") ? "SERVER" : "PLAYER";
-                    plugin.getConfigLoader().setLimitType(recipeName, newType);
-                } else if (event.getClick() == ClickType.SHIFT_LEFT) {
-                    int newLimit = getCurrentLimitNumber() + 1;
-                    plugin.getConfigLoader().setLimit(recipeName, newLimit);
-                } else if (event.getClick() == ClickType.SHIFT_RIGHT) {
-                    int newLimit = getCurrentLimitNumber() - 1;
-                    plugin.getConfigLoader().setLimit(recipeName, newLimit);
+                case "limitSelectItem" -> {
+                    if (event.getClick() == ClickType.RIGHT || event.getClick() == ClickType.LEFT) {
+                        String newType =
+                                getCurrentLimitType().equals("PLAYER") ? "SERVER" : "PLAYER";
+                        plugin.getConfigLoader().setLimitType(recipeName, newType);
+                    } else if (event.getClick() == ClickType.SHIFT_LEFT) {
+                        int newLimit = getCurrentLimitNumber() + 1;
+                        plugin.getConfigLoader().setLimit(recipeName, newLimit);
+                    } else if (event.getClick() == ClickType.SHIFT_RIGHT) {
+                        int newLimit = getCurrentLimitNumber() - 1;
+                        plugin.getConfigLoader().setLimit(recipeName, newLimit);
+                    }
+                    save();
+                    updateLimitIcon();
+                    sendToPlayer(player, currentReadOnly);
                 }
-                save();
-                updateLimitIcon();
-                sendToPlayer(player, currentReadOnly);
-                return;
+                case "unused_space" -> {}
             }
-
-            if (idKey.equals("unused_space")) {}
         }
     }
 

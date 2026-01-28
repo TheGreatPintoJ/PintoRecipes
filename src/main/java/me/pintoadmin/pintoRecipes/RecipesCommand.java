@@ -5,13 +5,14 @@ import org.bukkit.command.*;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.*;
 
-public class RecipesCommand implements CommandExecutor {
-    private final PintoRecipes plugin;
-
+public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
     public RecipesCommand(PintoRecipes plugin) {
         this.plugin = plugin;
-        plugin.getCommand("precipes").setExecutor(this);
-        plugin.getCommand("precipes").setTabCompleter(new RecipeCompleter(plugin));
+        PluginCommand precipesCommand = plugin.getCommand("precipes");
+        if (precipesCommand != null) {
+            precipesCommand.setExecutor(this);
+            precipesCommand.setTabCompleter(new RecipeCompleter(plugin));
+        }
     }
 
     @Override

@@ -16,23 +16,26 @@ public class RecipesGUI {
     private final int size = 6 * 9;
     private int currentPage = 0;
 
-    private ItemStack leftNavItem = new ItemStack(Material.ARROW);
-    private ItemStack pageNavItem = new ItemStack(Material.PAPER);
-    private ItemStack rightNavItem = new ItemStack(Material.ARROW);
-    private ItemStack newNavItem = new ItemStack(Material.RED_DYE);
+    private final ItemStack leftNavItem = new ItemStack(Material.ARROW);
+    private final ItemStack pageNavItem = new ItemStack(Material.PAPER);
+    private final ItemStack rightNavItem = new ItemStack(Material.ARROW);
+    private final ItemStack newNavItem = new ItemStack(Material.RED_DYE);
 
     public RecipesGUI(PintoRecipes plugin) {
         this.plugin = plugin;
 
         ItemMeta leftNavMeta = leftNavItem.getItemMeta();
+        assert leftNavMeta != null;
         leftNavMeta.setItemName(color("&lPrevious Page"));
         leftNavItem.setItemMeta(leftNavMeta);
 
         ItemMeta rightNavMeta = rightNavItem.getItemMeta();
+        assert rightNavMeta != null;
         rightNavMeta.setItemName(color("&lNext Page"));
         rightNavItem.setItemMeta(rightNavMeta);
 
         ItemMeta newNavMeta = newNavItem.getItemMeta();
+        assert newNavMeta != null;
         newNavMeta.setItemName(color("&c&lCreate new recipe"));
         newNavItem.setItemMeta(newNavMeta);
     }
@@ -43,6 +46,7 @@ public class RecipesGUI {
         inventory = Bukkit.createInventory(null, size, color("&8&l&oCustom Recipes"));
 
         ItemMeta unused_meta = unused_space.getItemMeta();
+        assert unused_meta != null;
         unused_meta.setItemName(color("&f"));
         unused_space.setItemMeta(unused_meta);
 
@@ -68,6 +72,7 @@ public class RecipesGUI {
                 if (itemOG == null) throw new IndexOutOfBoundsException();
                 ItemStack item = itemOG.clone();
                 ItemMeta meta = item.getItemMeta();
+                assert meta != null;
                 meta.setLore(
                         List.of(
                                 "",
@@ -93,6 +98,7 @@ public class RecipesGUI {
         if (currentPage != 0) inventory.setItem(size - 6, leftNavItem);
 
         ItemMeta pageNavMeta = pageNavItem.getItemMeta();
+        assert pageNavMeta != null;
         pageNavMeta.setItemName(color("&lPage: " + (currentPage + 1)));
         pageNavItem.setItemMeta(pageNavMeta);
         inventory.setItem(size - 5, pageNavItem);
@@ -108,7 +114,7 @@ public class RecipesGUI {
 
     public void sendToPlayer(Player player) {
         constructGUI();
-        InventoryView invView = player.openInventory(inventory);
+        player.openInventory(inventory);
     }
 
     public void onClick(InventoryClickEvent event) {
@@ -137,7 +143,9 @@ public class RecipesGUI {
                                 && clickedItem
                                         .getItemMeta()
                                         .getDisplayName()
-                                        .equals(item.getItemMeta().getDisplayName())) {
+                                        .equals(
+                                                Objects.requireNonNull(item.getItemMeta())
+                                                        .getDisplayName())) {
                             String recipeName = recipes.get(currentPage * (size - 18) + i);
                             if (event.getClick().equals(ClickType.SHIFT_RIGHT)) {
                                 plugin.getConfigLoader().removeRecipe(recipeName);

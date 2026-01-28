@@ -32,7 +32,7 @@ public class LoadRecipes {
             switch (type.toLowerCase()) {
                 case "shaped":
                     List<Map<String, String>> recipeMaps =
-                            (List<Map<String, String>>) configLoader.getRecipe(recipeName);
+                            plugin.toShapedRecipe(configLoader.getRecipe(recipeName));
                     ShapedRecipe shapedRecipe =
                             new ShapedRecipe(
                                     new NamespacedKey(plugin, recipeName.toLowerCase()), result);
@@ -74,7 +74,8 @@ public class LoadRecipes {
                     ShapelessRecipe shapelessRecipe =
                             new ShapelessRecipe(
                                     new NamespacedKey(plugin, recipeName.toLowerCase()), result);
-                    List<String> materialsList = (List<String>) configLoader.getRecipe(recipeName);
+                    List<String> materialsList =
+                            plugin.toStringList(configLoader.getRecipe(recipeName));
                     for (String entry : materialsList) {
                         shapelessRecipe.addIngredient(Material.valueOf(entry.toUpperCase()));
                     }

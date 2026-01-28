@@ -1,15 +1,12 @@
 package me.pintoadmin.pintoRecipes;
 
-import java.util.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 
-public class InventoryEvents implements Listener {
-    private final PintoRecipes plugin;
-
+public record InventoryEvents(PintoRecipes plugin) implements Listener {
     public InventoryEvents(PintoRecipes plugin) {
         this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
