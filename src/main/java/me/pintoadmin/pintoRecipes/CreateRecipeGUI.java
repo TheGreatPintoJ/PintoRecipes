@@ -6,6 +6,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.*;
+import org.bukkit.scheduler.*;
 
 import javax.annotation.*;
 import javax.naming.*;
@@ -55,11 +56,18 @@ public class CreateRecipeGUI {
         unusedMeta.getPersistentDataContainer().set(idNameKey, PersistentDataType.STRING, "unused_space");
         unused_space.setItemMeta(unusedMeta);
 
+        ItemMeta backNavMeta = backNavItem.getItemMeta();
+        assert backNavMeta != null;
+        backNavMeta.setItemName(color("&4&lClose"));
+        FireworkMeta fireworkMeta = (FireworkMeta) backNavMeta;
+        fireworkMeta.setPower(0);
+        backNavItem.setItemMeta(fireworkMeta);
+
         inventory = Bukkit.createInventory(null, 5 * 9, color("&eRecipe - "+recipeName));
-        loadGUI();
+        createGUI();
     }
 
-    public void loadGUI(){
+    public void createGUI(){
         for(int i = 0; i < inventory.getSize(); i++)
             inventory.setItem(i, unused_space);
 
@@ -107,13 +115,6 @@ public class CreateRecipeGUI {
             }
         }
 
-        ItemMeta backNavMeta = backNavItem.getItemMeta();
-        assert backNavMeta != null;
-        backNavMeta.setItemName(color("&4&lClose"));
-        FireworkMeta fireworkMeta = (FireworkMeta) backNavMeta;
-        fireworkMeta.setPower(0);
-        backNavItem.setItemMeta(fireworkMeta);
-
         typeSelectItem = new ItemStack(typeMap.get(getCurrentType()));
         ItemMeta typeSelectMeta = typeSelectItem.getItemMeta();
         assert typeSelectMeta != null;
@@ -134,7 +135,77 @@ public class CreateRecipeGUI {
         inventory.setItem(8, backNavItem);
         inventory.setItem(0, typeSelectItem);
         inventory.setItem(36, limitSelectItem);
+    }
+    public void loadGUI(){
+        if(recipeName != null) {
+            switch (plugin.getConfigLoader().getType(recipeName)) {
+                case "shaped":
+                    List<Map<String, String>> shapedRecipe = (List<Map<String, String>>) plugin.getConfigLoader().getRecipe(recipeName);
+                    if (shapedRecipe == null) {
+                        for (Integer index : craftingSlots)
+                            inventory.setItem(index, null);
+                    } else {
+                        int round = 1;
+                        for (Map<String, String> recipeMap : shapedRecipe) {
+                            for (int i = 0; i < 3; i++) {
+                                int operatingSlot = craftingSlots.get(round - 1);
 
+                                String value = null;
+                                if (round % 3 == 1)
+                                    value = recipeMap.get("left");
+                                if (round % 3 == 2)
+                                    value = recipeMap.get("middle");
+                                if (round % 3 == 0)
+                                    value = recipeMap.get("right");
+
+                                setItem(operatingSlot, value);
+                                round++;
+                            }
+                        }
+                    }
+                    break;
+                case "shapeless":
+                    List<String> shapelessRecipe = (List<String>) plugin.getConfigLoader().getRecipe(recipeName);
+                    for(int i = 0; i < 9; i++){
+                        try {
+                            setItem(craftingSlots.get(i), shapelessRecipe.get(i));
+                        } catch (IndexOutOfBoundsException ignored){
+                            inventory.setItem(craftingSlots.get(i), null);
+                        }
+                    }
+                    break;
+                case "furnace", "blasting", "smoking", "campfire", "stonecutter":
+                    String furnaceRecipe = (String) plugin.getConfigLoader().getRecipe(recipeName);
+                    setItem(furnaceSlot, furnaceRecipe);
+                    break;
+            }
+
+            updateTypeIcon();
+            updateLimitIcon();
+
+            inventory.setItem(resultSlot, plugin.getConfigLoader().getResultItem(recipeName));
+            inventory.setItem(8, backNavItem);
+        }
+    }
+    private void updateTypeIcon(){
+        typeSelectItem = new ItemStack(typeMap.get(getCurrentType()));
+        ItemMeta typeSelectMeta = typeSelectItem.getItemMeta();
+        assert typeSelectMeta != null;
+        typeSelectMeta.setItemName(color("&lRecipe type: "+getCurrentType()));
+        typeSelectMeta.setLore(List.of(color("&d&lLeft click to select next"), color("&d&lRight click to select previous")));
+        typeSelectMeta.getPersistentDataContainer().set(idNameKey, PersistentDataType.STRING, "typeSelectItem");
+        typeSelectItem.setItemMeta(typeSelectMeta);
+        inventory.setItem(0, typeSelectItem);
+    }
+    private void updateLimitIcon(){
+        ItemMeta limitSelectMeta = limitSelectItem.getItemMeta();
+        assert limitSelectMeta != null;
+        limitSelectMeta.setItemName(color("&lRecipe limit"));
+        limitSelectMeta.setLore(List.of(color("&r&7Type: "+getCurrentLimitType()), color("&r&7Number: "+getCurrentLimitNumber()),
+                color("&d&lLeft or right click to switch type"), color("&d&lShift-left click to increment number"), color("&d&lShift-right click to decrement number")));
+        limitSelectMeta.getPersistentDataContainer().set(idNameKey, PersistentDataType.STRING, "limitSelectItem");
+        limitSelectItem.setItemMeta(limitSelectMeta);
+        inventory.setItem(36, limitSelectItem);
     }
     public void sendToPlayer(Player player, boolean readOnly){
         currentReadOnly = readOnly;
@@ -171,7 +242,7 @@ public class CreateRecipeGUI {
                     plugin.getConfigLoader().saveShapedRecipe(recipeName, inventory.getItem(resultSlot), shapedMaterials);
                     return;
                 }
-                break;
+                return;
             case "shapeless":
                 List<String> shapelessMaterials = new ArrayList<>();
                 for(Integer index : craftingSlots){
@@ -192,37 +263,37 @@ public class CreateRecipeGUI {
                 }
                 if(shapelessMaterials.isEmpty()) return;
                 plugin.getConfigLoader().saveShapelessRecipe(recipeName, inventory.getItem(resultSlot), shapelessMaterials);
-                break;
+                return;
             case "furnace":
                 ItemStack furnaceItem = inventory.getItem(furnaceSlot);
                 if(furnaceItem == null) return;
                 Material furnaceMaterial = furnaceItem.getType();
                 plugin.getConfigLoader().saveFurnaceRecipe(recipeName, inventory.getItem(resultSlot), furnaceMaterial);
-                break;
+                return;
             case "blasting":
                 ItemStack blastingItem = inventory.getItem(furnaceSlot);
                 if(blastingItem == null) return;
                 Material blastingMaterial = blastingItem.getType();
                 plugin.getConfigLoader().saveBlastingRecipe(recipeName, inventory.getItem(resultSlot), blastingMaterial);
-                break;
+                return;
             case "smoking":
                 ItemStack smokingItem = inventory.getItem(furnaceSlot);
                 if(smokingItem == null) return;
                 Material smokingMaterial = smokingItem.getType();
                 plugin.getConfigLoader().saveSmokingRecipe(recipeName, inventory.getItem(resultSlot), smokingMaterial);
-                break;
+                return;
             case "campfire":
                 ItemStack campfireItem = inventory.getItem(furnaceSlot);
                 if(campfireItem == null) return;
                 Material campfireMaterial = campfireItem.getType();
                 plugin.getConfigLoader().saveCampfireRecipe(recipeName, inventory.getItem(resultSlot), campfireMaterial);
-                break;
+                return;
             case "stonecutter":
                 ItemStack stonecutterItem = inventory.getItem(furnaceSlot);
                 if(stonecutterItem == null) return;
                 Material stonecutterMaterial = stonecutterItem.getType();
                 plugin.getConfigLoader().saveStonecutterRecipe(recipeName, inventory.getItem(resultSlot), stonecutterMaterial);
-                break;
+                return;
         }
     }
     public void onClick(InventoryClickEvent event){
@@ -232,11 +303,11 @@ public class CreateRecipeGUI {
         if(currentReadOnly) event.setCancelled(true);
 
         if(event.getCurrentItem() != null) {
-
             if(event.getCurrentItem().isSimilar(backNavItem)) {
                 plugin.getRecipesGUI().sendToPlayer(player);
                 event.setCancelled(true);
                 onClose(player);
+                return;
             }
 
             if(currentReadOnly) return;
@@ -251,19 +322,18 @@ public class CreateRecipeGUI {
             if(idKey.equals("typeSelectItem")){
                 if(event.getClick() == ClickType.LEFT){
                     selectedTypeIndex++;
-                    if(selectedTypeIndex > typeList.size()-1){
+                    if(selectedTypeIndex > typeList.size()-1)
                         selectedTypeIndex = 0;
-                    }
                 } else if(event.getClick() == ClickType.RIGHT){
                     selectedTypeIndex--;
-                    if(selectedTypeIndex < 0){
+                    if(selectedTypeIndex < 0)
                         selectedTypeIndex = typeList.size()-1;
-                    }
                 }
 
                 save();
                 loadGUI();
                 sendToPlayer(player, currentReadOnly);
+                return;
             }
 
             if(idKey.equals("limitSelectItem")){
@@ -278,8 +348,9 @@ public class CreateRecipeGUI {
                     plugin.getConfigLoader().setLimit(recipeName, newLimit);
                 }
                 save();
-                loadGUI();
+                updateLimitIcon();
                 sendToPlayer(player, currentReadOnly);
+                return;
             }
 
             if(idKey.equals("unused_space")){}
