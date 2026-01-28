@@ -7,6 +7,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
+import org.bukkit.scheduler.*;
 
 public class RecipesGUI {
     private final PintoRecipes plugin;
@@ -16,10 +17,20 @@ public class RecipesGUI {
     private final int size = 6 * 9;
     private int currentPage = 0;
 
+    private List<ItemStack[]> pages = new ArrayList<>();
+
+    public boolean somethingChanged = false;
+
     private final ItemStack leftNavItem = new ItemStack(Material.ARROW);
     private final ItemStack pageNavItem = new ItemStack(Material.PAPER);
     private final ItemStack rightNavItem = new ItemStack(Material.ARROW);
     private final ItemStack newNavItem = new ItemStack(Material.RED_DYE);
+
+    private final List<String> constantItemLore = List.of(
+            color("&r&dLeft click to view recipe"),
+            color("&r&6Right click to edit recipe"),
+            color("&r&cShift-right click to remove recipe"),
+            color("&r&aShift-left click to rename recipe"));
 
     public RecipesGUI(PintoRecipes plugin) {
         this.plugin = plugin;
@@ -43,6 +54,8 @@ public class RecipesGUI {
         assert unused_meta != null;
         unused_meta.setItemName(color("&f"));
         unused_space.setItemMeta(unused_meta);
+
+        constructGUI();
     }
 
     private void constructGUI() {
@@ -52,51 +65,87 @@ public class RecipesGUI {
 
         for (int i = 0; i < inventory.getSize(); i++) inventory.setItem(i, unused_space);
 
-        for (int i = 0; i < size - 18; i++) {
-            try {
-                String recipeName =
-                        recipes.get(
-                                currentPage * (size - 18)
-                                        + i // e.g. 0 * (54 - 18) + 1 = 1 OR 1 * (54 - 18) + 2 = 38
-                                );
-                String recipeType = plugin.getConfigLoader().getType(recipeName);
+        updateItems();
 
-                String limitType = plugin.getConfigLoader().getLimitType(recipeName);
-                int limitNum = plugin.getConfigLoader().getLimit(recipeName);
-                int limitAmnt =
-                        limitType.equalsIgnoreCase("SERVER")
-                                ? 0
-                                : plugin.getSqLiteManager().getServerCrafts(recipeName);
+        updateNav();
+    }
 
-                ItemStack itemOG = plugin.getConfigLoader().getResultItem(recipeName);
-                if (itemOG == null || itemOG.getType().isAir()) throw new IndexOutOfBoundsException(recipeName);
-                ItemStack item = itemOG.clone();
-                ItemMeta meta = item.getItemMeta();
-                assert meta != null;
-                meta.setLore(
-                        List.of(
-                                "",
-                                color("&r&8ID: " + recipeName),
-                                color("&r&8Type: " + recipeType),
-                                color("&r&8Limit Type: " + limitType),
-                                color(
-                                        "&r&8Limit amount: "
-                                                + (limitType.equalsIgnoreCase("SERVER")
-                                                                && limitNum > -1
-                                                        ? limitAmnt + "/" + limitNum
-                                                        : limitNum)),
-                                color("&r&dLeft click to view recipe"),
-                                color("&r&6Right click to edit recipe"),
-                                color("&r&cShift-right click to remove recipe"),
-                                color("&r&aShift-left click to rename recipe")));
-                item.setItemMeta(meta);
-                inventory.setItem(i, item);
-            } catch (IndexOutOfBoundsException e) {
-                plugin.getConfigLoader().removeRecipe(e.getMessage());
-                inventory.setItem(i, null);
-            }
+    private void updateItems() {
+        if(!somethingChanged && pages.size() > currentPage){
+            inventory.setContents(pages.get(currentPage));
+            return;
+        }
+        somethingChanged = false;
+        var cfg = plugin.getConfigLoader();
+        var db = plugin.getSqLiteManager();
+        if (recipes == null) {
+            cfg.loadConfig();
+            recipes = cfg.recipes;
+            if (recipes == null) return;
         }
 
+        ItemStack[] pageItems;
+
+        final int pageSize = size - 18;
+        final int baseIndex = currentPage * pageSize;
+        final int recipesCount = recipes.size();
+
+        for (int i = 0; i < pageSize; i++) {
+            int idx = baseIndex + i;
+            if (idx >= recipesCount) {
+                inventory.setItem(i, null);
+                continue;
+            }
+
+            String recipeName = recipes.get(idx);
+
+            String recipeType = cfg.getType(recipeName);
+            String limitType = cfg.getLimitType(recipeName);
+            int limitNum = cfg.getLimit(recipeName);
+
+            ItemStack itemOG = cfg.getResultItem(recipeName);
+            if (itemOG == null || itemOG.getType().isAir()) {
+                cfg.removeRecipe(recipeName);
+                inventory.setItem(i, null);
+                continue;
+            }
+
+            int limitAmnt = limitType.equalsIgnoreCase("SERVER") ? 0 : db.getServerCrafts(recipeName);
+
+            ItemStack item = itemOG.clone();
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null) {
+                inventory.setItem(i, item);
+                continue;
+            }
+
+            List<String> dynamicLore = new ArrayList<>(List.of(
+                    "",
+                    color("&r&8ID: " + recipeName),
+                    color("&r&8Type: " + recipeType),
+                    color("&r&8Limit Type: " + limitType),
+                    color("&r&8Limit amount: " + (limitType.equalsIgnoreCase("SERVER") && limitNum > -1 ? limitAmnt + "/" + limitNum : limitNum))
+            ));
+            dynamicLore.addAll(constantItemLore);
+
+            meta.setLore(dynamicLore);
+            item.setItemMeta(meta);
+
+            ItemStack current = inventory.getItem(i);
+            if (current == null || !current.isSimilar(item)) {
+                inventory.setItem(i, item);
+            }
+        }
+        pageItems = inventory.getContents();
+        try {
+            pages.set(currentPage, pageItems);
+        } catch (IndexOutOfBoundsException ignored){
+            pages.add(currentPage, pageItems);
+        }
+
+    }
+
+    private void updateNav(){
         if (currentPage != 0) inventory.setItem(size - 6, leftNavItem);
 
         ItemMeta pageNavMeta = pageNavItem.getItemMeta();
@@ -111,13 +160,13 @@ public class RecipesGUI {
                     != null) inventory.setItem(size - 4, rightNavItem);
         } catch (IndexOutOfBoundsException ignored) {
         }
-
         inventory.setItem(size - 1, newNavItem);
     }
 
     public void sendToPlayer(Player player) {
-        constructGUI();
         player.openInventory(inventory);
+        updateItems();
+        updateNav();
     }
 
     public void onClick(InventoryClickEvent event) {
@@ -132,6 +181,7 @@ public class RecipesGUI {
                 currentPage--;
                 sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(pageNavItem)){
+                somethingChanged = true;
                 sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
                 plugin.getCreateRecipeGUI("new_recipe")

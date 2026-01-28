@@ -326,6 +326,7 @@ public class CreateRecipeGUI {
                         .saveStonecutterRecipe(
                                 recipeName, inventory.getItem(resultSlot), stonecutterMaterial);
         }
+        plugin.getRecipesGUI().somethingChanged = true;
         return true;
     }
 
