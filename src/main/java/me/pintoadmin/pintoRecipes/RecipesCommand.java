@@ -37,9 +37,12 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     return true;
                 }
                 plugin.getRecipesGUI().sendToPlayer(player);
-            } else if(args[0].equalsIgnoreCase("reload")){
+            } else if(args[0].equalsIgnoreCase("reload")) {
                 plugin.getLoadRecipes().reloadRecipes();
-                player.sendMessage(ChatColor.GREEN+"Reloaded recipes");
+                player.sendMessage(ChatColor.GREEN + "Reloaded recipes");
+            } else if(args[0].equalsIgnoreCase("debug")){
+                plugin.debugEnabled = !plugin.debugEnabled;
+                player.sendMessage("Debug mode is "+ (plugin.debugEnabled ? "on":"off"));
             } else {
                 player.sendMessage(ChatColor.RED + "You must specify a name for this subcommand");
             }

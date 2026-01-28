@@ -391,6 +391,10 @@ public class CreateRecipeGUI {
         return plugin.getConfigLoader().getLimit(recipeName);
     }
 
+    public Inventory getInventory() {
+        return inventory;
+    }
+
     private void setItem(int index, @Nullable String value) {
         if (value == null || value.equalsIgnoreCase("AIR")) {
             inventory.setItem(index, null);

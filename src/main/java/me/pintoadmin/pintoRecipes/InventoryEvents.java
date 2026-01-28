@@ -16,8 +16,10 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         for (CreateRecipeGUI gui : plugin.getEditGUIs().values()) {
             gui.onClick(event);
+            if(plugin.debugEnabled) plugin.getLogger().warning("CREATERECIPEGUI - Click: "+event.isCancelled()+"; clicktype: "+event.getClick()+"; clickedinventory: "+event.getClickedInventory()+"; inventory: "+gui.getInventory());
         }
         plugin.getRecipesGUI().onClick(event);
+        if(plugin.debugEnabled) plugin.getLogger().warning("RECIPESGUI - Click: "+event.isCancelled()+"; clicktype: "+event.getClick()+"; clickedinventory: "+event.getClickedInventory());
     }
 
     @EventHandler
