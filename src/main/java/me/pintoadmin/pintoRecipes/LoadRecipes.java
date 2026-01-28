@@ -26,6 +26,8 @@ public class LoadRecipes {
             ItemStack item = configLoader.getResultItem(recipeName);
             if(item == null) continue;
             if(!configLoader.getEnabled(recipeName)) continue;
+            Object recipe = configLoader.getRecipe(recipeName);
+            if(recipe == null) continue;
             switch(type.toLowerCase()){
                 case "shaped":
                     List<Map<String, String>> recipeMaps = (List<Map<String, String>>) configLoader.getRecipe(recipeName);
