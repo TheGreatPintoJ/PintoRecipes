@@ -1,26 +1,30 @@
 package me.pintoadmin.pintoRecipes;
 
-import org.bukkit.command.*;
-
 import java.util.*;
+import java.util.stream.*;
+import org.bukkit.command.*;
+import org.jetbrains.annotations.*;
 
-public class RecipeCompleter implements TabCompleter {
-    private final PintoRecipes plugin;
-
-    public RecipeCompleter(PintoRecipes plugin) {
-        this.plugin = plugin;
-    }
-
+public record RecipeCompleter(PintoRecipes plugin) implements TabCompleter {
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(
+            @NotNull CommandSender sender,
+            @NotNull Command command,
+            @NotNull String alias,
+            String[] args) {
         List<String> endArray = new ArrayList<>();
-        if(args.length == 1){
-            endArray.addAll(List.of("save", "show", "edit", "list", "remove"));
-        } else if(args.length == 2 && !args[0].equalsIgnoreCase("list")){
+        if (args.length == 1) {
+            endArray.addAll(
+                    Stream.of("save", "show", "edit", "list", "remove", "reload")
+                            .filter(
+                                    (string) ->
+                                            sender.hasPermission("pintorecipes.recipes." + string))
+                            .toList());
+        } else if (args.length == 2 && !args[0].equalsIgnoreCase("list")) {
+            if (!sender.hasPermission("pintorecipes.recipes." + args[0])) return List.of();
             endArray = new ArrayList<>(plugin.getConfigLoader().recipes);
         }
-        return endArray
-                .stream()
+        return endArray.stream()
                 .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
                 .toList();
     }

@@ -1,5 +1,5 @@
 name: PintoRecipes
-version: '1.7'
+version: '1.8'
 main: me.pintoadmin.pintoRecipes.PintoRecipes
 api-version: '1.21'
 authors: [ PintoJ ]
@@ -25,10 +25,13 @@ permissions:
     description: Permission to use subcommand "edit" in /pintorecipes
     default: op
   pintorecipes.recipes.list:
-    description: Permission to use subcommand "edit" in /pintorecipes (or to use /pintorecipes without arguments)
+    description: Permission to use subcommand "list" in /pintorecipes (or to use /pintorecipes without arguments)
     default: true
   pintorecipes.recipes.remove:
     description: Permission to use subcommand "remove" in /pintorecipes
+    default: op
+  pintorecipes.recipes.reload:
+    description: Permission to use subcommand "reload" in /pintorecipes
     default: op
   pintorecipes.craftbypass:
     description: Permission to bypass crafting limits
