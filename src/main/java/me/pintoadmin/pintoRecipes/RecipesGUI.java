@@ -196,90 +196,72 @@ public class RecipesGUI {
                         .sendToPlayer(player, false);
             } else {
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_FLUTE, 1f, 0.6f);
-                for (int i = 0; i < size - 18; i++) {
-                    try {
-                        ItemStack item =
-                                plugin.getConfigLoader()
-                                        .getResultItem(recipes.get(currentPage * (size - 18) + i));
-                        ItemStack clickedItem = event.getCurrentItem();
-                        if (clickedItem.getItemMeta() == null || item == null) continue;
-                        if (clickedItem.getType().equals(item.getType())
-                                && clickedItem.getAmount() == item.getAmount()
-                                && clickedItem
-                                        .getItemMeta()
-                                        .getDisplayName()
-                                        .equals(
-                                                Objects.requireNonNull(item.getItemMeta())
-                                                        .getDisplayName())) {
-                            String recipeName = recipes.get(currentPage * (size - 18) + i);
-                            if (event.getClick().equals(ClickType.SHIFT_RIGHT)) {
-                                plugin.getConfigLoader().removeRecipe(recipeName);
-                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
-                                player.sendMessage(
-                                        ChatColor.RED
-                                                + "Removed recipe "
-                                                + recipeName
-                                                + " from config");
-                                sendToPlayer(player);
-                            } else if (event.getClick().equals(ClickType.RIGHT)) {
-                                plugin.getCreateRecipeGUI(recipeName).sendToPlayer(player, false);
-                            } else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
-                                AnvilGUI.Builder renameGUI =
-                                        new AnvilGUI.Builder()
-                                                .onClose(
-                                                        stateSnapshot -> {
-                                                            if (stateSnapshot
-                                                                    .getText()
-                                                                    .equals(recipeName))
-                                                                stateSnapshot
-                                                                        .getPlayer()
-                                                                        .sendMessage(
-                                                                                color(
-                                                                                        "&cCancelled renaming"));
-                                                            else
-                                                                player.sendMessage(
-                                                                        ChatColor.GREEN
-                                                                                + "Renamed "
-                                                                                + recipeName
-                                                                                + " to "
-                                                                                + stateSnapshot
-                                                                                        .getText());
-                                                        })
-                                                .onClick(
-                                                        (slot, stateSnapshot) -> {
-                                                            if (slot != AnvilGUI.Slot.OUTPUT) {
-                                                                return Collections.emptyList();
-                                                            }
-                                                            if (stateSnapshot
-                                                                    .getText()
-                                                                    .equals(recipeName))
-                                                                return Collections.emptyList();
 
-                                                            plugin.getConfigLoader()
-                                                                    .renameRecipe(
-                                                                            recipeName,
-                                                                            stateSnapshot
-                                                                                    .getText());
-                                                            plugin.getSqLiteManager()
-                                                                    .renameColumn(
-                                                                            recipeName,
-                                                                            stateSnapshot
-                                                                                    .getText());
-                                                            sendToPlayer(player);
-                                                            return Collections.emptyList();
-                                                        })
-                                                .text(recipeName)
-                                                .title("Enter the new name")
-                                                .plugin(PintoRecipes.thisPlugin());
-                                renameGUI.open(player);
-                            } else {
-                                plugin.getCreateRecipeGUI(recipeName)
-                                        .sendToPlayer((Player) event.getWhoClicked(), true);
-                            }
-                            break;
-                        }
-                    } catch (IndexOutOfBoundsException ignored) {
-                    }
+                int clickedSlot = event.getSlot();
+                String recipeName = recipes.get((currentPage+1) * clickedSlot);
+                if (event.getClick().equals(ClickType.SHIFT_RIGHT)) {
+                    plugin.getConfigLoader().removeRecipe(recipeName);
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
+                    player.sendMessage(
+                            ChatColor.RED
+                                    + "Removed recipe "
+                                    + recipeName
+                                    + " from config");
+                    sendToPlayer(player);
+                } else if (event.getClick().equals(ClickType.RIGHT)) {
+                    plugin.getCreateRecipeGUI(recipeName).sendToPlayer(player, false);
+                } else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
+                    AnvilGUI.Builder renameGUI =
+                            new AnvilGUI.Builder()
+                                    .onClose(
+                                            stateSnapshot -> {
+                                                if (stateSnapshot
+                                                        .getText()
+                                                        .equals(recipeName))
+                                                    stateSnapshot
+                                                            .getPlayer()
+                                                            .sendMessage(
+                                                                    color(
+                                                                            "&cCancelled renaming"));
+                                                else
+                                                    player.sendMessage(
+                                                            ChatColor.GREEN
+                                                                    + "Renamed "
+                                                                    + recipeName
+                                                                    + " to "
+                                                                    + stateSnapshot
+                                                                    .getText());
+                                            })
+                                    .onClick(
+                                            (slot, stateSnapshot) -> {
+                                                if (slot != AnvilGUI.Slot.OUTPUT) {
+                                                    return Collections.emptyList();
+                                                }
+                                                if (stateSnapshot
+                                                        .getText()
+                                                        .equals(recipeName))
+                                                    return Collections.emptyList();
+
+                                                plugin.getConfigLoader()
+                                                        .renameRecipe(
+                                                                recipeName,
+                                                                stateSnapshot
+                                                                        .getText());
+                                                plugin.getSqLiteManager()
+                                                        .renameColumn(
+                                                                recipeName,
+                                                                stateSnapshot
+                                                                        .getText());
+                                                sendToPlayer(player);
+                                                return Collections.emptyList();
+                                            })
+                                    .text(recipeName)
+                                    .title("Enter the new name")
+                                    .plugin(PintoRecipes.thisPlugin());
+                    renameGUI.open(player);
+                } else {
+                    plugin.getCreateRecipeGUI(recipeName)
+                            .sendToPlayer((Player) event.getWhoClicked(), true);
                 }
             }
         }
