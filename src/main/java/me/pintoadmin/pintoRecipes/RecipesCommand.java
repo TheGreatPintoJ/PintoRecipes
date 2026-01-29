@@ -25,31 +25,36 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
             sender.sendMessage("This command can only be executed by a player");
             return true;
         }
-        if (!sender.hasPermission("pintorecipes.recipes")) {
+        if(args.length == 0) return true;
+        if (!sender.hasPermission("pintorecipes.recipes") || !sender.hasPermission("pintorecipes.recipes." + args[0])) {
             sender.sendMessage(ChatColor.RED + "You do not have permission to use this command");
             return true;
         }
         if (args.length < 2) {
-            if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
+            if (args[0].equalsIgnoreCase("list")) {
                 if (!sender.hasPermission("pintorecipes.recipes.list")) {
                     sender.sendMessage(
-                            ChatColor.RED + "You do not have permission to use this subcommand");
+                            ChatColor.RED + "You do not have permission to use this command");
                     return true;
                 }
                 plugin.getRecipesGUI().sendToPlayer(player);
             } else if(args[0].equalsIgnoreCase("reload")) {
+                if(!sender.hasPermission("pintorecipes.recipes.reload")){
+                    sender.sendMessage(ChatColor.RED+"You do not have permission to use this command");
+                    return true;
+                }
                 plugin.getLoadRecipes().reloadRecipes();
                 player.sendMessage(ChatColor.GREEN + "Reloaded recipes");
             } else if(args[0].equalsIgnoreCase("debug")){
+                if(!sender.hasPermission("pintorecipes.recipes.debug")){
+                    sender.sendMessage(ChatColor.RED+"You do not have permission to use this command");
+                    return true;
+                }
                 plugin.debugEnabled = !plugin.debugEnabled;
                 player.sendMessage("Debug mode is "+ (plugin.debugEnabled ? "on":"off"));
             } else {
-                player.sendMessage(ChatColor.RED + "You must specify a name for this subcommand");
+                player.sendMessage(ChatColor.RED + "You must specify a name for this command");
             }
-            return true;
-        }
-        if (!sender.hasPermission("pintorecipes.recipes." + args[0])) {
-            sender.sendMessage(ChatColor.RED + "You do not have permission to use this subcommand");
             return true;
         }
 
@@ -84,7 +89,7 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                         ChatColor.RED
                                 + "Usage: /"
                                 + label
-                                + " <show|save|edit|remove|reload> [recipe_name]");
+                                + " <list|show|save|edit|remove|reload> [recipe_name]");
         }
         plugin.getConfigLoader().loadConfig();
         return true;
