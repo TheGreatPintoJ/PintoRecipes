@@ -134,7 +134,7 @@ public class SQLiteManager {
         }
     }
 
-    public void incrementPlayerCrafts(String recipeName, UUID uuid) {
+    public void incrementPlayerCrafts(String recipeName, UUID uuid, int amount) {
         getConnection();
         try {
             if (columnNotExists(recipeName)) return;
@@ -147,7 +147,9 @@ public class SQLiteManager {
                                     + recipeName
                                     + " = "
                                     + recipeName
-                                    + " + 1;");
+                                    + " + "
+                                    +amount
+                                    +";");
             ps.setString(1, uuid.toString());
 
             ps.executeUpdate();

@@ -7,8 +7,8 @@ public final class PintoRecipes extends JavaPlugin {
     private static PintoRecipes instance = null;
     private final ConfigLoader configLoader = new ConfigLoader(this);
     private final LoadRecipes loadRecipes = new LoadRecipes(this);
-    private final RecipesGUI recipesGUI = new RecipesGUI(this);
     private final SQLiteManager sqLiteManager = new SQLiteManager(this);
+    private final RecipesGUI recipesGUI = new RecipesGUI(this);
 
     private final Map<String, CreateRecipeGUI> editGUIs = new HashMap<>();
 

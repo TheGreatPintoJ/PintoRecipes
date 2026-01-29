@@ -30,6 +30,8 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
         Player player = (Player) event.getWhoClicked();
         ItemStack craftedItem = event.getCurrentItem();
         if (craftedItem == null) return;
+        int crafts = getCrafted(event);
+
         String craftedRecipe = "";
         for (String recipeName : plugin.getConfigLoader().recipes) {
             if (craftedItem.isSimilar(plugin.getConfigLoader().getResultItem(recipeName)))
@@ -46,36 +48,80 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
 
         String limitType = plugin.getConfigLoader().getLimitType(craftedRecipe);
         int limitNum = plugin.getConfigLoader().getLimit(craftedRecipe);
-        if (limitNum == -1) return;
+
         int alreadyCrafted =
                 plugin.getSqLiteManager().getPlayerCrafts(craftedRecipe, player.getUniqueId());
         int serverCrafted = plugin.getSqLiteManager().getServerCrafts(craftedRecipe);
 
-        switch (limitType) {
-            case "SERVER":
-                if (limitNum <= serverCrafted
-                        && !player.hasPermission("pintorecipes.craftbypass")) {
-                    event.setCancelled(true);
-                    player.sendMessage(
-                            ChatColor.RED
-                                    + "The maximum amount of this item has already been crafted on this server");
-                } else
-                    plugin.getSqLiteManager()
-                            .incrementPlayerCrafts(craftedRecipe, player.getUniqueId());
-                break;
-            case "PLAYER":
-                if (limitNum <= alreadyCrafted
-                        && !player.hasPermission("pintorecipes.craftbypass")) {
-                    event.setCancelled(true);
-                    player.sendMessage(
-                            ChatColor.RED
-                                    + "You have already crafted the maximum number of this item on this server");
-                } else
-                    plugin.getSqLiteManager()
-                            .incrementPlayerCrafts(craftedRecipe, player.getUniqueId());
-                break;
-            default:
-                plugin.getLogger().severe("Invalid limit-type: " + limitType);
+        if(limitNum > -1) {
+            switch (limitType) {
+                case "SERVER":
+                    if (limitNum <= serverCrafted
+                            && !player.hasPermission("pintorecipes.craftbypass")) {
+                        event.setCancelled(true);
+                        player.sendMessage(
+                                ChatColor.RED
+                                        + "The maximum amount of this item has already been crafted on this server");
+                    }
+                    break;
+                case "PLAYER":
+                    if (limitNum <= alreadyCrafted
+                            && !player.hasPermission("pintorecipes.craftbypass")) {
+                        event.setCancelled(true);
+                        player.sendMessage(
+                                ChatColor.RED
+                                        + "You have already crafted the maximum number of this item on this server");
+                    }
+                    break;
+                default:
+                    plugin.getLogger().severe("Invalid limit-type: " + limitType);
+            }
         }
+        if(!event.isCancelled()){
+            plugin.getSqLiteManager()
+                    .incrementPlayerCrafts(craftedRecipe, player.getUniqueId(), crafts);
+        }
+    }
+
+    public static int getCrafted(CraftItemEvent event) {
+        if (event.getCurrentItem() == null) return 0;
+
+        if (!event.isShiftClick()) return 1; // Normal click = exactly one craft
+
+        if (!(event.getWhoClicked() instanceof Player player)) return 0;
+
+        CraftingInventory inv = event.getInventory();
+        ItemStack result = event.getRecipe().getResult().clone();
+        int itemsPerCraft = result.getAmount();
+
+        // ----- Ingredient limit -----
+        int ingredientCrafts = Integer.MAX_VALUE;
+
+        for (ItemStack item : inv.getMatrix()) {
+            if (item == null || item.getType().isAir()) continue;
+            ingredientCrafts = Math.min(ingredientCrafts, item.getAmount());
+        }
+
+        if (ingredientCrafts == Integer.MAX_VALUE) return 0;
+
+        // ----- Inventory space limit -----
+        int spaceForItems = getFitAmount(player.getInventory(), result);
+        int inventoryCrafts = spaceForItems / itemsPerCraft;
+
+        return Math.min(ingredientCrafts, inventoryCrafts);
+    }
+
+    private static int getFitAmount(PlayerInventory inv, ItemStack item) {
+        int maxStack = item.getMaxStackSize();
+        int space = 0;
+
+        for (ItemStack slot : inv.getStorageContents()) {
+            if (slot == null || slot.getType().isAir()) {
+                space += maxStack;
+            } else if (slot.isSimilar(item)) {
+                space += (maxStack - slot.getAmount());
+            }
+        }
+        return space;
     }
 }
