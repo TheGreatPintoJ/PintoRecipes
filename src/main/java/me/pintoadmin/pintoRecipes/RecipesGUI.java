@@ -155,12 +155,16 @@ public class RecipesGUI {
         pageNavItem.setItemMeta(pageNavMeta);
         inventory.setItem(size - 5, pageNavItem);
 
-        try {
-            if (plugin.getConfigLoader().getResultItem(recipes.get(currentPage * (size - 18)))
-                    != null) inventory.setItem(size - 4, rightNavItem);
-        } catch (IndexOutOfBoundsException ignored) {
-        }
         inventory.setItem(size - 1, newNavItem);
+
+        try {
+            int recipe = (currentPage +1)*(size - 19);
+            //noinspection ResultOfMethodCallIgnored
+            recipes.get(recipe);
+            inventory.setItem(size - 4, rightNavItem);
+        } catch (IndexOutOfBoundsException ignored) {
+            inventory.setItem(size - 4, unused_space);
+        }
     }
 
     public void sendToPlayer(Player player) {
