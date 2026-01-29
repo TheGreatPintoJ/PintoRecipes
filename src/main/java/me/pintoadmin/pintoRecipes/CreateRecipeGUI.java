@@ -142,7 +142,7 @@ public class CreateRecipeGUI {
         }
     }
 
-    private void loadSlots(){
+    private void loadSlots() {
         clearSlots();
         switch (configLoader.getType(recipeName)) {
             case "shaped":
@@ -183,11 +183,11 @@ public class CreateRecipeGUI {
         }
     }
 
-    private void clearSlots(){
+    private void clearSlots() {
         inventory.setItem(resultSlot, null);
-        if(getCurrentType().equalsIgnoreCase("shaped")
-            || getCurrentType().equalsIgnoreCase("shapeless"))
-                for (Integer index : craftingSlots) inventory.setItem(index, null);
+        if (getCurrentType().equalsIgnoreCase("shaped")
+                || getCurrentType().equalsIgnoreCase("shapeless"))
+            for (Integer index : craftingSlots) inventory.setItem(index, null);
         else {
             for (Integer index : craftingSlots) inventory.setItem(index, unused_space);
             setItem(furnaceSlot, null);
@@ -239,7 +239,8 @@ public class CreateRecipeGUI {
     public boolean save() {
         String type = typeList.get(selectedTypeIndex);
         if (inventory.getItem(resultSlot) == null) return false;
-        recipesGUI.somethingChanged = inventory.getItem(resultSlot) != configLoader.getResultItem(recipeName);
+        recipesGUI.somethingChanged =
+                inventory.getItem(resultSlot) != configLoader.getResultItem(recipeName);
 
         switch (type) {
             case "shaped":
@@ -265,9 +266,8 @@ public class CreateRecipeGUI {
                 }
                 resultIsAir = inventory.getItem(resultSlot) == null;
                 if (!resultIsAir) {
-                    configLoader
-                            .saveShapedRecipe(
-                                    recipeName, inventory.getItem(resultSlot), shapedMaterials);
+                    configLoader.saveShapedRecipe(
+                            recipeName, inventory.getItem(resultSlot), shapedMaterials);
                     return true;
                 }
                 return false;
@@ -289,49 +289,43 @@ public class CreateRecipeGUI {
                     shapelessMaterials.add(material.toString());
                 }
                 if (shapelessMaterials.isEmpty()) return false;
-                configLoader
-                        .saveShapelessRecipe(
-                                recipeName, inventory.getItem(resultSlot), shapelessMaterials);
+                configLoader.saveShapelessRecipe(
+                        recipeName, inventory.getItem(resultSlot), shapelessMaterials);
                 break;
             case "furnace":
                 ItemStack furnaceItem = inventory.getItem(furnaceSlot);
                 if (furnaceItem == null) return false;
                 Material furnaceMaterial = furnaceItem.getType();
-                configLoader
-                        .saveFurnaceRecipe(
-                                recipeName, inventory.getItem(resultSlot), furnaceMaterial);
+                configLoader.saveFurnaceRecipe(
+                        recipeName, inventory.getItem(resultSlot), furnaceMaterial);
                 break;
             case "blasting":
                 ItemStack blastingItem = inventory.getItem(furnaceSlot);
                 if (blastingItem == null) return false;
                 Material blastingMaterial = blastingItem.getType();
-                configLoader
-                        .saveBlastingRecipe(
-                                recipeName, inventory.getItem(resultSlot), blastingMaterial);
+                configLoader.saveBlastingRecipe(
+                        recipeName, inventory.getItem(resultSlot), blastingMaterial);
                 break;
             case "smoking":
                 ItemStack smokingItem = inventory.getItem(furnaceSlot);
                 if (smokingItem == null) return false;
                 Material smokingMaterial = smokingItem.getType();
-                configLoader
-                        .saveSmokingRecipe(
-                                recipeName, inventory.getItem(resultSlot), smokingMaterial);
+                configLoader.saveSmokingRecipe(
+                        recipeName, inventory.getItem(resultSlot), smokingMaterial);
                 break;
             case "campfire":
                 ItemStack campfireItem = inventory.getItem(furnaceSlot);
                 if (campfireItem == null) return false;
                 Material campfireMaterial = campfireItem.getType();
-                configLoader
-                        .saveCampfireRecipe(
-                                recipeName, inventory.getItem(resultSlot), campfireMaterial);
+                configLoader.saveCampfireRecipe(
+                        recipeName, inventory.getItem(resultSlot), campfireMaterial);
                 break;
             case "stonecutter":
                 ItemStack stonecutterItem = inventory.getItem(furnaceSlot);
                 if (stonecutterItem == null) return false;
                 Material stonecutterMaterial = stonecutterItem.getType();
-                configLoader
-                        .saveStonecutterRecipe(
-                                recipeName, inventory.getItem(resultSlot), stonecutterMaterial);
+                configLoader.saveStonecutterRecipe(
+                        recipeName, inventory.getItem(resultSlot), stonecutterMaterial);
         }
         return true;
     }
@@ -398,7 +392,7 @@ public class CreateRecipeGUI {
     }
 
     public void onClose(Player player) {
-        if(save()) clearSlots();
+        if (save()) clearSlots();
         player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.4f);
         playersViewing.remove(player.getUniqueId());
     }

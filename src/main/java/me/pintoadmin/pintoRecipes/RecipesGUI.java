@@ -26,11 +26,12 @@ public class RecipesGUI {
     private final ItemStack rightNavItem = new ItemStack(Material.ARROW);
     private final ItemStack newNavItem = new ItemStack(Material.RED_DYE);
 
-    private final List<String> constantItemLore = List.of(
-            color("&r&dLeft click to view recipe"),
-            color("&r&6Right click to edit recipe"),
-            color("&r&cShift-right click to remove recipe"),
-            color("&r&aShift-left click to rename recipe"));
+    private final List<String> constantItemLore =
+            List.of(
+                    color("&r&dLeft click to view recipe"),
+                    color("&r&6Right click to edit recipe"),
+                    color("&r&cShift-right click to remove recipe"),
+                    color("&r&aShift-left click to rename recipe"));
 
     public RecipesGUI(PintoRecipes plugin) {
         this.plugin = plugin;
@@ -71,7 +72,7 @@ public class RecipesGUI {
     }
 
     private void updateItems() {
-        if(!somethingChanged && pages.size() > currentPage){
+        if (!somethingChanged && pages.size() > currentPage) {
             inventory.setContents(pages.get(currentPage));
             return;
         }
@@ -110,7 +111,8 @@ public class RecipesGUI {
                 continue;
             }
 
-            int limitAmnt = limitType.equalsIgnoreCase("SERVER") ? 0 : db.getServerCrafts(recipeName);
+            int limitAmnt =
+                    limitType.equalsIgnoreCase("SERVER") ? 0 : db.getServerCrafts(recipeName);
 
             ItemStack item = itemOG.clone();
             ItemMeta meta = item.getItemMeta();
@@ -119,13 +121,19 @@ public class RecipesGUI {
                 continue;
             }
 
-            List<String> dynamicLore = new ArrayList<>(List.of(
-                    "",
-                    color("&r&8ID: " + recipeName),
-                    color("&r&8Type: " + recipeType),
-                    color("&r&8Limit Type: " + limitType),
-                    color("&r&8Limit amount: " + (limitType.equalsIgnoreCase("SERVER") && limitNum > -1 ? limitAmnt + "/" + limitNum : limitNum))
-            ));
+            List<String> dynamicLore =
+                    new ArrayList<>(
+                            List.of(
+                                    "",
+                                    color("&r&8ID: " + recipeName),
+                                    color("&r&8Type: " + recipeType),
+                                    color("&r&8Limit Type: " + limitType),
+                                    color(
+                                            "&r&8Limit amount: "
+                                                    + (limitType.equalsIgnoreCase("SERVER")
+                                                                    && limitNum > -1
+                                                            ? limitAmnt + "/" + limitNum
+                                                            : limitNum))));
             dynamicLore.addAll(constantItemLore);
 
             meta.setLore(dynamicLore);
@@ -139,13 +147,12 @@ public class RecipesGUI {
         pageItems = inventory.getContents();
         try {
             pages.set(currentPage, pageItems);
-        } catch (IndexOutOfBoundsException ignored){
+        } catch (IndexOutOfBoundsException ignored) {
             pages.add(currentPage, pageItems);
         }
-
     }
 
-    private void updateNav(){
+    private void updateNav() {
         if (currentPage != 0) inventory.setItem(size - 6, leftNavItem);
 
         ItemMeta pageNavMeta = pageNavItem.getItemMeta();
@@ -158,7 +165,7 @@ public class RecipesGUI {
         inventory.setItem(size - 1, newNavItem);
 
         try {
-            int recipe = (currentPage +1)*(size - 19);
+            int recipe = (currentPage + 1) * (size - 19);
             //noinspection ResultOfMethodCallIgnored
             recipes.get(recipe);
             inventory.setItem(size - 4, rightNavItem);
@@ -178,7 +185,7 @@ public class RecipesGUI {
         if (event.getCurrentItem() != null) {
             Player player = (Player) event.getWhoClicked();
             event.setCancelled(true);
-            if(event.getCurrentItem().isSimilar(unused_space)) return;
+            if (event.getCurrentItem().isSimilar(unused_space)) return;
             if (event.getCurrentItem().isSimilar(rightNavItem)) {
                 currentPage++;
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_SNARE, 1f, 1f);
@@ -187,28 +194,24 @@ public class RecipesGUI {
                 currentPage--;
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_SNARE, 1f, 1f);
                 sendToPlayer(player);
-            } else if (event.getCurrentItem().isSimilar(pageNavItem)){
+            } else if (event.getCurrentItem().isSimilar(pageNavItem)) {
                 somethingChanged = true;
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1f, 0.7f);
                 sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 1.5f);
-                plugin.getCreateRecipeGUI("new_recipe")
-                        .sendToPlayer(player, false);
+                plugin.getCreateRecipeGUI("new_recipe").sendToPlayer(player, false);
             } else {
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_FLUTE, 1f, 0.6f);
 
                 int clickedSlot = event.getSlot();
 
-                String recipeName = recipes.get((currentPage+1) * clickedSlot);
+                String recipeName = recipes.get((currentPage + 1) * clickedSlot);
                 if (event.getClick().equals(ClickType.SHIFT_RIGHT)) {
                     plugin.getConfigLoader().removeRecipe(recipeName);
                     player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f);
                     player.sendMessage(
-                            ChatColor.RED
-                                    + "Removed recipe "
-                                    + recipeName
-                                    + " from config");
+                            ChatColor.RED + "Removed recipe " + recipeName + " from config");
                     somethingChanged = true;
                     sendToPlayer(player);
                 } else if (event.getClick().equals(ClickType.RIGHT)) {
@@ -218,48 +221,45 @@ public class RecipesGUI {
                             new AnvilGUI.Builder()
                                     .onClose(
                                             stateSnapshot -> {
-                                                if (stateSnapshot
-                                                        .getText()
-                                                        .equals(recipeName))
+                                                if (stateSnapshot.getText().equals(recipeName))
                                                     stateSnapshot
                                                             .getPlayer()
                                                             .sendMessage(
-                                                                    color(
-                                                                            "&cCancelled renaming"));
+                                                                    color("&cCancelled renaming"));
                                                 else
                                                     player.sendMessage(
                                                             ChatColor.GREEN
                                                                     + "Renamed "
                                                                     + recipeName
                                                                     + " to "
-                                                                    + stateSnapshot
-                                                                    .getText());
+                                                                    + stateSnapshot.getText());
                                             })
                                     .onClick(
                                             (slot, stateSnapshot) -> {
-                                                if (slot != AnvilGUI.Slot.OUTPUT && slot != AnvilGUI.Slot.INPUT_LEFT) {
+                                                if (slot != AnvilGUI.Slot.OUTPUT
+                                                        && slot != AnvilGUI.Slot.INPUT_LEFT) {
                                                     return Collections.emptyList();
-                                                } else if(slot == AnvilGUI.Slot.INPUT_LEFT){
+                                                } else if (slot == AnvilGUI.Slot.INPUT_LEFT) {
                                                     Player statePlayer = stateSnapshot.getPlayer();
-                                                    statePlayer.playSound(statePlayer, Sound.BLOCK_GLASS_BREAK, 0.6f, 1f);
+                                                    statePlayer.playSound(
+                                                            statePlayer,
+                                                            Sound.BLOCK_GLASS_BREAK,
+                                                            0.6f,
+                                                            1f);
                                                     sendToPlayer(statePlayer);
                                                     return Collections.emptyList();
                                                 }
-                                                if (stateSnapshot
-                                                        .getText()
-                                                        .equals(recipeName))
+                                                if (stateSnapshot.getText().equals(recipeName))
                                                     return Collections.emptyList();
 
                                                 plugin.getConfigLoader()
                                                         .renameRecipe(
                                                                 recipeName,
-                                                                stateSnapshot
-                                                                        .getText());
+                                                                stateSnapshot.getText());
                                                 plugin.getSqLiteManager()
                                                         .renameColumn(
                                                                 recipeName,
-                                                                stateSnapshot
-                                                                        .getText());
+                                                                stateSnapshot.getText());
                                                 sendToPlayer(player);
                                                 return Collections.emptyList();
                                             })

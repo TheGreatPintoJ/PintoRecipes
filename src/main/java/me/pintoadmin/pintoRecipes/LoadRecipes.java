@@ -3,11 +3,10 @@ package me.pintoadmin.pintoRecipes;
 import static org.bukkit.Bukkit.getServer;
 
 import java.util.*;
+import javax.naming.*;
 import org.bukkit.*;
 import org.bukkit.inventory.*;
 import org.bukkit.permissions.*;
-
-import javax.naming.*;
 
 public class LoadRecipes {
     private final PintoRecipes plugin;
@@ -29,7 +28,7 @@ public class LoadRecipes {
         plugin.getSqLiteManager().addColumns();
     }
 
-    public void loadRecipe(String recipeName){
+    public void loadRecipe(String recipeName) {
         if (recipeName == null || recipeName.isEmpty()) return;
         String type = configLoader.getType(recipeName);
         ItemStack result = configLoader.getResultItem(recipeName);
@@ -69,11 +68,7 @@ public class LoadRecipes {
                     try {
                         getServer().addRecipe(shapedRecipe);
                         plugin.getLogger()
-                                .info(
-                                        "Loaded Recipe: "
-                                                + result.getType()
-                                                + " - "
-                                                + recipeMaps);
+                                .info("Loaded Recipe: " + result.getType() + " - " + recipeMaps);
                     } catch (IllegalStateException ignored) {
                     }
                 }
@@ -91,19 +86,14 @@ public class LoadRecipes {
                     try {
                         getServer().addRecipe(shapelessRecipe);
                         plugin.getLogger()
-                                .info(
-                                        "Loaded Recipe: "
-                                                + result.getType()
-                                                + " - "
-                                                + materialsList);
+                                .info("Loaded Recipe: " + result.getType() + " - " + materialsList);
                     } catch (IllegalStateException ignored) {
                     }
                 }
                 break;
             case "furnace":
                 Material furnaceMaterial =
-                        Material.valueOf(
-                                (String) configLoader.getRecipe(recipeName.toLowerCase()));
+                        Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
                 int furnaceCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                 int furnaceExperience = configLoader.getExperience(recipeName.toLowerCase());
                 if (!furnaceMaterial.isAir()) {
@@ -129,8 +119,7 @@ public class LoadRecipes {
                 break;
             case "blasting":
                 Material blastingMaterial =
-                        Material.valueOf(
-                                (String) configLoader.getRecipe(recipeName.toLowerCase()));
+                        Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
                 int blastingCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                 int blastingExperience = configLoader.getExperience(recipeName.toLowerCase());
                 if (!blastingMaterial.isAir()) {
@@ -156,8 +145,7 @@ public class LoadRecipes {
                 break;
             case "smoking":
                 Material smokingMaterial =
-                        Material.valueOf(
-                                (String) configLoader.getRecipe(recipeName.toLowerCase()));
+                        Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
                 int smokingCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                 int smokingExperience = configLoader.getExperience(recipeName.toLowerCase());
                 if (!smokingMaterial.isAir()) {
@@ -183,8 +171,7 @@ public class LoadRecipes {
                 break;
             case "campfire":
                 Material campfireMaterial =
-                        Material.valueOf(
-                                (String) configLoader.getRecipe(recipeName.toLowerCase()));
+                        Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
                 int campfireCookTime = configLoader.getCooktime(recipeName.toLowerCase());
                 int campfireExperience = configLoader.getExperience(recipeName.toLowerCase());
                 if (!campfireMaterial.isAir()) {
@@ -210,8 +197,7 @@ public class LoadRecipes {
                 break;
             case "stonecutter":
                 Material stonecutterMaterial =
-                        Material.valueOf(
-                                (String) configLoader.getRecipe(recipeName.toLowerCase()));
+                        Material.valueOf((String) configLoader.getRecipe(recipeName.toLowerCase()));
                 if (!stonecutterMaterial.isAir()) {
                     StonecuttingRecipe stonecutterRecipe =
                             new StonecuttingRecipe(
@@ -243,8 +229,8 @@ public class LoadRecipes {
             plugin.getServer().getPluginManager().addPermission(permission);
     }
 
-    public void reloadRecipes(){
-        for(Map.Entry<String, NamespacedKey> entry : activeRecipes.entrySet()) {
+    public void reloadRecipes() {
+        for (Map.Entry<String, NamespacedKey> entry : activeRecipes.entrySet()) {
             NamespacedKey key = entry.getValue();
             String recipeName = entry.getKey();
             getServer().removeRecipe(key);

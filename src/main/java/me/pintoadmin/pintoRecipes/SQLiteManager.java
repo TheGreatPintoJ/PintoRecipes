@@ -59,13 +59,12 @@ public class SQLiteManager {
         }
     }
 
-    public void removeColumn(String name){
+    public void removeColumn(String name) {
         getConnection();
         if (columnNotExists(name)) return;
         try {
             PreparedStatement ps =
-                    connection.prepareStatement(
-                            "ALTER TABLE crafts DROP COLUMN " + name);
+                    connection.prepareStatement("ALTER TABLE crafts DROP COLUMN " + name);
             ps.execute();
             ps.close();
         } catch (SQLException e) {
@@ -148,8 +147,8 @@ public class SQLiteManager {
                                     + " = "
                                     + recipeName
                                     + " + "
-                                    +amount
-                                    +";");
+                                    + amount
+                                    + ";");
             ps.setString(1, uuid.toString());
 
             ps.executeUpdate();

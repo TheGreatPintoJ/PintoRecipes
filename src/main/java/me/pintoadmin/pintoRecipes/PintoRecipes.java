@@ -13,6 +13,7 @@ public final class PintoRecipes extends JavaPlugin {
     private final Map<String, CreateRecipeGUI> editGUIs = new HashMap<>();
 
     public boolean debugEnabled = false;
+
     public static JavaPlugin thisPlugin() {
         return instance;
     }

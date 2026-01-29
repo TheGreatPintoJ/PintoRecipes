@@ -16,10 +16,28 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         for (CreateRecipeGUI gui : plugin.getEditGUIs().values()) {
             gui.onClick(event);
-            if(plugin.debugEnabled) plugin.getLogger().warning("CREATERECIPEGUI - Click: "+event.isCancelled()+"; clicktype: "+event.getClick()+"; clickedinventory: "+event.getClickedInventory()+"; inventory: "+gui.getInventory());
+            if (plugin.debugEnabled)
+                plugin.getLogger()
+                        .warning(
+                                "CREATERECIPEGUI - Click: "
+                                        + event.isCancelled()
+                                        + "; clicktype: "
+                                        + event.getClick()
+                                        + "; clickedinventory: "
+                                        + event.getClickedInventory()
+                                        + "; inventory: "
+                                        + gui.getInventory());
         }
         plugin.getRecipesGUI().onClick(event);
-        if(plugin.debugEnabled) plugin.getLogger().warning("RECIPESGUI - Click: "+event.isCancelled()+"; clicktype: "+event.getClick()+"; clickedinventory: "+event.getClickedInventory());
+        if (plugin.debugEnabled)
+            plugin.getLogger()
+                    .warning(
+                            "RECIPESGUI - Click: "
+                                    + event.isCancelled()
+                                    + "; clicktype: "
+                                    + event.getClick()
+                                    + "; clickedinventory: "
+                                    + event.getClickedInventory());
     }
 
     @EventHandler
@@ -53,7 +71,7 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
                 plugin.getSqLiteManager().getPlayerCrafts(craftedRecipe, player.getUniqueId());
         int serverCrafted = plugin.getSqLiteManager().getServerCrafts(craftedRecipe);
 
-        if(limitNum > -1) {
+        if (limitNum > -1) {
             switch (limitType) {
                 case "SERVER":
                     if (limitNum <= serverCrafted
@@ -77,7 +95,7 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
                     plugin.getLogger().severe("Invalid limit-type: " + limitType);
             }
         }
-        if(!event.isCancelled()){
+        if (!event.isCancelled()) {
             plugin.getSqLiteManager()
                     .incrementPlayerCrafts(craftedRecipe, player.getUniqueId(), crafts);
         }
