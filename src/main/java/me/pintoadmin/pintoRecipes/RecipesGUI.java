@@ -178,6 +178,7 @@ public class RecipesGUI {
         if (event.getCurrentItem() != null) {
             Player player = (Player) event.getWhoClicked();
             event.setCancelled(true);
+            if(event.getCurrentItem().isSimilar(unused_space)) return;
             if (event.getCurrentItem().isSimilar(rightNavItem)) {
                 currentPage++;
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_SNARE, 1f, 1f);
@@ -198,6 +199,7 @@ public class RecipesGUI {
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_FLUTE, 1f, 0.6f);
 
                 int clickedSlot = event.getSlot();
+
                 String recipeName = recipes.get((currentPage+1) * clickedSlot);
                 if (event.getClick().equals(ClickType.SHIFT_RIGHT)) {
                     plugin.getConfigLoader().removeRecipe(recipeName);
@@ -235,7 +237,12 @@ public class RecipesGUI {
                                             })
                                     .onClick(
                                             (slot, stateSnapshot) -> {
-                                                if (slot != AnvilGUI.Slot.OUTPUT) {
+                                                if (slot != AnvilGUI.Slot.OUTPUT && slot != AnvilGUI.Slot.INPUT_LEFT) {
+                                                    return Collections.emptyList();
+                                                } else if(slot == AnvilGUI.Slot.INPUT_LEFT){
+                                                    Player statePlayer = stateSnapshot.getPlayer();
+                                                    statePlayer.playSound(statePlayer, Sound.BLOCK_GLASS_BREAK, 0.6f, 1f);
+                                                    sendToPlayer(statePlayer);
                                                     return Collections.emptyList();
                                                 }
                                                 if (stateSnapshot
