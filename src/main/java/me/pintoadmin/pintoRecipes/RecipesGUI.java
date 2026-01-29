@@ -17,7 +17,7 @@ public class RecipesGUI {
     private final int size = 6 * 9;
     private int currentPage = 0;
 
-    private List<ItemStack[]> pages = new ArrayList<>();
+    private final List<ItemStack[]> pages = new ArrayList<>();
 
     public boolean somethingChanged = false;
 
@@ -176,17 +176,22 @@ public class RecipesGUI {
             event.setCancelled(true);
             if (event.getCurrentItem().isSimilar(rightNavItem)) {
                 currentPage++;
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_SNARE, 1f, 1f);
                 sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(leftNavItem)) {
                 currentPage--;
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_SNARE, 1f, 1f);
                 sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(pageNavItem)){
                 somethingChanged = true;
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1f, 0.7f);
                 sendToPlayer(player);
             } else if (event.getCurrentItem().isSimilar(newNavItem)) {
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 1.5f);
                 plugin.getCreateRecipeGUI("new_recipe")
                         .sendToPlayer(player, false);
             } else {
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_FLUTE, 1f, 0.6f);
                 for (int i = 0; i < size - 18; i++) {
                     try {
                         ItemStack item =

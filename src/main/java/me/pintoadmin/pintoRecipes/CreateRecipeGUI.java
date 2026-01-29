@@ -362,6 +362,7 @@ public class CreateRecipeGUI {
 
             switch (idKey) {
                 case "typeSelectItem" -> {
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 0.3f);
                     if (event.getClick() == ClickType.LEFT) {
                         selectedTypeIndex++;
                         if (selectedTypeIndex > typeList.size() - 1) selectedTypeIndex = 0;
@@ -375,6 +376,7 @@ public class CreateRecipeGUI {
                     sendToPlayer(player, currentReadOnly);
                 }
                 case "limitSelectItem" -> {
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_SNARE, 1f, 0.3f);
                     if (event.getClick() == ClickType.RIGHT || event.getClick() == ClickType.LEFT) {
                         String newType =
                                 getCurrentLimitType().equals("PLAYER") ? "SERVER" : "PLAYER";
@@ -397,6 +399,7 @@ public class CreateRecipeGUI {
 
     public void onClose(Player player) {
         if(save()) clearSlots();
+        player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.4f);
         playersViewing.remove(player.getUniqueId());
     }
 
