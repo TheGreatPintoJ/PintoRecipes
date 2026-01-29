@@ -207,6 +207,7 @@ public class RecipesGUI {
                                     + "Removed recipe "
                                     + recipeName
                                     + " from config");
+                    somethingChanged = true;
                     sendToPlayer(player);
                 } else if (event.getClick().equals(ClickType.RIGHT)) {
                     plugin.getCreateRecipeGUI(recipeName).sendToPlayer(player, false);
