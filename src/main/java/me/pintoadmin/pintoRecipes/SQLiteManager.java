@@ -40,18 +40,7 @@ public class SQLiteManager {
         getConnection();
         for (String recipeName : plugin.getConfigLoader().recipes) {
             try {
-                Statement statement = connection.createStatement();
-                boolean columnExists = false;
-                ResultSet rs = statement.executeQuery("PRAGMA table_info(crafts);");
-                while (rs.next()) {
-                    if (rs.getString("name").equalsIgnoreCase(recipeName)) {
-                        columnExists = true;
-                        break;
-                    }
-                }
-                rs.close();
-
-                if (!columnExists) {
+                if (columnNotExists(recipeName)) {
                     PreparedStatement tablePS =
                             connection.prepareStatement(
                                     "ALTER TABLE crafts ADD COLUMN "

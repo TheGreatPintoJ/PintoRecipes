@@ -104,7 +104,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
-        plugin.getLoadRecipes().loadRecipes();
+        plugin.getLoadRecipes().loadRecipe(name);
     }
 
     public void saveShapelessRecipe(String name, ItemStack resultingItem, List<String> materials) {
@@ -126,7 +126,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
-        plugin.getLoadRecipes().loadRecipes();
+        plugin.getLoadRecipes().loadRecipe(name);
     }
 
     public void saveFurnaceRecipe(String name, ItemStack resultingItem, Material material) {
@@ -147,8 +147,9 @@ public class ConfigLoader {
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save recipe: ");
             plugin.getLogger().severe(e.getMessage());
+            plugin.getLogger().severe(e.getCause().toString());
         }
-        plugin.getLoadRecipes().loadRecipes();
+        plugin.getLoadRecipes().loadRecipe(name);
     }
 
     public void saveBlastingRecipe(String name, ItemStack resultingItem, Material material) {
@@ -170,7 +171,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
-        plugin.getLoadRecipes().loadRecipes();
+        plugin.getLoadRecipes().loadRecipe(name);
     }
 
     public void saveSmokingRecipe(String name, ItemStack resultingItem, Material material) {
@@ -192,7 +193,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
-        plugin.getLoadRecipes().loadRecipes();
+        plugin.getLoadRecipes().loadRecipe(name);
     }
 
     public void saveCampfireRecipe(String name, ItemStack resultingItem, Material material) {
@@ -214,7 +215,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
-        plugin.getLoadRecipes().loadRecipes();
+        plugin.getLoadRecipes().loadRecipe(name);
     }
 
     public void saveStonecutterRecipe(String name, ItemStack resultingItem, Material material) {
@@ -239,7 +240,7 @@ public class ConfigLoader {
             plugin.getLogger().severe("Failed to save recipe: ");
             plugin.getLogger().severe(e.getMessage());
         }
-        plugin.getLoadRecipes().loadRecipes();
+        plugin.getLoadRecipes().loadRecipe(name);
     }
 
     public Object getRecipe(String name) {
