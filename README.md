@@ -1,4 +1,4 @@
-<img width="1498" height="455" alt="PintoRecipes_banner" src="https://github.com/user-attachments/assets/ded88270-4681-4df8-9e61-f01270824a00" />
+[<img width="1498" height="455" alt="PintoRecipes_banner" src="https://github.com/user-attachments/assets/ded88270-4681-4df8-9e61-f01270824a00" />](https://thegreatpintoj.github.io/PintoPlugins/readmes/PintoRecipes.html)
 
 <h1 align="center">PintoRecipes</h1>
 <p align="center">A spigot plugin to add custom recipes to your server</p>
@@ -42,7 +42,7 @@ The `recipes.yml` file is where all custom recipes are stored.
 * `category` - The category of whatever book to put the recipe in
 * `cooktime` - The time it will take to finish cooking in ticks (only available for suitable recipe types)
 * `experience` - The amount of exp to give the player when item is taken out of container (only available for suitable recipe types)
-* More information [here](https://docs.pintocraft.com/books/pintorecipes/page/config)
+* More information [here](https://thegreatpintoj.github.io/PintoPlugins/readmes/PintoRecipes.html)
 
 ### Notes
 * I have not yet found a problem with reloading instead, but you might run into problems so it's better to restart
