@@ -1,5 +1,6 @@
 package me.pintoadmin.pintoRecipes;
 
+import java.math.*;
 import java.util.*;
 import javax.annotation.*;
 import org.bukkit.*;
@@ -25,6 +26,8 @@ public class CreateRecipeGUI {
     private boolean currentReadOnly = false;
     private final String recipeName;
     private boolean recipeEnabled = false;
+    private int recipeCooktime = 0;
+    private double recipeExperience = 0;
 
     private int selectedTypeIndex;
     private final List<String> typeList =
@@ -36,6 +39,12 @@ public class CreateRecipeGUI {
                     "smoking",
                     "campfire",
                     "stonecutter");
+    private final List<String> FURNACE_TYPES = List.of(
+            "furnace",
+            "blasting",
+            "smoking",
+            "campfire"
+    );
     private final Map<String, Material> typeMap =
             Map.of(
                     "shaped", Material.CRAFTING_TABLE,
@@ -51,6 +60,7 @@ public class CreateRecipeGUI {
     private final ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
     private final ItemStack limitSelectItem = new ItemStack(Material.PAPER);
     private final ItemStack enableSelectItem = new ItemStack(Material.REDSTONE_BLOCK);
+    private final ItemStack optionSelectItem = new ItemStack(Material.EXPERIENCE_BOTTLE);
 
     public CreateRecipeGUI(PintoRecipes plugin, String recipeName) {
         this.plugin = plugin;
@@ -241,10 +251,30 @@ public class CreateRecipeGUI {
         inventory.setItem(44, enableSelectItem);
     }
 
+    private void updateOptionsIcon() {
+        ItemMeta optionSelectMeta = optionSelectItem.getItemMeta();
+        assert optionSelectMeta != null;
+
+        optionSelectMeta.setItemName(color("&r&lRecipe Options"));
+        optionSelectMeta.setLore(
+                List.of(
+                        color("&7&nCooktime: "+recipeCooktime),
+                        color("&7&nExperience: "+recipeExperience),
+                        color("&r&2Click to increment/decrement cooktime"),
+                        color("&r&3Shift-Click to increment/decrement experience")));
+        optionSelectMeta
+                .getPersistentDataContainer()
+                .set(idNameKey, PersistentDataType.STRING, "optionSelectItem");
+        optionSelectItem.setItemMeta(optionSelectMeta);
+        if(FURNACE_TYPES.contains(getCurrentType()))
+            inventory.setItem(4, optionSelectItem);
+    }
+
     private void updateInfoIcons() {
         updateTypeIcon();
         updateLimitIcon();
         updateEnabledIcon();
+        updateOptionsIcon();
     }
 
     public void sendToPlayer(Player player, boolean readOnly) {
@@ -406,9 +436,33 @@ public class CreateRecipeGUI {
                     sendToPlayer(player, currentReadOnly);
                 }
                 case "enableSelectItem" -> {
-                    //player.playSound(player, Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 0.3f);
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 0.8f);
                     recipeEnabled = !recipeEnabled;
                     configLoader.setEnabled(recipeName, recipeEnabled);
+                    save();
+                    updateInfoIcons();
+                    sendToPlayer(player, currentReadOnly);
+                }
+                case "optionSelectItem" -> {
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_HARP, 1f, 0.3f);
+                    if (event.getClick() == ClickType.LEFT) { // Increment cooktime
+                        recipeCooktime++;
+                        configLoader.setCooktime(recipeName, recipeCooktime);
+                    } else if(event.getClick() == ClickType.RIGHT) { // Decrement cooktime
+                        if(recipeCooktime > 0)
+                            recipeCooktime--;
+                        configLoader.setCooktime(recipeName, recipeCooktime);
+                    } else if (event.getClick() == ClickType.SHIFT_LEFT) { // Increment exp
+                        recipeExperience += 0.1f;
+                        recipeExperience = round(recipeExperience, 1);
+                        configLoader.setExperience(recipeName, recipeExperience);
+                    } else if (event.getClick() == ClickType.SHIFT_RIGHT) { // Decrement exp
+                        if(recipeExperience > 0)
+                            recipeExperience -= 0.1f;
+                        recipeExperience = round(recipeExperience, 1);
+                        configLoader.setExperience(recipeName, recipeExperience);
+                    }
+
                     save();
                     updateInfoIcons();
                     sendToPlayer(player, currentReadOnly);
@@ -454,4 +508,17 @@ public class CreateRecipeGUI {
     private String color(String input) {
         return ChatColor.translateAlternateColorCodes('&', input);
     }
+
+    // Source - https://stackoverflow.com/a/2808648
+    // Posted by Jonik, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-01-31, License - CC BY-SA 4.0
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
 }

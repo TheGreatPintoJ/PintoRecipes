@@ -339,6 +339,26 @@ public class ConfigLoader {
         }
     }
 
+    public void setCooktime(String name, double cooktime) {
+        loadConfig();
+        try {
+            recipeConfig.set(name + ".cooktime", cooktime);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException ignored) {
+        }
+    }
+
+    public void setExperience(String name, double exp) {
+        loadConfig();
+        try {
+            recipeConfig.set(name + ".experience", exp);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException ignored) {
+        }
+    }
+
     public int getLimit(String name) {
         loadConfig();
         int limit = recipeConfig.getInt(name + ".limit", -1);
