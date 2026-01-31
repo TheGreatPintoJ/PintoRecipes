@@ -8,7 +8,6 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.*;
-import org.bukkit.scheduler.*;
 
 public class CreateRecipeGUI {
     private final PintoRecipes plugin;
@@ -25,6 +24,7 @@ public class CreateRecipeGUI {
 
     private boolean currentReadOnly = false;
     private final String recipeName;
+    private boolean recipeEnabled = false;
 
     private int selectedTypeIndex;
     private final List<String> typeList =
@@ -50,6 +50,7 @@ public class CreateRecipeGUI {
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
     private final ItemStack backNavItem = new ItemStack(Material.FIREWORK_ROCKET);
     private final ItemStack limitSelectItem = new ItemStack(Material.PAPER);
+    private final ItemStack enableSelectItem = new ItemStack(Material.REDSTONE_BLOCK);
 
     public CreateRecipeGUI(PintoRecipes plugin, String recipeName) {
         this.plugin = plugin;
@@ -123,8 +124,7 @@ public class CreateRecipeGUI {
             }
         }
 
-        updateTypeIcon();
-        updateLimitIcon();
+        updateInfoIcons();
 
         inventory.setItem(resultSlot, configLoader.getResultItem(recipeName));
         inventory.setItem(8, backNavItem);
@@ -134,8 +134,7 @@ public class CreateRecipeGUI {
         if (recipeName != null) {
             loadSlots();
 
-            updateTypeIcon();
-            updateLimitIcon();
+            updateInfoIcons();
 
             inventory.setItem(resultSlot, configLoader.getResultItem(recipeName));
             inventory.setItem(8, backNavItem);
@@ -226,6 +225,26 @@ public class CreateRecipeGUI {
                 .set(idNameKey, PersistentDataType.STRING, "limitSelectItem");
         limitSelectItem.setItemMeta(limitSelectMeta);
         inventory.setItem(36, limitSelectItem);
+    }
+
+    private void updateEnabledIcon() {
+        enableSelectItem.setType(recipeEnabled ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK);
+        ItemMeta enableSelectMeta = enableSelectItem.getItemMeta();
+        assert enableSelectMeta != null;
+
+        enableSelectMeta.setItemName(color("&r&lEnabled " + recipeEnabled));
+        enableSelectMeta.setLore(List.of(color("&d&6Click to toggle")));
+        enableSelectMeta
+                .getPersistentDataContainer()
+                .set(idNameKey, PersistentDataType.STRING, "enableSelectItem");
+        enableSelectItem.setItemMeta(enableSelectMeta);
+        inventory.setItem(44, enableSelectItem);
+    }
+
+    private void updateInfoIcons() {
+        updateTypeIcon();
+        updateLimitIcon();
+        updateEnabledIcon();
     }
 
     public void sendToPlayer(Player player, boolean readOnly) {
@@ -383,7 +402,15 @@ public class CreateRecipeGUI {
                         configLoader.setLimit(recipeName, newLimit);
                     }
                     save();
-                    updateLimitIcon();
+                    updateInfoIcons();
+                    sendToPlayer(player, currentReadOnly);
+                }
+                case "enableSelectItem" -> {
+                    //player.playSound(player, Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 0.3f);
+                    recipeEnabled = !recipeEnabled;
+                    configLoader.setEnabled(recipeName, recipeEnabled);
+                    save();
+                    updateInfoIcons();
                     sendToPlayer(player, currentReadOnly);
                 }
                 case "unused_space" -> {}

@@ -265,6 +265,16 @@ public class ConfigLoader {
         return enabled;
     }
 
+    public void setEnabled(String name, boolean enabled) {
+        loadConfig();
+        try {
+            recipeConfig.set(name + ".enabled", enabled);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException ignored) {
+        }
+    }
+
     public String getType(String name) {
         return recipeConfig.getString(name + ".type", "shaped");
     }
