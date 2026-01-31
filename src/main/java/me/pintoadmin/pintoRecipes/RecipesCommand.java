@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -154,6 +155,11 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     sender.sendMessage("You must specify a recipe for this command");
                     break;
                 }
+                if (!plugin.getConfigLoader().recipes.contains(args[1])) {
+                    sender.sendMessage("That recipe doesn't exist");
+                    break;
+                }
+
                 recipeName = args[1];
                 ItemStack result = plugin.getConfigLoader().getResultItem(recipeName);
                 Object recipe = plugin.getConfigLoader().getRecipe(recipeName);
@@ -173,9 +179,10 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
 
                     List<String> sets = List.of(set1, set2, set3);
                     List<String> finalSets = new ArrayList<>();
+                    Map<Character, String> abbreviations = new HashMap<>();
 
                     int setNum = 0;
-                    int round = 0;
+                    int round = 1;
                     for(Map<String, String> map : items){
                         String set = sets.get(setNum);
                         for (int i = 0; i < 3; i++) {
@@ -184,23 +191,30 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                             if (round % 3 == 2) value = map.get("middle");
                             if (round % 3 == 0) value = map.get("right");
 
-                            if (value != null && !value.equalsIgnoreCase("air")) {
+                            if (value != null && !value.isEmpty()) {
+                                Character abbreviation = value.toUpperCase().charAt(0);
                                 set = set.replace(
                                         String.valueOf(round).charAt(0),
                                         value.toUpperCase().charAt(0));
+                                abbreviations.put(abbreviation, value.toUpperCase());
                             }
                             round++;
                         }
                         setNum++;
                         finalSets.add(set);
                     }
-                    sender.sendMessage(finalSets.toString());
+                    //sender.sendMessage(finalSets.toString());
 
                     sender.sendMessage(pre);
                     sender.sendMessage(finalSets.getFirst());
                     sender.sendMessage(finalSets.get(1));
                     sender.sendMessage(finalSets.getLast());
                     sender.sendMessage(post);
+                    sender.sendMessage("");
+
+                    for (Map.Entry<Character, String> abb : abbreviations.entrySet())
+                        sender.sendMessage(abb.getKey()+" - "+abb.getValue());
+
                 } else if(!plugin.toStringList(recipe).isEmpty()){
                     List<String> items = plugin.toStringList(recipe);
                     sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
