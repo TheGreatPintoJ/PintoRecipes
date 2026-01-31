@@ -3,7 +3,12 @@ package me.pintoadmin.pintoRecipes;
 import org.bukkit.*;
 import org.bukkit.command.*;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
     public RecipesCommand(PintoRecipes plugin) {
@@ -15,6 +20,8 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
         }
     }
 
+    private static final List<String> consoleSubcommands = List.of("list", "reload", "remove", "show", "debug");
+
     @Override
     public boolean onCommand(
             @NotNull CommandSender sender,
@@ -22,7 +29,13 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
             @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("This command can only be executed by a player");
+            if(args.length == 0) {
+                sender.sendMessage("You must specify a subcommand!");
+                return true;
+            }
+            if(consoleSubcommands.contains(args[0].toLowerCase())){
+                consoleCommand(sender, args);
+            } else sender.sendMessage("This command can only be executed by a player");
             return true;
         }
         if(args.length == 0 && player.hasPermission("pintorecipes.recipes.list"))
@@ -99,5 +112,100 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
         }
         plugin.getConfigLoader().loadConfig();
         return true;
+    }
+
+    private void consoleCommand(CommandSender sender, String[] args){
+        String recipeName;
+        switch (args[0].toLowerCase()){
+            case "list":
+                sender.sendMessage("Recipes in 'recipes.yml': ");
+                List<String> recipes = plugin.getConfigLoader().recipes;
+                for(String recipe : recipes){
+                    sender.sendMessage("- "+recipe);
+                }
+                break;
+            case "remove":
+                // Take args[1] and remove
+                if(args.length != 2){
+                    sender.sendMessage("You must specify a recipe for this command");
+                    break;
+                }
+                recipeName = args[1];
+                if (!plugin.getConfigLoader().recipes.contains(recipeName))
+                    sender.sendMessage("That recipe doesn't exist");
+                else {
+                    plugin.getConfigLoader().removeRecipe(recipeName);
+                    sender.sendMessage("Removed recipe " + recipeName + " from config");
+                }
+                break;
+            case "reload":
+                // Reload all recipes
+                plugin.getLoadRecipes().reloadRecipes();
+                sender.sendMessage("Reloaded recipes");
+                break;
+            case "debug":
+                // Toggle Debug mode
+                plugin.debugEnabled = !plugin.debugEnabled;
+                sender.sendMessage("Debug is now "+(plugin.debugEnabled ? "on":"off"));
+                break;
+            case "show":
+                // Makeshift 'show' recipe
+                if(args.length != 2){
+                    sender.sendMessage("You must specify a recipe for this command");
+                    break;
+                }
+                recipeName = args[1];
+                ItemStack result = plugin.getConfigLoader().getResultItem(recipeName);
+                Object recipe = plugin.getConfigLoader().getRecipe(recipeName);
+                String recipeType = plugin.getConfigLoader().getType(recipeName);
+                //sender.sendMessage(result.getType() +" - "+ recipe.toString());
+                if(recipe instanceof String itemName){ // Case for smelting/stonecutting
+                    sender.sendMessage(result.getType()+" is "+recipeType+" with "+itemName+" item");
+                } else if(!plugin.toShapedRecipe(recipe).isEmpty()){
+                    List<Map<String, String>> items = plugin.toShapedRecipe(recipe);
+                    sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
+
+                    String pre  = "-------------";
+                    String set1 = "| 1 | 2 | 3 |";
+                    String set2 = "| 4 | 5 | 6 |";
+                    String set3 = "| 7 | 8 | 9 |";
+                    String post = "-------------";
+
+                    List<String> sets = List.of(set1, set2, set3);
+                    List<String> finalSets = new ArrayList<>();
+
+                    int setNum = 0;
+                    int round = 0;
+                    for(Map<String, String> map : items){
+                        String set = sets.get(setNum);
+                        for (int i = 0; i < 3; i++) {
+                            String value = null;
+                            if (round % 3 == 1) value = map.get("left");
+                            if (round % 3 == 2) value = map.get("middle");
+                            if (round % 3 == 0) value = map.get("right");
+
+                            if (value != null && !value.equalsIgnoreCase("air")) {
+                                set = set.replace(
+                                        String.valueOf(round).charAt(0),
+                                        value.toUpperCase().charAt(0));
+                            }
+                            round++;
+                        }
+                        setNum++;
+                        finalSets.add(set);
+                    }
+                    sender.sendMessage(finalSets.toString());
+
+                    sender.sendMessage(pre);
+                    sender.sendMessage(finalSets.getFirst());
+                    sender.sendMessage(finalSets.get(1));
+                    sender.sendMessage(finalSets.getLast());
+                    sender.sendMessage(post);
+                } else if(!plugin.toStringList(recipe).isEmpty()){
+                    List<String> items = plugin.toStringList(recipe);
+                    sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
+                }
+                break;
+        }
     }
 }
