@@ -42,3 +42,5 @@ wither_skull:
     v: 4440
     type: WITHER_SKELETON_SKULL
   recipe: SKELETON_SKULL
+  cooktime: 200
+  experience: 0
