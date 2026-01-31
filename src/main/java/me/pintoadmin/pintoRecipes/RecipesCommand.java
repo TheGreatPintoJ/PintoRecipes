@@ -69,6 +69,8 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                 }
                 plugin.debugEnabled = !plugin.debugEnabled;
                 player.sendMessage("Debug mode is " + (plugin.debugEnabled ? "on" : "off"));
+            }  else if(args[0].equalsIgnoreCase("uncraft")) {
+                plugin.addUncraftingGUI(new UncraftingGUI(plugin, player));
             } else {
                 player.sendMessage(ChatColor.RED + "You must specify a name for this command");
             }

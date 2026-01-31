@@ -29,6 +29,18 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
                                         + gui.getInventory());
         }
         plugin.getRecipesGUI().onClick(event);
+        for(UncraftingGUI gui : plugin.getUncraftingGUIS()){
+            gui.onClick(event);
+            if (plugin.debugEnabled)
+                plugin.getLogger()
+                        .warning(
+                                "RECIPESGUI - Click: "
+                                        + event.isCancelled()
+                                        + "; clicktype: "
+                                        + event.getClick()
+                                        + "; clickedinventory: "
+                                        + event.getClickedInventory());
+        }
         if (plugin.debugEnabled)
             plugin.getLogger()
                     .warning(

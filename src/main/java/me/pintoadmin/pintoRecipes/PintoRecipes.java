@@ -12,6 +12,8 @@ public final class PintoRecipes extends JavaPlugin {
 
     private final Map<String, CreateRecipeGUI> editGUIs = new HashMap<>();
 
+    private final List<UncraftingGUI> uncraftingGUIS = new ArrayList<>();
+
     public boolean debugEnabled = false;
 
     public static JavaPlugin thisPlugin() {
@@ -39,6 +41,13 @@ public final class PintoRecipes extends JavaPlugin {
         if (editGUIs.get(recipeName) == null)
             editGUIs.putIfAbsent(recipeName, new CreateRecipeGUI(this, recipeName));
         return editGUIs.get(recipeName);
+    }
+
+    public List<UncraftingGUI> getUncraftingGUIS() {
+        return uncraftingGUIS;
+    }
+    public void addUncraftingGUI(UncraftingGUI gui){
+        uncraftingGUIS.add(gui);
     }
 
     public Map<String, CreateRecipeGUI> getEditGUIs() {
