@@ -6,10 +6,7 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
     public RecipesCommand(PintoRecipes plugin) {
@@ -164,10 +161,13 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                 ItemStack result = plugin.getConfigLoader().getResultItem(recipeName);
                 Object recipe = plugin.getConfigLoader().getRecipe(recipeName);
                 String recipeType = plugin.getConfigLoader().getType(recipeName);
-                //sender.sendMessage(result.getType() +" - "+ recipe.toString());
+
+                List<Map<String, String>> shapedRecipe = plugin.toShapedRecipe(recipe);
+                List<String> shapelessRecipe = plugin.toStringList(recipe);
+
                 if(recipe instanceof String itemName){ // Case for smelting/stonecutting
                     sender.sendMessage(result.getType()+" is "+recipeType+" with "+itemName+" item");
-                } else if(!plugin.toShapedRecipe(recipe).isEmpty()){
+                } else if(shapedRecipe != null && !shapedRecipe.isEmpty()){
                     List<Map<String, String>> items = plugin.toShapedRecipe(recipe);
                     sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
 
@@ -179,7 +179,7 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
 
                     List<String> sets = List.of(set1, set2, set3);
                     List<String> finalSets = new ArrayList<>();
-                    Map<Character, String> abbreviations = new HashMap<>();
+                    LinkedHashMap<Character, String> abbreviations = new LinkedHashMap<>();
 
                     int setNum = 0;
                     int round = 1;
@@ -192,18 +192,22 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                             if (round % 3 == 0) value = map.get("right");
 
                             if (value != null && !value.isEmpty()) {
-                                Character abbreviation = value.toUpperCase().charAt(0);
+                                char abbreviation;
+                                int j = 0;
+                                do {
+                                    abbreviation = value.toUpperCase().charAt(j++);
+                                    if(abbreviations.containsKey(abbreviation) && abbreviations.get(abbreviation).equals(value)) break;
+                                } while(abbreviations.putIfAbsent(abbreviation, value.toUpperCase()) != null);
+
                                 set = set.replace(
                                         String.valueOf(round).charAt(0),
-                                        value.toUpperCase().charAt(0));
-                                abbreviations.put(abbreviation, value.toUpperCase());
+                                        abbreviation);
                             }
                             round++;
                         }
                         setNum++;
                         finalSets.add(set);
                     }
-                    //sender.sendMessage(finalSets.toString());
 
                     sender.sendMessage(pre);
                     sender.sendMessage(finalSets.getFirst());
@@ -215,7 +219,7 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     for (Map.Entry<Character, String> abb : abbreviations.entrySet())
                         sender.sendMessage(abb.getKey()+" - "+abb.getValue());
 
-                } else if(!plugin.toStringList(recipe).isEmpty()){
+                } else if(shapelessRecipe != null && !shapelessRecipe.isEmpty()){
                     List<String> items = plugin.toStringList(recipe);
                     sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
                 }
