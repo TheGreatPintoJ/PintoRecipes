@@ -18,7 +18,7 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
         }
     }
 
-    private static final List<String> consoleSubcommands = List.of("list", "reload", "remove", "show", "debug");
+    private static final List<String> consoleSubcommands = List.of("list", "reload", "remove", "show", "debug", "rename");
 
     @Override
     public boolean onCommand(
@@ -223,6 +223,22 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     List<String> items = plugin.toStringList(recipe);
                     sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
                 }
+                break;
+            case "rename":
+                // Take 3 args: 0:rename 1:oldname 2:newname
+                if(args.length != 3){
+                    sender.sendMessage("Usage: /pr rename <oldname> <newname>");
+                    break;
+                }
+                if (!plugin.getConfigLoader().recipes.contains(args[1])) {
+                    sender.sendMessage("That recipe doesn't exist");
+                    break;
+                }
+                String oldName = args[1];
+                String newName = args[2];
+
+                plugin.getConfigLoader().renameRecipe(oldName, newName);
+                sender.sendMessage("Recipe '"+oldName+"' has been renamed to '"+newName+"'");
                 break;
         }
     }
