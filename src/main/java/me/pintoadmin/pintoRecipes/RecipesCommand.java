@@ -25,6 +25,9 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
             sender.sendMessage("This command can only be executed by a player");
             return true;
         }
+        if(args.length == 0 && player.hasPermission("pintorecipes.recipes.list"))
+            plugin.getRecipesGUI().sendToPlayer(player);
+
         if (args.length == 0) return true;
         if (!sender.hasPermission("pintorecipes.recipes")
                 || !sender.hasPermission("pintorecipes.recipes." + args[0])) {
