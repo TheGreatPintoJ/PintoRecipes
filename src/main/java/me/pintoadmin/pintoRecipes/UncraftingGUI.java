@@ -60,7 +60,11 @@ public class UncraftingGUI {
                     for (char character : set.toCharArray()){
                         int currentSlot = craftingSlots.get(craftingSlot);
                         ItemStack itemStack = ingredientMap.get(character);
-                        inventory.setItem(currentSlot, itemStack);
+                        ItemStack newItemStack;
+                        if(itemStack != null)
+                            newItemStack = new ItemStack(itemStack.getType());
+                        else newItemStack = new ItemStack(Material.AIR);
+                        inventory.setItem(currentSlot, newItemStack);
                         craftingSlot++;
                     }
                 }
