@@ -14,23 +14,21 @@ import java.util.*;
 public class UncraftingGUI {
     private final PintoRecipes plugin;
     private final Inventory inventory;
-    private final Player player;
 
     private final List<Integer> craftingSlots =
             new ArrayList<>(List.of(14, 15, 16, 23, 24, 25, 32, 33, 34));
     private final int resultSlot = 20;
 
-    private final NamespacedKey idNameKey = new NamespacedKey(PintoRecipes.thisPlugin(), "item_id");
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 
     public UncraftingGUI(PintoRecipes plugin, Player player) {
         this.plugin = plugin;
-        this.player = player;
         inventory = Bukkit.createInventory(null, 5 * 9, color("&6&lUncrafting GUI"));
 
         ItemMeta unusedMeta = unused_space.getItemMeta();
         assert unusedMeta != null;
         unusedMeta.setItemName(color("&f"));
+        NamespacedKey idNameKey = new NamespacedKey(PintoRecipes.thisPlugin(), "item_id");
         unusedMeta
                 .getPersistentDataContainer()
                 .set(idNameKey, PersistentDataType.STRING, "unused_space");
@@ -48,6 +46,7 @@ public class UncraftingGUI {
 
     private void loadIngredients(){
         ItemStack item = inventory.getItem(resultSlot);
+        if(item == null) return;
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
 
         for(Recipe recipe : recipes){
@@ -85,7 +84,7 @@ public class UncraftingGUI {
             public void run(){
                 if (craftingSlots.contains(clickedSlot)){
                     // Remove "result"
-                    setItem(resultSlot, "AIR");
+                    inventory.setItem(resultSlot, null);
                 }
 
                 if(clickedSlot == resultSlot){
@@ -94,7 +93,7 @@ public class UncraftingGUI {
                     else {
                         // Remove crafting items
                         for (int slot : craftingSlots) {
-                            setItem(slot, "AIR");
+                            inventory.setItem(slot, null);
                         }
                     }
                 }
@@ -105,16 +104,6 @@ public class UncraftingGUI {
     public void onClose(){
         plugin.getUncraftingGUIS().remove(this);
     }
-
-    private void setItem(int index, @Nullable String value) {
-        if (value == null || value.equalsIgnoreCase("AIR")) {
-            inventory.setItem(index, null);
-        } else {
-            Material material = Material.valueOf(value.toUpperCase());
-            inventory.setItem(index, new ItemStack(material));
-        }
-    }
-
 
     public Inventory getInventory() {
         return inventory;
