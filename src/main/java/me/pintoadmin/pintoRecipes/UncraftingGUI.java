@@ -49,24 +49,39 @@ public class UncraftingGUI {
         if(item == null) return;
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
 
-        for(Recipe recipe : recipes){
-            if(recipe instanceof ShapedRecipe shapedRecipe){
+        for(Recipe recipe : recipes) {
+            if (recipe instanceof ShapedRecipe shapedRecipe) {
                 Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
                 String[] recipeShape = shapedRecipe.getShape();
 
                 int craftingSlot = 0;
-                for (String set : recipeShape){
-                    for (char character : set.toCharArray()){
+                for (String set : recipeShape) {
+                    for (char character : set.toCharArray()) {
                         int currentSlot = craftingSlots.get(craftingSlot);
                         ItemStack itemStack = ingredientMap.get(character);
                         ItemStack newItemStack;
-                        if(itemStack != null)
+                        if (itemStack != null)
                             newItemStack = new ItemStack(itemStack.getType());
                         else newItemStack = new ItemStack(Material.AIR);
                         inventory.setItem(currentSlot, newItemStack);
                         craftingSlot++;
                     }
                 }
+            } else if(recipe instanceof ShapelessRecipe shapelessRecipe){
+                List<ItemStack> ingredients = shapelessRecipe.getIngredientList();
+                int i = 0;
+                try {
+                    for (int slot : craftingSlots) {
+                        inventory.setItem(slot, ingredients.get(i));
+                        i++;
+                    }
+                } catch (IndexOutOfBoundsException ignored){
+                    for (int j = i; j < craftingSlots.size(); j++)
+                        inventory.setItem(craftingSlots.get(j), null);
+                }
+            } else {
+                for (int slot : craftingSlots)
+                    inventory.setItem(slot, null);
             }
         }
     }
