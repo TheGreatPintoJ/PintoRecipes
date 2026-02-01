@@ -6,6 +6,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.*;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.*;
 import java.util.*;
@@ -16,8 +17,8 @@ public class UncraftingGUI {
     private final Player player;
 
     private final List<Integer> craftingSlots =
-            new ArrayList<>(List.of(10, 11, 12, 19, 20, 21, 28, 29, 30));
-    private final int resultSlot = 24;
+            new ArrayList<>(List.of(14, 15, 16, 23, 24, 25, 32, 33, 34));
+    private final int resultSlot = 20;
 
     private final NamespacedKey idNameKey = new NamespacedKey(PintoRecipes.thisPlugin(), "item_id");
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
@@ -53,8 +54,6 @@ public class UncraftingGUI {
             if(recipe instanceof ShapedRecipe shapedRecipe){
                 Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
                 String[] recipeShape = shapedRecipe.getShape();
-                plugin.getLogger().warning(Arrays.toString(recipeShape)); // TODO: REMOVE
-                plugin.getLogger().warning(ingredientMap.toString()); // TODO: REMOVE
 
                 int craftingSlot = 0;
                 for (String set : recipeShape){
@@ -72,19 +71,31 @@ public class UncraftingGUI {
     public void onClick(InventoryClickEvent event){
         if (event.getClickedInventory() != inventory) return;
         int clickedSlot = event.getSlot();
-        if (inventory.getItem(clickedSlot) == null) return;
 
-        if (event.getCurrentItem().isSimilar(unused_space)) {
+        if (event.getCurrentItem() != null && event.getCurrentItem().isSimilar(unused_space)) {
             event.setCancelled(true);
             return;
         }
+        new BukkitRunnable(){
+            @Override
+            public void run(){
+                if (craftingSlots.contains(clickedSlot)){
+                    // Remove "result"
+                    setItem(resultSlot, "AIR");
+                }
 
-        loadIngredients();
-
-        if (craftingSlots.contains(clickedSlot)){
-            // Remove "result"
-            setItem(resultSlot, "AIR");
-        }
+                if(clickedSlot == resultSlot){
+                    if(inventory.getItem(clickedSlot) != null)
+                        loadIngredients();
+                    else {
+                        // Remove crafting items
+                        for (int slot : craftingSlots) {
+                            setItem(slot, "AIR");
+                        }
+                    }
+                }
+            }
+        }.runTaskLater(plugin, 1);
     }
 
     public void onClose(){
@@ -99,6 +110,12 @@ public class UncraftingGUI {
             inventory.setItem(index, new ItemStack(material));
         }
     }
+
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
 
     private String color(String input) {
         return ChatColor.translateAlternateColorCodes('&', input);
