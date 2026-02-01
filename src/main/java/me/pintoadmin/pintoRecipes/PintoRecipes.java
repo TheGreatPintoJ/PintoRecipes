@@ -25,6 +25,7 @@ public final class PintoRecipes extends JavaPlugin {
         instance = this;
         new RecipesCommand(this);
         new InventoryEvents(this);
+        new UncraftCommand(this);
         loadRecipes.loadRecipes();
     }
 
