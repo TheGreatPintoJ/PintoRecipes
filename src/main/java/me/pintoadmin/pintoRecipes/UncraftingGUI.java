@@ -50,6 +50,12 @@ public class UncraftingGUI {
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
 
         for(Recipe recipe : recipes) {
+            if(recipe.getResult().getAmount() > item.getAmount()) return; // Not enough to uncraft
+            int resultMult = 1;
+            if(item.getAmount() % recipe.getResult().getAmount() == 0){
+                resultMult = item.getAmount() / recipe.getResult().getAmount();
+                plugin.getLogger().warning("Rem is 0 - "+resultMult); // TODO: remove
+            }
             if (recipe instanceof ShapedRecipe shapedRecipe) {
                 Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
                 String[] recipeShape = shapedRecipe.getShape();
@@ -61,9 +67,12 @@ public class UncraftingGUI {
                         ItemStack itemStack = ingredientMap.get(character);
                         ItemStack newItemStack;
                         if (itemStack != null)
-                            newItemStack = new ItemStack(itemStack.getType());
-                        else newItemStack = new ItemStack(Material.AIR);
+                            newItemStack = new ItemStack(itemStack.getType(), itemStack.getAmount() * resultMult);
+                        else
+                            newItemStack = new ItemStack(Material.AIR);
+
                         inventory.setItem(currentSlot, newItemStack);
+                        plugin.getLogger().warning("Set item "+newItemStack); // TODO: remove
                         craftingSlot++;
                     }
                 }
