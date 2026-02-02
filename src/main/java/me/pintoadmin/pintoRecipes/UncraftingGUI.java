@@ -7,6 +7,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.*;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.*;
 
 import javax.annotation.*;
 import java.util.*;
@@ -14,6 +15,7 @@ import java.util.*;
 public class UncraftingGUI {
     private final PintoRecipes plugin;
     private final Inventory inventory;
+    private final Player player;
 
     private final List<Integer> craftingSlots =
             new ArrayList<>(List.of(14, 15, 16, 23, 24, 25, 32, 33, 34));
@@ -21,8 +23,11 @@ public class UncraftingGUI {
 
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 
+    private Recipe currentRecipe;
+
     public UncraftingGUI(PintoRecipes plugin, Player player) {
         this.plugin = plugin;
+        this.player = player;
         inventory = Bukkit.createInventory(null, 5 * 9, color("&6&lUncrafting GUI"));
 
         ItemMeta unusedMeta = unused_space.getItemMeta();
@@ -49,10 +54,12 @@ public class UncraftingGUI {
         if(item == null) return;
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
 
-        for(Recipe recipe : recipes) {
+        currentRecipe = recipes.getFirst();
+
+        //for(Recipe recipe : recipes) {
             int resultMult = getCurrentMult();
 
-            if (recipe instanceof ShapedRecipe shapedRecipe) {
+            if (currentRecipe instanceof ShapedRecipe shapedRecipe) {
                 Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
                 String[] recipeShape = shapedRecipe.getShape();
 
@@ -60,32 +67,17 @@ public class UncraftingGUI {
                 for (String set : recipeShape) {
                     for (char character : set.toCharArray()) {
                         int currentSlot = craftingSlots.get(craftingSlot);
-                        ItemStack itemStack = ingredientMap.get(character);
-                        ItemStack newItemStack;
-                        if (itemStack != null){
-                            int newAmnt = itemStack.getAmount() * resultMult;
-                            if(newAmnt == 0){
-                                newItemStack = new ItemStack(Material.AIR);
-                            } else newItemStack = new ItemStack(itemStack.getType(), newAmnt);
-                        } else
-                            newItemStack = new ItemStack(Material.AIR);
-
+                        ItemStack newItemStack = getItemStack(ingredientMap.get(character), resultMult);
                         inventory.setItem(currentSlot, newItemStack);
                         craftingSlot++;
                     }
                 }
-            } else if(recipe instanceof ShapelessRecipe shapelessRecipe){
+            } else if(currentRecipe instanceof ShapelessRecipe shapelessRecipe){
                 List<ItemStack> ingredients = shapelessRecipe.getIngredientList();
                 int i = 0;
                 try {
                     for (int slot : craftingSlots) {
-                        ItemStack itemStack = ingredients.get(i);
-                        ItemStack newItemStack;
-                        if(itemStack != null)
-                            newItemStack = new ItemStack(itemStack.getType(), itemStack.getAmount() * resultMult);
-                        else
-                            newItemStack = new ItemStack(Material.AIR);
-
+                        ItemStack newItemStack = getItemStack(ingredients.get(i), resultMult);
                         inventory.setItem(slot, newItemStack);
                         i++;
                     }
@@ -97,7 +89,20 @@ public class UncraftingGUI {
                 for (int slot : craftingSlots)
                     inventory.setItem(slot, null);
             }
-        }
+        //}
+    }
+
+    @NotNull
+    private ItemStack getItemStack(ItemStack itemStack, int resultMult) {
+        ItemStack newItemStack;
+        if (itemStack != null) {
+            int newAmnt = itemStack.getAmount() * resultMult;
+            if (newAmnt == 0) {
+                newItemStack = new ItemStack(Material.AIR);
+            } else newItemStack = new ItemStack(itemStack.getType(), newAmnt);
+        } else
+            newItemStack = new ItemStack(Material.AIR);
+        return newItemStack;
     }
 
     public void onClick(InventoryClickEvent event){
@@ -108,6 +113,7 @@ public class UncraftingGUI {
             event.setCancelled(true);
             return;
         }
+
         new BukkitRunnable(){
             @Override
             public void run(){
@@ -119,8 +125,9 @@ public class UncraftingGUI {
                         return;
                     }
                     int amount = item.getAmount();
+                    int resultAmnt = currentRecipe.getResult().getAmount();
                     int currentMult = getCurrentMult();
-                    item.setAmount(amount % currentMult);
+                    if(currentMult > 0) item.setAmount(amount % resultAmnt);
                     inventory.setItem(resultSlot, item);
                 }
 
@@ -145,15 +152,8 @@ public class UncraftingGUI {
     private int getCurrentMult(){
         ItemStack item = inventory.getItem(resultSlot);
         if(item == null) return 0;
-        List<Recipe> recipes = Bukkit.getRecipesFor(item);
-
-        Recipe recipe = recipes.getLast();
-        if(recipe.getResult().getAmount() > item.getAmount()) return 0; // Not enough to uncraft
-        int resultMult = 1;
-        if(item.getAmount() % recipe.getResult().getAmount() == 0)
-            resultMult = item.getAmount() / recipe.getResult().getAmount();
-
-        return resultMult;
+        if(currentRecipe.getResult().getAmount() > item.getAmount()) return 0; // Not enough to uncraft
+        return (int) (double) (item.getAmount() / currentRecipe.getResult().getAmount());
     }
 
     public Inventory getInventory() {
