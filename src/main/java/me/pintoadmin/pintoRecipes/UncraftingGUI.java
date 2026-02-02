@@ -54,42 +54,42 @@ public class UncraftingGUI {
         if(item == null) return;
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
 
+        if(recipes.isEmpty()) return;
         currentRecipe = recipes.getFirst();
 
-        //for(Recipe recipe : recipes) {
-            int resultMult = getCurrentMult();
+        //for(Recipe recipe : recipes) {}
+        int resultMult = getCurrentMult();
 
-            if (currentRecipe instanceof ShapedRecipe shapedRecipe) {
-                Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
-                String[] recipeShape = shapedRecipe.getShape();
+        if (currentRecipe instanceof ShapedRecipe shapedRecipe) {
+            Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
+            String[] recipeShape = shapedRecipe.getShape();
 
-                int craftingSlot = 0;
-                for (String set : recipeShape) {
-                    for (char character : set.toCharArray()) {
-                        int currentSlot = craftingSlots.get(craftingSlot);
-                        ItemStack newItemStack = getItemStack(ingredientMap.get(character), resultMult);
-                        inventory.setItem(currentSlot, newItemStack);
-                        craftingSlot++;
-                    }
+            int craftingSlot = 0;
+            for (String set : recipeShape) {
+                for (char character : set.toCharArray()) {
+                    int currentSlot = craftingSlots.get(craftingSlot);
+                    ItemStack newItemStack = getItemStack(ingredientMap.get(character), resultMult);
+                    inventory.setItem(currentSlot, newItemStack);
+                    craftingSlot++;
                 }
-            } else if(currentRecipe instanceof ShapelessRecipe shapelessRecipe){
-                List<ItemStack> ingredients = shapelessRecipe.getIngredientList();
-                int i = 0;
-                try {
-                    for (int slot : craftingSlots) {
-                        ItemStack newItemStack = getItemStack(ingredients.get(i), resultMult);
-                        inventory.setItem(slot, newItemStack);
-                        i++;
-                    }
-                } catch (IndexOutOfBoundsException ignored){
-                    for (int j = i; j < craftingSlots.size(); j++)
-                        inventory.setItem(craftingSlots.get(j), null);
-                }
-            } else {
-                for (int slot : craftingSlots)
-                    inventory.setItem(slot, null);
             }
-        //}
+        } else if(currentRecipe instanceof ShapelessRecipe shapelessRecipe){
+            List<ItemStack> ingredients = shapelessRecipe.getIngredientList();
+            int i = 0;
+            try {
+                for (int slot : craftingSlots) {
+                    ItemStack newItemStack = getItemStack(ingredients.get(i), resultMult);
+                    inventory.setItem(slot, newItemStack);
+                    i++;
+                }
+            } catch (IndexOutOfBoundsException ignored){
+                for (int j = i; j < craftingSlots.size(); j++)
+                    inventory.setItem(craftingSlots.get(j), null);
+            }
+        } else {
+            for (int slot : craftingSlots)
+                inventory.setItem(slot, null);
+        }
     }
 
     @NotNull
@@ -146,6 +146,14 @@ public class UncraftingGUI {
     }
 
     public void onClose(){
+        if(inventory.getItem(resultSlot) != null){
+            player.getInventory().addItem(inventory.getItem(resultSlot));
+        } else {
+            for(int slot : craftingSlots){
+                if(inventory.getItem(slot) != null)
+                    player.getInventory().addItem(inventory.getItem(slot));
+            }
+        }
         plugin.getUncraftingGUIS().remove(this);
     }
 
