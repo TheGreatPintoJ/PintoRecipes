@@ -50,12 +50,8 @@ public class UncraftingGUI {
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
 
         for(Recipe recipe : recipes) {
-            if(recipe.getResult().getAmount() > item.getAmount()) return; // Not enough to uncraft
-            int resultMult = 1;
-            if(item.getAmount() % recipe.getResult().getAmount() == 0){
-                resultMult = item.getAmount() / recipe.getResult().getAmount();
-                plugin.getLogger().warning("Rem is 0 - "+resultMult); // TODO: remove
-            }
+            int resultMult = getCurrentMult();
+
             if (recipe instanceof ShapedRecipe shapedRecipe) {
                 Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
                 String[] recipeShape = shapedRecipe.getShape();
@@ -66,13 +62,15 @@ public class UncraftingGUI {
                         int currentSlot = craftingSlots.get(craftingSlot);
                         ItemStack itemStack = ingredientMap.get(character);
                         ItemStack newItemStack;
-                        if (itemStack != null)
-                            newItemStack = new ItemStack(itemStack.getType(), itemStack.getAmount() * resultMult);
-                        else
+                        if (itemStack != null){
+                            int newAmnt = itemStack.getAmount() * resultMult;
+                            if(newAmnt == 0){
+                                newItemStack = new ItemStack(Material.AIR);
+                            } else newItemStack = new ItemStack(itemStack.getType(), newAmnt);
+                        } else
                             newItemStack = new ItemStack(Material.AIR);
 
                         inventory.setItem(currentSlot, newItemStack);
-                        plugin.getLogger().warning("Set item "+newItemStack); // TODO: remove
                         craftingSlot++;
                     }
                 }
@@ -81,7 +79,14 @@ public class UncraftingGUI {
                 int i = 0;
                 try {
                     for (int slot : craftingSlots) {
-                        inventory.setItem(slot, ingredients.get(i));
+                        ItemStack itemStack = ingredients.get(i);
+                        ItemStack newItemStack;
+                        if(itemStack != null)
+                            newItemStack = new ItemStack(itemStack.getType(), itemStack.getAmount() * resultMult);
+                        else
+                            newItemStack = new ItemStack(Material.AIR);
+
+                        inventory.setItem(slot, newItemStack);
                         i++;
                     }
                 } catch (IndexOutOfBoundsException ignored){
@@ -107,8 +112,16 @@ public class UncraftingGUI {
             @Override
             public void run(){
                 if (craftingSlots.contains(clickedSlot)){
-                    // Remove "result"
-                    inventory.setItem(resultSlot, null);
+                    // Reduce "result"
+                    ItemStack item = inventory.getItem(resultSlot);
+                    if(item == null) {
+                        inventory.setItem(resultSlot, null);
+                        return;
+                    }
+                    int amount = item.getAmount();
+                    int currentMult = getCurrentMult();
+                    item.setAmount(amount % currentMult);
+                    inventory.setItem(resultSlot, item);
                 }
 
                 if(clickedSlot == resultSlot){
@@ -129,10 +142,23 @@ public class UncraftingGUI {
         plugin.getUncraftingGUIS().remove(this);
     }
 
+    private int getCurrentMult(){
+        ItemStack item = inventory.getItem(resultSlot);
+        if(item == null) return 0;
+        List<Recipe> recipes = Bukkit.getRecipesFor(item);
+
+        Recipe recipe = recipes.getLast();
+        if(recipe.getResult().getAmount() > item.getAmount()) return 0; // Not enough to uncraft
+        int resultMult = 1;
+        if(item.getAmount() % recipe.getResult().getAmount() == 0)
+            resultMult = item.getAmount() / recipe.getResult().getAmount();
+
+        return resultMult;
+    }
+
     public Inventory getInventory() {
         return inventory;
     }
-
 
     private String color(String input) {
         return ChatColor.translateAlternateColorCodes('&', input);
