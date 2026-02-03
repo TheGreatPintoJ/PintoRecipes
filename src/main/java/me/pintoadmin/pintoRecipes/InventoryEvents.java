@@ -6,6 +6,9 @@ import org.bukkit.event.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public record InventoryEvents(PintoRecipes plugin) implements Listener {
     public InventoryEvents(PintoRecipes plugin) {
         this.plugin = plugin;
@@ -29,6 +32,18 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
                                         + gui.getInventory());
         }
         plugin.getRecipesGUI().onClick(event);
+        for(UncraftingGUI gui : plugin.getUncraftingGUIS()){
+            gui.onClick(event);
+            if (plugin.debugEnabled)
+                plugin.getLogger()
+                        .warning(
+                                "RECIPESGUI - Click: "
+                                        + event.isCancelled()
+                                        + "; clicktype: "
+                                        + event.getClick()
+                                        + "; clickedinventory: "
+                                        + event.getClickedInventory());
+        }
         if (plugin.debugEnabled)
             plugin.getLogger()
                     .warning(
@@ -41,7 +56,13 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {}
+    public void onInventoryClose(InventoryCloseEvent event) {
+        List<UncraftingGUI> guis = new ArrayList<>(plugin.getUncraftingGUIS());
+        for(UncraftingGUI gui : guis) {
+            if (gui.getInventory() == event.getInventory())
+                gui.onClose();
+        }
+    }
 
     @EventHandler
     public void onCraft(CraftItemEvent event) {
