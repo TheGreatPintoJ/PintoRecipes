@@ -39,59 +39,40 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
         if(args.length == 0 && player.hasPermission("pintorecipes.recipes.list"))
             plugin.getRecipesGUI().sendToPlayer(player);
 
-        if (args.length == 0) return true;
-        if (!sender.hasPermission("pintorecipes.recipes")
-                || !sender.hasPermission("pintorecipes.recipes." + args[0])) {
-            sender.sendMessage(ChatColor.RED + "You do not have permission to use this command");
-            return true;
-        }
-        if (args.length < 2) {
-            if (args[0].equalsIgnoreCase("list")) {
-                if (!sender.hasPermission("pintorecipes.recipes.list")) {
-                    sender.sendMessage(
-                            ChatColor.RED + "You do not have permission to use this command");
-                    return true;
-                }
-                plugin.getRecipesGUI().sendToPlayer(player);
-            } else if (args[0].equalsIgnoreCase("reload")) {
-                if (!sender.hasPermission("pintorecipes.recipes.reload")) {
-                    sender.sendMessage(
-                            ChatColor.RED + "You do not have permission to use this command");
-                    return true;
-                }
-                plugin.getLoadRecipes().reloadRecipes();
-                player.sendMessage(ChatColor.GREEN + "Reloaded recipes");
-            } else if (args[0].equalsIgnoreCase("debug")) {
-                if (!sender.hasPermission("pintorecipes.recipes.debug")) {
-                    sender.sendMessage(
-                            ChatColor.RED + "You do not have permission to use this command");
-                    return true;
-                }
-                plugin.debugEnabled = !plugin.debugEnabled;
-                player.sendMessage("Debug mode is " + (plugin.debugEnabled ? "on" : "off"));
-            } else {
-                player.sendMessage(ChatColor.RED + "You must specify a name for this command");
+        if(args.length > 0){
+            if(!player.hasPermission("pintorecipes.recipe."+args[0])){
+                player.sendMessage(ChatColor.RED+"You don't have permission to use this command");
+                return true;
             }
-            return true;
-        }
-
-        switch (args[0]) {
-            case "show":
+            if(args[0].equalsIgnoreCase("show")){
+                if(args.length != 2){
+                    player.sendMessage(ChatColor.RED+"Usage: /pr show <recipe>");
+                    return true;
+                }
                 if (!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED + "That recipe doesn't exist");
                 else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, true);
-                break;
-            case "save":
+            } else if(args[0].equalsIgnoreCase("save")){
+                if(args.length != 2){
+                    player.sendMessage(ChatColor.RED+"Usage: /pr save <recipe>");
+                    return true;
+                }
                 if (plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED + "That recipe already exists");
                 else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
-                break;
-            case "edit":
+            } else if(args[0].equalsIgnoreCase("edit")){
+                if(args.length != 2){
+                    player.sendMessage(ChatColor.RED+"Usage: /pr edit <recipe>");
+                    return true;
+                }
                 if (!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED + "That recipe doesn't exist");
                 else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
-                break;
-            case "remove":
+            } else if(args[0].equalsIgnoreCase("remove")){
+                if(args.length != 2){
+                    player.sendMessage(ChatColor.RED+"Usage: /pr remove <recipe>");
+                    return true;
+                }
                 if (!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED + "That recipe doesn't exist");
                 else {
@@ -100,15 +81,23 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     player.sendMessage(
                             ChatColor.RED + "Removed recipe " + args[1] + " from config");
                 }
-                break;
-            default:
+            } else if(args[0].equalsIgnoreCase("list")) {
+                plugin.getRecipesGUI().sendToPlayer(player);
+            } else if(args[0].equalsIgnoreCase("reload")){
+                plugin.getLoadRecipes().reloadRecipes();
+                player.sendMessage(ChatColor.GREEN + "Reloaded recipes");
+            } else if(args[0].equalsIgnoreCase("debug")){
+                plugin.debugEnabled = !plugin.debugEnabled;
+                player.sendMessage("Debug mode is " + (plugin.debugEnabled ? "on" : "off"));
+            } else {
                 player.sendMessage(
                         ChatColor.RED
                                 + "Usage: /"
                                 + label
                                 + " <list|show|save|edit|remove|reload> [recipe_name]");
+            }
+            plugin.getConfigLoader().loadConfig();
         }
-        plugin.getConfigLoader().loadConfig();
         return true;
     }
 
