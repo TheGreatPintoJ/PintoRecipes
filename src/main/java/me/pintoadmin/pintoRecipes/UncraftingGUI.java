@@ -22,8 +22,11 @@ public class UncraftingGUI {
     private final int resultSlot = 20;
 
     private final ItemStack unused_space = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+    private final ItemStack recipeSelectItem = new ItemStack(Material.BARRIER);
 
     private Recipe currentRecipe;
+    private final List<Recipe> possibleRecipes = new ArrayList<>();
+    private final int recipeSelectSlot = 8;
 
     public UncraftingGUI(PintoRecipes plugin, Player player) {
         this.plugin = plugin;
@@ -47,22 +50,27 @@ public class UncraftingGUI {
         for (int i = 0; i < inventory.getSize(); i++)
             if(i != resultSlot && !craftingSlots.contains(i))
                 inventory.setItem(i, unused_space);
+        setRecipeSelectItem();
     }
 
     private void loadIngredients(){
         ItemStack item = inventory.getItem(resultSlot);
         if(item == null) return;
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
+        possibleRecipes.clear();
+        possibleRecipes.addAll(recipes);
 
         if(recipes.isEmpty()) return;
-        currentRecipe = recipes.getFirst();
+        if(currentRecipe == null)
+            currentRecipe = recipes.getFirst();
 
-        //for(Recipe recipe : recipes) {}
         int resultMult = getCurrentMult();
 
         if (currentRecipe instanceof ShapedRecipe shapedRecipe) {
             Map<Character, ItemStack> ingredientMap = shapedRecipe.getIngredientMap();
             String[] recipeShape = shapedRecipe.getShape();
+
+            setRecipeSelectItem();
 
             int craftingSlot = 0;
             for (String set : recipeShape) {
@@ -77,6 +85,7 @@ public class UncraftingGUI {
             List<ItemStack> ingredients = shapelessRecipe.getIngredientList();
             int i = 0;
             try {
+                setRecipeSelectItem();
                 for (int slot : craftingSlots) {
                     ItemStack newItemStack = getItemStack(ingredients.get(i), resultMult);
                     inventory.setItem(slot, newItemStack);
@@ -105,13 +114,70 @@ public class UncraftingGUI {
         return newItemStack;
     }
 
+    private void setRecipeSelectItem(){
+        Material itemType = getFirstType(currentRecipe);
+        if(itemType == null) itemType = Material.BARRIER;
+
+        recipeSelectItem.setType(itemType);
+        ItemMeta meta = recipeSelectItem.getItemMeta();
+        assert meta != null;
+        meta.setItemName(color("&fCurrent recipe: "+itemType));
+        List<String> lore = new ArrayList<>();
+
+        possibleRecipes.forEach(recipe -> {
+            try {
+                lore.add(color("&f&o"+getFirstType(recipe).toString()));
+            } catch (NullPointerException ignored){}
+        }); // List of other recipes
+
+        lore.addAll(List.of(
+                color("&f"),
+                color("&r&2Left/Right-Click to change recipe")
+        ));
+        meta.setLore(lore);
+        recipeSelectItem.setItemMeta(meta);
+        inventory.setItem(recipeSelectSlot, recipeSelectItem);
+    }
+
+    private Material getFirstType(Recipe recipe){
+        if(recipe instanceof ShapedRecipe shapedRecipe){
+            return shapedRecipe.getIngredientMap().get('a').getType();
+        } else if(recipe instanceof ShapelessRecipe shapelessRecipe){
+            return shapelessRecipe.getIngredientList().getFirst().getType();
+        } else return null;
+    }
+
     public void onClick(InventoryClickEvent event){
         if (event.getClickedInventory() != inventory) return;
         int clickedSlot = event.getSlot();
+        ClickType clickType = event.getClick();
 
-        if (event.getCurrentItem() != null && event.getCurrentItem().isSimilar(unused_space)) {
-            event.setCancelled(true);
-            return;
+        if (event.getCurrentItem() != null) {
+            if (event.getCurrentItem().isSimilar(unused_space)) {
+                event.setCancelled(true);
+                return;
+            }
+
+            if (event.getCurrentItem().isSimilar(recipeSelectItem)) {
+                event.setCancelled(true);
+                // Recipe changing logic
+                if(possibleRecipes.isEmpty()) return;
+                int currentRecipeIndex = possibleRecipes.contains(currentRecipe) ? possibleRecipes.indexOf(currentRecipe) : 0;
+
+                if(clickType == ClickType.LEFT){
+                    // increment recipe
+                    if(currentRecipeIndex < possibleRecipes.size())
+                        currentRecipeIndex++;
+                } else if(clickType == ClickType.RIGHT){
+                    // decrement recipe
+                    if(currentRecipeIndex > 0
+                            && currentRecipeIndex <= possibleRecipes.size())
+                        currentRecipeIndex--;
+                }
+                currentRecipe = possibleRecipes.get(currentRecipeIndex);
+                loadIngredients();
+                return;
+            }
         }
 
         new BukkitRunnable(){
@@ -122,6 +188,9 @@ public class UncraftingGUI {
                     ItemStack item = inventory.getItem(resultSlot);
                     if(item == null) {
                         inventory.setItem(resultSlot, null);
+                        currentRecipe = null;
+                        possibleRecipes.clear();
+                        setRecipeSelectItem();
                         return;
                     }
                     int amount = item.getAmount();
@@ -139,10 +208,13 @@ public class UncraftingGUI {
                         for (int slot : craftingSlots) {
                             inventory.setItem(slot, null);
                         }
+                        currentRecipe = null;
+                        possibleRecipes.clear();
                     }
+                    setRecipeSelectItem();
                 }
             }
-        }.runTaskLater(plugin, 1);
+        }.runTaskLater(plugin, 1); // Delay for updated slot values
     }
 
     public void onClose(){
