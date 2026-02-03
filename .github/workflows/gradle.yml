@@ -1,4 +1,4 @@
-name: Release on merge to master
+name: Publish on merge to master
 
 on:
   pull_request:
@@ -17,16 +17,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '21' # Change if needed
-      
+          java-version: '17' # Change if needed
+
       - name: Ensure Permissions
         run: chmod a+x gradlew
 
@@ -69,3 +69,24 @@ jobs:
           files: ${{ steps.jar.outputs.file }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- mc-publish integration ---
+      - name: Publish to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ vars.MODRINTH_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          curseforge-id: ${{ vars.CURSEFORGE_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          name: ${{ github.event.pull_request.title }}
+          version: ${{ github.event.pull_request.title }}
+          changelog: ${{ github.event.pull_request.body }}
+
+          loaders: |
+            paper
+            spigot
+
+          game-versions: |
+            >=1.21

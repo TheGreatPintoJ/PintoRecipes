@@ -265,6 +265,16 @@ public class ConfigLoader {
         return enabled;
     }
 
+    public void setEnabled(String name, boolean enabled) {
+        loadConfig();
+        try {
+            recipeConfig.set(name + ".enabled", enabled);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException ignored) {
+        }
+    }
+
     public String getType(String name) {
         return recipeConfig.getString(name + ".type", "shaped");
     }
@@ -326,6 +336,26 @@ public class ConfigLoader {
         } catch (IllegalArgumentException e) {
             plugin.getLogger().severe("Invalid experience: " + exp);
             return 1;
+        }
+    }
+
+    public void setCooktime(String name, double cooktime) {
+        loadConfig();
+        try {
+            recipeConfig.set(name + ".cooktime", cooktime);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException ignored) {
+        }
+    }
+
+    public void setExperience(String name, double exp) {
+        loadConfig();
+        try {
+            recipeConfig.set(name + ".experience", exp);
+            recipeConfig.save(new File(plugin.getDataFolder() + "/recipes.yml"));
+            loadConfig();
+        } catch (IOException ignored) {
         }
     }
 

@@ -5,11 +5,14 @@
 
 ### Features
 * _Sleek_ GUI
-* Options for shaped, shapeless, furnace, blasting, smoking, campfire, and stonecutter recipes
-* Any item is craftable/smeltable/etc. (including nbt)
-* Option to limit how many of a custom item is crafted (including vanilla recipes if you create a 'custom' recipe for them)
-  * Permission to bypass crafting limitations (`pintorecipes.craftbypass`)
-* Permissions to limit who can craft any item (default to anybody)
+  * Options for shaped, shapeless, furnace, blasting, smoking, campfire, and stonecutter recipes
+  * Any item is craftable/smeltable/etc. (including nbt)
+  * Option to limit how many of a custom item is crafted (including vanilla recipes if you create a 'custom' recipe for them)
+    * Permission to bypass crafting limitations (`pintorecipes.craftbypass`)
+  * Permissions to limit who can craft any item (default to anybody)
+* Uncrafting GUI
+  * Supports switching through multiple recipes per item
+  * Can uncraft using custom recipes
 
 
 ### Commands

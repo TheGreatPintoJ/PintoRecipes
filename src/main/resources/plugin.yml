@@ -1,5 +1,5 @@
 name: PintoRecipes
-version: '1.8'
+version: '1.9'
 main: me.pintoadmin.pintoRecipes.PintoRecipes
 api-version: '1.21'
 authors: [ PintoJ ]
@@ -10,6 +10,10 @@ commands:
     description: Manage recipes
     permission: pintorecipes.recipes
     aliases: [pr, precipes]
+  uncraft:
+    usage: /uncraft
+    description: Open uncrafting GUI
+    permission: pintorecipes.uncraft
 
 permissions:
   pintorecipes.recipes:
@@ -36,3 +40,6 @@ permissions:
   pintorecipes.craftbypass:
     description: Permission to bypass crafting limits
     default: false
+  pintorecipes.uncraft:
+    description: Permission to use uncrafting command
+    default: true
