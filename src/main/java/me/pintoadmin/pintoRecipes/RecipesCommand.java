@@ -1,12 +1,11 @@
 package me.pintoadmin.pintoRecipes;
 
+import java.util.*;
 import org.bukkit.*;
 import org.bukkit.command.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.*;
-
-import java.util.*;
 
 public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
     public RecipesCommand(PintoRecipes plugin) {
@@ -18,7 +17,8 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
         }
     }
 
-    private static final List<String> consoleSubcommands = List.of("list", "reload", "remove", "show", "debug", "rename");
+    private static final List<String> consoleSubcommands =
+            List.of("list", "reload", "remove", "show", "debug", "rename");
 
     @Override
     public boolean onCommand(
@@ -27,50 +27,50 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
             @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            if(args.length == 0) {
+            if (args.length == 0) {
                 sender.sendMessage("You must specify a subcommand!");
                 return true;
             }
-            if(consoleSubcommands.contains(args[0].toLowerCase())){
+            if (consoleSubcommands.contains(args[0].toLowerCase())) {
                 consoleCommand(sender, args);
             } else sender.sendMessage("This command can only be executed by a player");
             return true;
         }
-        if(args.length == 0 && player.hasPermission("pintorecipes.recipes.list"))
+        if (args.length == 0 && player.hasPermission("pintorecipes.recipes.list"))
             plugin.getRecipesGUI().sendToPlayer(player);
 
-        if(args.length > 0){
-            if(!player.hasPermission("pintorecipes.recipe."+args[0])){
-                player.sendMessage(ChatColor.RED+"You don't have permission to use this command");
+        if (args.length > 0) {
+            if (!player.hasPermission("pintorecipes.recipe." + args[0])) {
+                player.sendMessage(ChatColor.RED + "You don't have permission to use this command");
                 return true;
             }
-            if(args[0].equalsIgnoreCase("show")){
-                if(args.length != 2){
-                    player.sendMessage(ChatColor.RED+"Usage: /pr show <recipe>");
+            if (args[0].equalsIgnoreCase("show")) {
+                if (args.length != 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /pr show <recipe>");
                     return true;
                 }
                 if (!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED + "That recipe doesn't exist");
                 else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, true);
-            } else if(args[0].equalsIgnoreCase("save")){
-                if(args.length != 2){
-                    player.sendMessage(ChatColor.RED+"Usage: /pr save <recipe>");
+            } else if (args[0].equalsIgnoreCase("save")) {
+                if (args.length != 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /pr save <recipe>");
                     return true;
                 }
                 if (plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED + "That recipe already exists");
                 else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
-            } else if(args[0].equalsIgnoreCase("edit")){
-                if(args.length != 2){
-                    player.sendMessage(ChatColor.RED+"Usage: /pr edit <recipe>");
+            } else if (args[0].equalsIgnoreCase("edit")) {
+                if (args.length != 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /pr edit <recipe>");
                     return true;
                 }
                 if (!plugin.getConfigLoader().recipes.contains(args[1]))
                     player.sendMessage(ChatColor.RED + "That recipe doesn't exist");
                 else plugin.getCreateRecipeGUI(args[1]).sendToPlayer(player, false);
-            } else if(args[0].equalsIgnoreCase("remove")){
-                if(args.length != 2){
-                    player.sendMessage(ChatColor.RED+"Usage: /pr remove <recipe>");
+            } else if (args[0].equalsIgnoreCase("remove")) {
+                if (args.length != 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /pr remove <recipe>");
                     return true;
                 }
                 if (!plugin.getConfigLoader().recipes.contains(args[1]))
@@ -81,12 +81,12 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     player.sendMessage(
                             ChatColor.RED + "Removed recipe " + args[1] + " from config");
                 }
-            } else if(args[0].equalsIgnoreCase("list")) {
+            } else if (args[0].equalsIgnoreCase("list")) {
                 plugin.getRecipesGUI().sendToPlayer(player);
-            } else if(args[0].equalsIgnoreCase("reload")){
+            } else if (args[0].equalsIgnoreCase("reload")) {
                 plugin.getLoadRecipes().reloadRecipes();
                 player.sendMessage(ChatColor.GREEN + "Reloaded recipes");
-            } else if(args[0].equalsIgnoreCase("debug")){
+            } else if (args[0].equalsIgnoreCase("debug")) {
                 plugin.debugEnabled = !plugin.debugEnabled;
                 player.sendMessage("Debug mode is " + (plugin.debugEnabled ? "on" : "off"));
             } else {
@@ -101,19 +101,19 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
         return true;
     }
 
-    private void consoleCommand(CommandSender sender, String[] args){
+    private void consoleCommand(CommandSender sender, String[] args) {
         String recipeName;
-        switch (args[0].toLowerCase()){
+        switch (args[0].toLowerCase()) {
             case "list":
                 sender.sendMessage("Recipes in 'recipes.yml': ");
                 List<String> recipes = plugin.getConfigLoader().recipes;
-                for(String recipe : recipes){
-                    sender.sendMessage("- "+recipe);
+                for (String recipe : recipes) {
+                    sender.sendMessage("- " + recipe);
                 }
                 break;
             case "remove":
                 // Take args[1] and remove
-                if(args.length != 2){
+                if (args.length != 2) {
                     sender.sendMessage("You must specify a recipe for this command");
                     break;
                 }
@@ -133,11 +133,11 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
             case "debug":
                 // Toggle Debug mode
                 plugin.debugEnabled = !plugin.debugEnabled;
-                sender.sendMessage("Debug is now "+(plugin.debugEnabled ? "on":"off"));
+                sender.sendMessage("Debug is now " + (plugin.debugEnabled ? "on" : "off"));
                 break;
             case "show":
                 // Makeshift 'show' recipe
-                if(args.length != 2){
+                if (args.length != 2) {
                     sender.sendMessage("You must specify a recipe for this command");
                     break;
                 }
@@ -154,13 +154,15 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                 List<Map<String, String>> shapedRecipe = plugin.toShapedRecipe(recipe);
                 List<String> shapelessRecipe = plugin.toStringList(recipe);
 
-                if(recipe instanceof String itemName){ // Case for smelting/stonecutting
-                    sender.sendMessage(result.getType()+" is "+recipeType+" with "+itemName+" item");
-                } else if(shapedRecipe != null && !shapedRecipe.isEmpty()){
+                if (recipe instanceof String itemName) { // Case for smelting/stonecutting
+                    sender.sendMessage(
+                            result.getType() + " is " + recipeType + " with " + itemName + " item");
+                } else if (shapedRecipe != null && !shapedRecipe.isEmpty()) {
                     List<Map<String, String>> items = plugin.toShapedRecipe(recipe);
-                    sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
+                    sender.sendMessage(
+                            result.getType() + " is " + recipeType + " with " + items + " items");
 
-                    String pre  = "-------------";
+                    String pre = "-------------";
                     String set1 = "| 1 | 2 | 3 |";
                     String set2 = "| 4 | 5 | 6 |";
                     String set3 = "| 7 | 8 | 9 |";
@@ -172,7 +174,7 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
 
                     int setNum = 0;
                     int round = 1;
-                    for(Map<String, String> map : items){
+                    for (Map<String, String> map : items) {
                         String set = sets.get(setNum);
                         for (int i = 0; i < 3; i++) {
                             String value = null;
@@ -185,12 +187,13 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                                 int j = 0;
                                 do {
                                     abbreviation = value.toUpperCase().charAt(j++);
-                                    if(abbreviations.containsKey(abbreviation) && abbreviations.get(abbreviation).equals(value)) break;
-                                } while(abbreviations.putIfAbsent(abbreviation, value.toUpperCase()) != null);
+                                    if (abbreviations.containsKey(abbreviation)
+                                            && abbreviations.get(abbreviation).equals(value)) break;
+                                } while (abbreviations.putIfAbsent(
+                                                abbreviation, value.toUpperCase())
+                                        != null);
 
-                                set = set.replace(
-                                        String.valueOf(round).charAt(0),
-                                        abbreviation);
+                                set = set.replace(String.valueOf(round).charAt(0), abbreviation);
                             }
                             round++;
                         }
@@ -206,16 +209,17 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                     sender.sendMessage("");
 
                     for (Map.Entry<Character, String> abb : abbreviations.entrySet())
-                        sender.sendMessage(abb.getKey()+" - "+abb.getValue());
+                        sender.sendMessage(abb.getKey() + " - " + abb.getValue());
 
-                } else if(shapelessRecipe != null && !shapelessRecipe.isEmpty()){
+                } else if (shapelessRecipe != null && !shapelessRecipe.isEmpty()) {
                     List<String> items = plugin.toStringList(recipe);
-                    sender.sendMessage(result.getType()+" is "+recipeType+" with "+items+" items");
+                    sender.sendMessage(
+                            result.getType() + " is " + recipeType + " with " + items + " items");
                 }
                 break;
             case "rename":
                 // Take 3 args: 0:rename 1:oldname 2:newname
-                if(args.length != 3){
+                if (args.length != 3) {
                     sender.sendMessage("Usage: /pr rename <oldname> <newname>");
                     break;
                 }
@@ -227,7 +231,8 @@ public record RecipesCommand(PintoRecipes plugin) implements CommandExecutor {
                 String newName = args[2];
 
                 plugin.getConfigLoader().renameRecipe(oldName, newName);
-                sender.sendMessage("Recipe '"+oldName+"' has been renamed to '"+newName+"'");
+                sender.sendMessage(
+                        "Recipe '" + oldName + "' has been renamed to '" + newName + "'");
                 break;
         }
     }

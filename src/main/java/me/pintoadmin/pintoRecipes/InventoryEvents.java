@@ -1,13 +1,12 @@
 package me.pintoadmin.pintoRecipes;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public record InventoryEvents(PintoRecipes plugin) implements Listener {
     public InventoryEvents(PintoRecipes plugin) {
@@ -32,7 +31,7 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
                                         + gui.getInventory());
         }
         plugin.getRecipesGUI().onClick(event);
-        for(UncraftingGUI gui : plugin.getUncraftingGUIS()){
+        for (UncraftingGUI gui : plugin.getUncraftingGUIS()) {
             gui.onClick(event);
             if (plugin.debugEnabled)
                 plugin.getLogger()
@@ -58,9 +57,8 @@ public record InventoryEvents(PintoRecipes plugin) implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         List<UncraftingGUI> guis = new ArrayList<>(plugin.getUncraftingGUIS());
-        for(UncraftingGUI gui : guis) {
-            if (gui.getInventory() == event.getInventory())
-                gui.onClose();
+        for (UncraftingGUI gui : guis) {
+            if (gui.getInventory() == event.getInventory()) gui.onClose();
         }
     }
 

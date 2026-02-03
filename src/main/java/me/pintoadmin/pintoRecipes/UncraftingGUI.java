@@ -1,5 +1,7 @@
 package me.pintoadmin.pintoRecipes;
 
+import java.util.*;
+import javax.annotation.*;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.inventory.*;
@@ -8,9 +10,6 @@ import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.*;
-
-import javax.annotation.*;
-import java.util.*;
 
 public class UncraftingGUI {
     private final PintoRecipes plugin;
@@ -46,23 +45,21 @@ public class UncraftingGUI {
         player.openInventory(inventory);
     }
 
-    private void createGUI(){
+    private void createGUI() {
         for (int i = 0; i < inventory.getSize(); i++)
-            if(i != resultSlot && !craftingSlots.contains(i))
-                inventory.setItem(i, unused_space);
+            if (i != resultSlot && !craftingSlots.contains(i)) inventory.setItem(i, unused_space);
         setRecipeSelectItem();
     }
 
-    private void loadIngredients(){
+    private void loadIngredients() {
         ItemStack item = inventory.getItem(resultSlot);
-        if(item == null) return;
+        if (item == null) return;
         List<Recipe> recipes = Bukkit.getRecipesFor(item);
         possibleRecipes.clear();
         possibleRecipes.addAll(recipes);
 
-        if(recipes.isEmpty()) return;
-        if(currentRecipe == null)
-            currentRecipe = recipes.getFirst();
+        if (recipes.isEmpty()) return;
+        if (currentRecipe == null) currentRecipe = recipes.getFirst();
 
         int resultMult = getCurrentMult();
 
@@ -81,7 +78,7 @@ public class UncraftingGUI {
                     craftingSlot++;
                 }
             }
-        } else if(currentRecipe instanceof ShapelessRecipe shapelessRecipe){
+        } else if (currentRecipe instanceof ShapelessRecipe shapelessRecipe) {
             List<ItemStack> ingredients = shapelessRecipe.getIngredientList();
             int i = 0;
             try {
@@ -91,63 +88,59 @@ public class UncraftingGUI {
                     inventory.setItem(slot, newItemStack);
                     i++;
                 }
-            } catch (IndexOutOfBoundsException ignored){
+            } catch (IndexOutOfBoundsException ignored) {
                 for (int j = i; j < craftingSlots.size(); j++)
                     inventory.setItem(craftingSlots.get(j), null);
             }
         } else {
-            for (int slot : craftingSlots)
-                inventory.setItem(slot, null);
+            for (int slot : craftingSlots) inventory.setItem(slot, null);
         }
     }
 
-    @NotNull
-    private ItemStack getItemStack(ItemStack itemStack, int resultMult) {
+    @NotNull private ItemStack getItemStack(ItemStack itemStack, int resultMult) {
         ItemStack newItemStack;
         if (itemStack != null) {
             int newAmnt = itemStack.getAmount() * resultMult;
             if (newAmnt == 0) {
                 newItemStack = new ItemStack(Material.AIR);
             } else newItemStack = new ItemStack(itemStack.getType(), newAmnt);
-        } else
-            newItemStack = new ItemStack(Material.AIR);
+        } else newItemStack = new ItemStack(Material.AIR);
         return newItemStack;
     }
 
-    private void setRecipeSelectItem(){
+    private void setRecipeSelectItem() {
         Material itemType = getFirstType(currentRecipe);
-        if(itemType == null) itemType = Material.BARRIER;
+        if (itemType == null) itemType = Material.BARRIER;
 
         recipeSelectItem.setType(itemType);
         ItemMeta meta = recipeSelectItem.getItemMeta();
         assert meta != null;
-        meta.setItemName(color("&fCurrent recipe: "+itemType));
+        meta.setItemName(color("&fCurrent recipe: " + itemType));
         List<String> lore = new ArrayList<>();
 
-        possibleRecipes.forEach(recipe -> {
-            try {
-                lore.add(color("&f&o"+getFirstType(recipe).toString()));
-            } catch (NullPointerException ignored){}
-        }); // List of other recipes
+        possibleRecipes.forEach(
+                recipe -> {
+                    try {
+                        lore.add(color("&f&o" + getFirstType(recipe).toString()));
+                    } catch (NullPointerException ignored) {
+                    }
+                }); // List of other recipes
 
-        lore.addAll(List.of(
-                color("&f"),
-                color("&r&2Left/Right-Click to change recipe")
-        ));
+        lore.addAll(List.of(color("&f"), color("&r&2Left/Right-Click to change recipe")));
         meta.setLore(lore);
         recipeSelectItem.setItemMeta(meta);
         inventory.setItem(recipeSelectSlot, recipeSelectItem);
     }
 
-    private Material getFirstType(Recipe recipe){
-        if(recipe instanceof ShapedRecipe shapedRecipe){
+    private Material getFirstType(Recipe recipe) {
+        if (recipe instanceof ShapedRecipe shapedRecipe) {
             return shapedRecipe.getIngredientMap().get('a').getType();
-        } else if(recipe instanceof ShapelessRecipe shapelessRecipe){
+        } else if (recipe instanceof ShapelessRecipe shapelessRecipe) {
             return shapelessRecipe.getIngredientList().getFirst().getType();
         } else return null;
     }
 
-    public void onClick(InventoryClickEvent event){
+    public void onClick(InventoryClickEvent event) {
         if (event.getClickedInventory() != inventory) return;
         int clickedSlot = event.getSlot();
         ClickType clickType = event.getClick();
@@ -161,17 +154,18 @@ public class UncraftingGUI {
             if (event.getCurrentItem().isSimilar(recipeSelectItem)) {
                 event.setCancelled(true);
                 // Recipe changing logic
-                if(possibleRecipes.isEmpty()) return;
-                int currentRecipeIndex = possibleRecipes.contains(currentRecipe) ? possibleRecipes.indexOf(currentRecipe) : 0;
+                if (possibleRecipes.isEmpty()) return;
+                int currentRecipeIndex =
+                        possibleRecipes.contains(currentRecipe)
+                                ? possibleRecipes.indexOf(currentRecipe)
+                                : 0;
 
-                if(clickType == ClickType.LEFT){
+                if (clickType == ClickType.LEFT) {
                     // increment recipe
-                    if(currentRecipeIndex < possibleRecipes.size())
-                        currentRecipeIndex++;
-                } else if(clickType == ClickType.RIGHT){
+                    if (currentRecipeIndex < possibleRecipes.size()) currentRecipeIndex++;
+                } else if (clickType == ClickType.RIGHT) {
                     // decrement recipe
-                    if(currentRecipeIndex > 0
-                            && currentRecipeIndex <= possibleRecipes.size())
+                    if (currentRecipeIndex > 0 && currentRecipeIndex <= possibleRecipes.size())
                         currentRecipeIndex--;
                 }
                 currentRecipe = possibleRecipes.get(currentRecipeIndex);
@@ -180,13 +174,13 @@ public class UncraftingGUI {
             }
         }
 
-        new BukkitRunnable(){
+        new BukkitRunnable() {
             @Override
-            public void run(){
-                if (craftingSlots.contains(clickedSlot)){
+            public void run() {
+                if (craftingSlots.contains(clickedSlot)) {
                     // Reduce "result"
                     ItemStack item = inventory.getItem(resultSlot);
-                    if(item == null) {
+                    if (item == null) {
                         inventory.setItem(resultSlot, null);
                         currentRecipe = null;
                         possibleRecipes.clear();
@@ -196,13 +190,12 @@ public class UncraftingGUI {
                     int amount = item.getAmount();
                     int resultAmnt = currentRecipe.getResult().getAmount();
                     int currentMult = getCurrentMult();
-                    if(currentMult > 0) item.setAmount(amount % resultAmnt);
+                    if (currentMult > 0) item.setAmount(amount % resultAmnt);
                     inventory.setItem(resultSlot, item);
                 }
 
-                if(clickedSlot == resultSlot){
-                    if(inventory.getItem(clickedSlot) != null)
-                        loadIngredients();
+                if (clickedSlot == resultSlot) {
+                    if (inventory.getItem(clickedSlot) != null) loadIngredients();
                     else {
                         // Remove crafting items
                         for (int slot : craftingSlots) {
@@ -217,22 +210,23 @@ public class UncraftingGUI {
         }.runTaskLater(plugin, 1); // Delay for updated slot values
     }
 
-    public void onClose(){
-        if(inventory.getItem(resultSlot) != null){
+    public void onClose() {
+        if (inventory.getItem(resultSlot) != null) {
             player.getInventory().addItem(inventory.getItem(resultSlot));
         } else {
-            for(int slot : craftingSlots){
-                if(inventory.getItem(slot) != null)
+            for (int slot : craftingSlots) {
+                if (inventory.getItem(slot) != null)
                     player.getInventory().addItem(inventory.getItem(slot));
             }
         }
         plugin.getUncraftingGUIS().remove(this);
     }
 
-    private int getCurrentMult(){
+    private int getCurrentMult() {
         ItemStack item = inventory.getItem(resultSlot);
-        if(item == null) return 0;
-        if(currentRecipe.getResult().getAmount() > item.getAmount()) return 0; // Not enough to uncraft
+        if (item == null) return 0;
+        if (currentRecipe.getResult().getAmount() > item.getAmount())
+            return 0; // Not enough to uncraft
         return (int) (double) (item.getAmount() / currentRecipe.getResult().getAmount());
     }
 

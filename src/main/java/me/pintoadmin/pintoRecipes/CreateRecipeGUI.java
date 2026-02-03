@@ -39,12 +39,8 @@ public class CreateRecipeGUI {
                     "smoking",
                     "campfire",
                     "stonecutter");
-    private final List<String> FURNACE_TYPES = List.of(
-            "furnace",
-            "blasting",
-            "smoking",
-            "campfire"
-    );
+    private final List<String> FURNACE_TYPES =
+            List.of("furnace", "blasting", "smoking", "campfire");
     private final Map<String, Material> typeMap =
             Map.of(
                     "shaped", Material.CRAFTING_TABLE,
@@ -258,16 +254,15 @@ public class CreateRecipeGUI {
         optionSelectMeta.setItemName(color("&r&lRecipe Options"));
         optionSelectMeta.setLore(
                 List.of(
-                        color("&7&nCooktime: "+recipeCooktime),
-                        color("&7&nExperience: "+recipeExperience),
+                        color("&7&nCooktime: " + recipeCooktime),
+                        color("&7&nExperience: " + recipeExperience),
                         color("&r&2Click to increment/decrement cooktime"),
                         color("&r&3Shift-Click to increment/decrement experience")));
         optionSelectMeta
                 .getPersistentDataContainer()
                 .set(idNameKey, PersistentDataType.STRING, "optionSelectItem");
         optionSelectItem.setItemMeta(optionSelectMeta);
-        if(FURNACE_TYPES.contains(getCurrentType()))
-            inventory.setItem(4, optionSelectItem);
+        if (FURNACE_TYPES.contains(getCurrentType())) inventory.setItem(4, optionSelectItem);
     }
 
     private void updateInfoIcons() {
@@ -448,17 +443,15 @@ public class CreateRecipeGUI {
                     if (event.getClick() == ClickType.LEFT) { // Increment cooktime
                         recipeCooktime++;
                         configLoader.setCooktime(recipeName, recipeCooktime);
-                    } else if(event.getClick() == ClickType.RIGHT) { // Decrement cooktime
-                        if(recipeCooktime > 0)
-                            recipeCooktime--;
+                    } else if (event.getClick() == ClickType.RIGHT) { // Decrement cooktime
+                        if (recipeCooktime > 0) recipeCooktime--;
                         configLoader.setCooktime(recipeName, recipeCooktime);
                     } else if (event.getClick() == ClickType.SHIFT_LEFT) { // Increment exp
                         recipeExperience += 0.1f;
                         recipeExperience = round(recipeExperience, 1);
                         configLoader.setExperience(recipeName, recipeExperience);
                     } else if (event.getClick() == ClickType.SHIFT_RIGHT) { // Decrement exp
-                        if(recipeExperience > 0)
-                            recipeExperience -= 0.1f;
+                        if (recipeExperience > 0) recipeExperience -= 0.1f;
                         recipeExperience = round(recipeExperience, 1);
                         configLoader.setExperience(recipeName, recipeExperience);
                     }
@@ -520,5 +513,4 @@ public class CreateRecipeGUI {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
-
 }

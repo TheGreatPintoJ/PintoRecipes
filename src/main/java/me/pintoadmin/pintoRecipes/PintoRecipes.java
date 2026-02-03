@@ -47,7 +47,8 @@ public final class PintoRecipes extends JavaPlugin {
     public List<UncraftingGUI> getUncraftingGUIS() {
         return uncraftingGUIS;
     }
-    public void addUncraftingGUI(UncraftingGUI gui){
+
+    public void addUncraftingGUI(UncraftingGUI gui) {
         uncraftingGUIS.add(gui);
     }
 
